@@ -1,9 +1,17 @@
 <script lang="ts" setup>
+import SummitBanner from './components/SummitBanner.vue';
+import SummitLive from './components/SummitLive.vue';
 import SummitSchedule from './components/SummitSchedule.vue';
+import SummitGuests from './components/SummitGuests.vue';
+import SummitPartner from './components/SummitPartner.vue';
 </script>
 <template>
   <div class="demo">
+    <SummitBanner />
+    <SummitLive />
     <SummitSchedule />
+    <SummitGuests />
+    <SummitPartner/>
   </div>
 </template>
 

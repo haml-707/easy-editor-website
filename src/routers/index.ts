@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useLangStore } from '@/stores';
 
 export const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/zh' },
+  { path: '/', redirect: '/zh/' },
   // zh
   {
     path: '/zh/',
