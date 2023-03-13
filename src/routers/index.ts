@@ -2,13 +2,18 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useLangStore } from '@/stores';
 
 export const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/zh' },
-  // zh
+  { path: '/', redirect: '/zh/' },
   {
     path: '/zh/',
-    name: 'zh',
+    name: 'home',
     alias: '/en/',
-    component: () => import('@/views/summit/TheSummit.vue'),
+    component: () => import('@/views/TheEdit.vue'),
+  },
+  {
+    path: '/zh/edit/:name',
+    name: 'edit',
+    alias: '/zh/edit/:name',
+    component: () => import('@/views/sig/TheSig.vue'),
   },
 ];
 

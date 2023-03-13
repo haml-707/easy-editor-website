@@ -67,6 +67,16 @@ export default defineConfig({
         target: 'https://easyeditor.test.osinfra.cn/',
         changeOrigin: true,
       },
+      '/api-omapi/': {
+        target: 'https://omapi.osinfra.cn/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-omapi/, ''),
+      },
+      '/api-meeting/': {
+        target: 'https://meetings.openeuler.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-meeting/, ''),
+      },
     },
   },
 });
