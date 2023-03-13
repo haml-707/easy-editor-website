@@ -61,4 +61,12 @@ export default defineConfig({
       useSource: true,
     }),
   ],
+  server: {
+    proxy: {
+      '/api/': {
+        target: 'https://easyeditor.test.osinfra.cn/',
+        changeOrigin: true,
+      },
+    },
+  },
 });
