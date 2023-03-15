@@ -64,9 +64,10 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api/': {
-        target: 'https://easyeditor.test.osinfra.cn/',
+      '/api-edit/': {
+        target: 'https://easyeditor.test.osinfra.cn/api/',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-edit/, ''),
       },
       '/api-omapi/': {
         target: 'https://omapi.osinfra.cn/',
