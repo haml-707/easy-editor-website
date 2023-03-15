@@ -22,6 +22,7 @@ const props = defineProps({
     default: '',
   },
 });
+
 const contributionSelectBox = ref([
   {
     color: 'bg-color-maintainer',
@@ -135,7 +136,8 @@ watch(
   () => props.sig,
   () => {
     getMemberData();
-  }
+  },
+  { immediate: true }
 );
 onMounted(() => {
   loading.value = false;
@@ -155,6 +157,7 @@ const querySearch = () => {
       item.gitee_id.toLowerCase().includes(searchInput.value)
     );
     reallData.value = newList;
+
     filterReallData();
   } else {
     getMemberData();
@@ -253,7 +256,6 @@ const turnPage = (option: string) => {
               currentPage * pageSize
             )
           "
-          style="width: 100%"
         >
           <el-table-column
             prop="rank"

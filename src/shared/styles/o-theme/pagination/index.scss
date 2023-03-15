@@ -2,6 +2,8 @@
 @use './var.scss';
 
 .el-pagination {
+  display: flex;
+  justify-content: center;
   .el-select {
     --el-select-border-color-hover: none;
     --el-select-input-focus-border-color: none;

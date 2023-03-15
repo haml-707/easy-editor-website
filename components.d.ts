@@ -12,6 +12,8 @@ declare module '@vue/runtime-core' {
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     AppPaginationMo: typeof import('./src/components/AppPaginationMo.vue')['default']
     BreadCrumbs: typeof import('./src/components/BreadCrumbs.vue')['default']
+    ElCollapse: typeof import('element-plus/es')['ElCollapse']
+    ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
