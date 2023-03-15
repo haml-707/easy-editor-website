@@ -1,14 +1,19 @@
 import { createI18n } from 'vue-i18n';
 
-import zh from './lang/zh';
-import en from './lang/en';
+import sig from './sig';
+import common from './common';
+import edit from './edit';
 
 const messages = {
   zh: {
-    ...zh,
+    common: common.zh,
+    sig: sig.zh,
+    edit: edit.zh,
   },
   en: {
-    ...en,
+    common: common.en,
+    sig: sig.en,
+    edit: edit.en,
   },
 };
 

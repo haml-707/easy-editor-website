@@ -1,10 +1,27 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useLangStore } from '@/stores';
-import { watch } from 'vue';
+import { watch, computed, ref } from 'vue';
+import AppHeader from './components/AppHeader.vue';
+import AppFooter from './components/AppFooter.vue';
+import { useRoute } from 'vue-router';
 
+import { useLangStore } from '@/stores';
+import EditHeader from '@/views/edit/EditHeader.vue';
+import EditFooter from '@/views/edit/EditFooter.vue';
+import EditTextTitle from '@/views/edit/EditTextTitle.vue';
+
+const { t } = useI18n();
+const route = useRoute();
 const { locale } = useI18n();
 const langStore = useLangStore();
+const isEditPage = computed(() => {
+  return route.name === 'edit';
+});
+const isPreviewMode = ref(false);
+function getModeType(val: boolean) {
+  isPreviewMode.value = val;
+}
+
 watch(
   () => langStore.lang,
   (val) => {
@@ -14,30 +31,54 @@ watch(
 </script>
 
 <template>
-  <header></header>
-  <main><RouterView></RouterView></main>
-  <footer></footer>
+  <header><AppHeader /></header>
+  <main :class="isEditPage ? 'edit-page' : ''">
+    <component
+      :is="isEditPage ? EditHeader : EditTextTitle"
+      :title="t('edit.TITLE')"
+      @switch-change="getModeType"
+    ></component>
+    <div class="content">
+      <RouterView class="router-view" :mode-type="isPreviewMode"></RouterView>
+    </div>
+    <EditFooter v-if="isEditPage" />
+  </main>
+  <footer>
+    <AppFooter v-show="!isEditPage" />
+  </footer>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 #app {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-position: center top;
+  background-size: 100% auto;
+  background-repeat: repeat;
+  background-color: var(--o-color-bg1);
+  background-image: url(./assets/common/bg/bg.jpg);
 }
 
 main {
   position: relative;
-  margin: 80px auto 0;
-  max-width: 1472px;
+  margin: 0 auto 0;
+  max-width: 1416px;
+  width: calc(100% - 88px);
   height: 100%;
-  padding: 0 16px;
-  min-height: calc(100vh - 339px);
-  background-color: var(--o-color-bg1);
-  margin-top: 80px;
+  min-height: calc(100vh - 80px);
   overflow: hidden;
 
   @media (max-width: 1100px) {
     margin-top: 48px;
+  }
+}
+.edit-page {
+  max-width: 100%;
+  width: 100%;
+  > .content {
+    background-color: var(--o-color-bg1);
+    .router-view {
+      margin: 0 auto;
+      max-width: 1504px;
+    }
   }
 }
 </style>

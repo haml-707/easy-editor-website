@@ -25,3 +25,18 @@
     }
   }
 }
+
+.el-textarea {
+  font-size: var(--o-textarea-font_size);
+  line-height: var(--o-textarea-line_height);
+  .el-textarea__inner {
+    // TODO:间距
+    padding: 4px 14px;
+    border-radius: 0;
+    color: var(--o-textarea-color);
+    background-color: transparent;
+    &:not(:focus) {
+      box-shadow: 0 0 0 1px var(--o-textarea-border-color) inset;
+    }
+  }
+}

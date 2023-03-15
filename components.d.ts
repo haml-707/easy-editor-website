@@ -7,16 +7,29 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    ElBottom: typeof import('element-plus/es')['ElBottom']
-    ElButtom: typeof import('element-plus/es')['ElButtom']
-    ElButton: typeof import('element-plus/es')['ElButton']
-    ElContainer: typeof import('element-plus/es')['ElContainer']
-    ElTabPane: typeof import('element-plus/es')['ElTabPane']
-    ElTabs: typeof import('element-plus/es')['ElTabs']
-    ElTimePicker: typeof import('element-plus/es')['ElTimePicker']
-    ElTimeSelect: typeof import('element-plus/es')['ElTimeSelect']
+    AppContent: typeof import('./src/components/AppContent.vue')['default']
+    AppFooter: typeof import('./src/components/AppFooter.vue')['default']
+    AppHeader: typeof import('./src/components/AppHeader.vue')['default']
+    AppPaginationMo: typeof import('./src/components/AppPaginationMo.vue')['default']
+    BreadCrumbs: typeof import('./src/components/BreadCrumbs.vue')['default']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElForm: typeof import('element-plus/es')['ElForm']
+    ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElInput: typeof import('element-plus/es')['ElInput']
+    ElOption: typeof import('element-plus/es')['ElOption']
+    ElPagination: typeof import('element-plus/es')['ElPagination']
+    ElProgress: typeof import('element-plus/es')['ElProgress']
+    ElRadio: typeof import('element-plus/es')['ElRadio']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
+    ElSelect: typeof import('element-plus/es')['ElSelect']
+    ElSwitch: typeof import('element-plus/es')['ElSwitch']
+    ElTable: typeof import('element-plus/es')['ElTable']
+    ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     OIcon: typeof import('./src/components/OIcon.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

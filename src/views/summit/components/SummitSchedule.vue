@@ -1,29 +1,42 @@
 <script lang="ts" setup>
-import { ref, reactive } from 'vue';
+import { ref, onMounted } from 'vue';
 import IconTime from '~icons/app/icon-time.svg';
+
+import { modifyPageData, getPageData } from '@/api/api-easy-edit';
+
+import { ElMessage } from 'element-plus';
 
 // const value1 = ref<[Date, Date]>([
 //   new Date(2016, 9, 10, 8, 40),
 //   new Date(2016, 9, 10, 9, 40),
 // ]);
-const value1 = ref(['15:55', '15:59']);
+// const value1 = ref<any>(['15:55', '15:59']);
 
-const isEditor = ref(true);
+const isEditor = ref(false);
 
-const scheduleData: any = reactive({
+const scheduleData: any = ref({
   title: '输入标题',
   content: [
     {
       lable: '上午：主论坛',
-      id: 0,
+      id: window.crypto.randomUUID(),
       content: [
         {
-          time: [null, null],
-          desc: 'XXX领导致辞',
-          person: [
+          id: window.crypto.randomUUID(),
+          name: '请填写标题',
+          content: [
             {
-              name: '姓名',
-              post: ['XXX成员'],
+              id: window.crypto.randomUUID(),
+              time: ['14:00', '14:05'],
+              desc: 'XXX领导致辞',
+              person: [
+                {
+                  id: window.crypto.randomUUID(),
+                  name: '姓名',
+                  post: ['XXX成员'],
+                },
+              ],
+              detail: [''],
             },
           ],
         },
@@ -132,26 +145,49 @@ function changeIndexShow(id: number, index: number) {
   indexShow.value = index;
 }
 // 控制主论坛及各个分论坛的显示
-const tabType = ref(scheduleData.content[0].id);
+const tabType = ref(0);
+console.log(tabType.value);
+
 const otherTabType = ref(0);
+function tabClick() {
+  otherTabType.value = 0;
+}
+
+function handleGetPageData() {
+  getPageData(6).then((res) => {
+    try {
+      scheduleData.value = JSON.parse(res.data.content);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+}
+
 function handleInputBlur() {
   console.log('失焦事件');
 }
-function handleClose() {
-  console.log(value1);
-}
+
 function addSubtitle() {
-  scheduleData.content.push({
-    lable: '上午：主论坛',
-    id: scheduleData.content.length,
+  scheduleData.value.content.push({
+    lable: '请输入论坛名称',
+    id: window.crypto.randomUUID(),
     content: [
       {
-        time: [null, null],
-        desc: 'XXX领导致辞',
-        person: [
+        id: window.crypto.randomUUID(),
+        name: '填写标题',
+        content: [
           {
-            name: '姓名',
-            post: ['XXX成员'],
+            id: window.crypto.randomUUID(),
+            time: ['14:00', '14:05'],
+            desc: 'XXX领导致辞',
+            person: [
+              {
+                id: window.crypto.randomUUID(),
+                name: '姓名',
+                post: ['XXX成员'],
+              },
+            ],
+            detail: [''],
           },
         ],
       },
@@ -159,11 +195,14 @@ function addSubtitle() {
   });
 }
 function delSubtitle(index: number) {
-  scheduleData.content.splice(index, 1);
+  scheduleData.value.content.splice(index, 1);
+  tabType.value = 0;
 }
 function addContent() {
-  scheduleData.content[tabType.value].content.push({
-    time: [null, null],
+  scheduleData.value.content[tabType.value].content[
+    otherTabType.value
+  ].content.push({
+    time: ['14:00', '14:05'],
     desc: 'XXX领导致辞',
     person: [
       {
@@ -171,23 +210,30 @@ function addContent() {
         post: ['XXX成员'],
       },
     ],
+    detail: [''],
   });
 }
 function delContent(index: number) {
-  scheduleData.content[tabType.value].content.splice(index, 1);
+  scheduleData.value.content[tabType.value].content[
+    otherTabType.value
+  ].content.splice(index, 1);
 }
-
+function delSubtitle2(index: number) {
+  scheduleData.value.content[tabType.value].content.splice(index, 1);
+}
 function addSubtitle2() {
-  scheduleData.content[tabType.value].content.push({
-    id: 0,
-    name: '麒麟软件',
+  scheduleData.value.content[tabType.value].content.push({
+    id: window.crypto.randomUUID(),
+    name: '请填写标题',
     content: [
       {
-        time: ['14:00', '14:10'],
-        desc: '欧拉社区领导致辞',
+        id: window.crypto.randomUUID(),
+        time: ['14:00', '18:30'],
+        desc: 'xxx领导致辞',
         person: [
           {
-            name: '冯冠霖',
+            id: window.crypto.randomUUID(),
+            name: 'xxx',
             post: ['开放原子开源基金会秘书长'],
           },
         ],
@@ -196,10 +242,28 @@ function addSubtitle2() {
     ],
   });
 }
+function savePageData() {
+  modifyPageData(6, JSON.stringify(scheduleData.value)).then(() => {
+    ElMessage({
+      type: 'success',
+      message: '保存成功',
+    });
+  });
+}
+// function createNewPage() {
+//   createPage(JSON.stringify(scheduleData.value)).then(() => {
+//     ElMessage({
+//       type: 'success',
+//       message: '保存成功',
+//     });
+//   });
+// }
+onMounted(() => {
+  handleGetPageData();
+});
 </script>
 
 <template>
-  <el-button @click="isEditor = !isEditor">编辑</el-button>
   <div class="schedule">
     <h4 class="meeting-title">
       <input
@@ -209,11 +273,15 @@ function addSubtitle2() {
         @blur="handleInputBlur"
       />
     </h4>
-    <el-tabs v-model="tabType" class="schedule-tabs">
+    <el-tabs
+      v-model.number="tabType"
+      class="schedule-tabs"
+      @tab-click="tabClick"
+    >
       <el-tab-pane
         v-for="(itemList, index) in scheduleData.content"
         :key="itemList.id"
-        :name="itemList.id"
+        :name="index"
       >
         <template #label>
           <div class="time-tabs">
@@ -223,41 +291,76 @@ function addSubtitle2() {
               type="text"
               @blur="handleInputBlur"
             />
-            <span v-if="isEditor" title="删除" @click="delSubtitle(index)"
+            <span v-if="isEditor" title="删除" @click.stop="delSubtitle(index)"
               >X</span
             >
           </div>
         </template>
       </el-tab-pane>
+      <el-button v-if="isEditor" @click="addSubtitle">增加副标题</el-button>
     </el-tabs>
-    <el-button v-if="isEditor" @click="addSubtitle">增加副标题</el-button>
     <el-button v-if="isEditor" @click="addSubtitle2">增加三级标题</el-button>
 
     <el-container :level-index="1">
       <template
-        v-for="scheduleItem in scheduleData.content"
-        :key="scheduleItem.label"
+        v-for="(scheduleItem, index) in scheduleData.content"
+        :key="scheduleItem.id"
       >
         <div
-          v-show="
-            tabType === scheduleItem.id && !scheduleItem.content[0].content
-          "
-          class="schedule-item"
+          v-show="tabType == index && scheduleItem.content[0].content"
+          class="schedule-item other"
         >
-          <div class="content-list">
-            <div
-              v-for="(subItem, subIndex) in scheduleItem.content"
-              :key="subItem.time"
-              class="content-item"
-              :class="{
-                'show-detail': indexShow === subIndex,
-              }"
+          <el-tabs
+            v-if="scheduleItem.content[1]"
+            v-model.number="otherTabType"
+            class="other-tabs"
+          >
+            <el-tab-pane
+              v-for="(itemList, scheduleIndex) in scheduleItem.content"
+              :key="itemList.id"
+              :name="scheduleIndex"
             >
-              <!-- 该lable下只存在一个论坛的时候 -->
-              <template v-if="!subItem.content">
+              <template #label>
+                <div class="time-tabs">
+                  <input
+                    v-model="itemList.name"
+                    :readonly="!isEditor"
+                    type="text"
+                    @blur="handleInputBlur"
+                  />
+                  <span v-show="isEditor" @click="delSubtitle2(scheduleIndex)"
+                    >X</span
+                  >
+                </div>
+              </template>
+            </el-tab-pane>
+          </el-tabs>
+          <div
+            v-for="(itemList, listIndex) in scheduleItem.content"
+            v-show="tabType == index && otherTabType == listIndex"
+            :key="itemList.id"
+            class="content"
+          >
+            <!-- <h4 v-if="itemList.title || isEditor" class="other-title">
+              <input
+                v-model="itemList.title"
+                :readonly="!isEditor"
+                type="text"
+                @blur="handleInputBlur"
+              />
+            </h4> -->
+            <div class="content-list">
+              <div
+                v-for="(subItem, subIndex) in itemList.content"
+                :key="subItem.id"
+                class="content-item"
+                :class="{
+                  'show-detail': indexShow === subIndex && idShow === listIndex,
+                }"
+              >
                 <span class="time">
-                  <el-time-picker
-                    v-model="value1"
+                  <!-- <el-time-picker
+                    v-model="subItem.time"
                     is-range
                     value-format="HH:mm"
                     :readonly="!isEditor"
@@ -265,22 +368,41 @@ function addSubtitle2() {
                     start-placeholder="Start"
                     end-placeholder="End"
                     @change="handleClose"
+                  /> -->
+                  <!-- {{ subItem.time }} -->
+                  <IconTime />
+                  <input
+                    v-model="subItem.time[0]"
+                    class="input-time"
+                    :readonly="!isEditor"
+                    type="text"
+                    @blur="handleInputBlur"
                   />
-                  <!-- <IconTime />{{
-                    subItem.time[0] + '-' + subItem.time[1]
-                  }} -->
+                  -
+                  <input
+                    v-model="subItem.time[1]"
+                    class="input-time"
+                    :readonly="!isEditor"
+                    type="text"
+                    @blur="handleInputBlur"
+                  />
+                  <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
                 </span>
-                <span class="desc">
+                <span
+                  class="desc"
+                  :class="{ 'exit-detail': subItem.detail[0] }"
+                  @click="changeIndexShow(listIndex, subIndex as any)"
+                >
                   <input
                     v-model="subItem.desc"
                     :readonly="!isEditor"
                     type="text"
                     @blur="handleInputBlur"
                 /></span>
-                <div v-if="subItem.person" class="name-box">
+                <div v-if="subItem.person[0]" class="name-box">
                   <div
                     v-for="personItem in subItem.person"
-                    :key="personItem.name"
+                    :key="personItem.id"
                   >
                     <span class="name">
                       <input
@@ -288,178 +410,115 @@ function addSubtitle2() {
                         :readonly="!isEditor"
                         type="text"
                         @blur="handleInputBlur"
-                    /></span>
-                    <template v-if="personItem.post[0]">
-                      <span
-                        v-for="(postItem, postIndex) in personItem.post"
-                        :key="postItem"
-                        class="post"
+                      />
+                    </span>
+                    <span
+                      v-for="(postItem, postIndex) in personItem.post"
+                      :key="postIndex"
+                      class="post"
+                    >
+                      <input
+                        v-model="personItem.post[postIndex]"
+                        :readonly="!isEditor"
+                        type="text"
+                        @blur="handleInputBlur"
+                      />
+                    </span>
+                  </div>
+                </div>
+                <div v-if="subItem.detail[0]" class="detail">
+                  <p>
+                    <span>议题名称：</span><span> {{ subItem.desc }}</span>
+                  </p>
+                  <p v-if="subItem.detail[0]">
+                    <span>议题简介：</span
+                    ><span
+                      ><span
+                        v-for="(itemDetail, detailIndex) in subItem.detail"
+                        :key="detailIndex"
+                        class="detail-text"
                       >
                         <input
-                          v-model="personItem.post[postIndex]"
+                          v-model="subItem.detail[detailIndex]"
                           :readonly="!isEditor"
                           type="text"
                           @blur="handleInputBlur"
-                        />
-                      </span>
-                    </template>
-                  </div>
+                        /> </span
+                    ></span>
+                  </p>
+                  <p v-if="subItem.person[0]">
+                    <span>发言人：</span>
+                    <span
+                      v-for="personItem in subItem.person"
+                      :key="personItem.id"
+                      >{{ personItem.name }}
+                      <template v-if="personItem.post[0]">
+                        <span>(</span>
+                        <span
+                          v-for="(postItem, postIndex) in personItem.post"
+                          :key="postIndex"
+                          >{{ postItem }}</span
+                        >
+                        <span>)</span>
+                      </template>
+                    </span>
+                  </p>
                 </div>
+                <div
+                  v-show="
+                    indexShow !== -1 && subItem.detail && idShow === listIndex
+                  "
+                  class="mask"
+                  @click="changeIndexShow(-1, -1)"
+                ></div>
                 <span
                   v-if="isEditor"
                   class="del-content"
                   @click="delContent(subIndex)"
                   >X</span
                 >
-              </template>
-              <!-- 该lable下不只存在一个论坛的时候 -->
-            </div>
-          </div>
-          <el-button v-if="isEditor" class="add-content" @click="addContent">
-            增加日程
-          </el-button>
-        </div>
-        <div
-          v-show="
-            tabType === scheduleItem.id && scheduleItem.content[0].content
-          "
-          class="schedule-item other"
-        >
-          <el-tabs v-model="otherTabType" class="other-tabs">
-            <el-tab-pane
-              v-for="itemList in scheduleItem.content"
-              :key="itemList.id"
-              :label="itemList.name"
-              :name="itemList.id"
-            >
-              <h4 v-if="itemList.title" class="other-title">
-                <input
-                  v-model="itemList.title"
-                  :readonly="!isEditor"
-                  type="text"
-                  @blur="handleInputBlur"
-                />
-              </h4>
-              <div class="content-list">
-                <div
-                  v-for="(subItem, subIndex) in itemList.content"
-                  :key="subItem.time"
-                  class="content-item"
-                  :class="{
-                    'show-detail':
-                      indexShow === subIndex && idShow === itemList.id,
-                  }"
-                >
-                  <span class="time">
-                    <!-- <el-time-picker
-                      v-model="value1"
-                      value-format="HH:mm"
-                      is-range
-                      format="HH:mm"
-                      start-placeholder="Start time"
-                      end-placeholder="End time"
-                    /> -->
-
-                    <IconTime />{{
-                      subItem.time[0] + '-' + subItem.time[1]
-                    }}</span
-                  >
-                  <span
-                    class="desc"
-                    :class="{ 'exit-detail': subItem.detail[0] }"
-                    @click="changeIndexShow(itemList.id, subIndex as any)"
-                  >
-                    <input
-                      v-model="subItem.desc"
-                      :readonly="!isEditor"
-                      type="text"
-                      @blur="handleInputBlur"
-                  /></span>
-                  <div v-if="subItem.person[0]" class="name-box">
-                    <div
-                      v-for="personItem in subItem.person"
-                      :key="personItem.name"
-                    >
-                      <span class="name">{{ personItem.name }} </span>
-                      <template v-if="personItem.post[0]">
-                        <span
-                          v-for="(postItem, postIndex) in personItem.post"
-                          :key="postItem"
-                          class="post"
-                        >
-                          <input
-                            v-model="personItem.post[postIndex]"
-                            :readonly="!isEditor"
-                            type="text"
-                            @blur="handleInputBlur"
-                          />
-                        </span>
-                      </template>
-                    </div>
-                  </div>
-                  <div v-if="subItem.detail[0]" class="detail">
-                    <p>
-                      <span>议题名称：</span><span> {{ subItem.desc }}</span>
-                    </p>
-                    <p v-if="subItem.detail[0]">
-                      <span>议题简介：</span
-                      ><span
-                        ><span
-                          v-for="itemDetail in subItem.detail"
-                          :key="itemDetail"
-                          class="detail-text"
-                          >{{ itemDetail }}</span
-                        ></span
-                      >
-                    </p>
-                    <p v-if="subItem.person[0]">
-                      <span>发言人：</span>
-                      <span
-                        v-for="personItem in subItem.person"
-                        :key="personItem.name"
-                        >{{ personItem.name }}
-                        <template v-if="personItem.post[0]">
-                          <span>(</span>
-                          <span
-                            v-for="postItem in personItem.post"
-                            :key="postItem"
-                            >{{ postItem }}</span
-                          >
-                          <span>)</span>
-                        </template>
-                      </span>
-                    </p>
-                  </div>
-                  <div
-                    v-show="
-                      indexShow !== -1 &&
-                      subItem.detail &&
-                      idShow === itemList.id
-                    "
-                    class="mask"
-                    @click="changeIndexShow(-1, -1)"
-                  ></div>
-                </div>
               </div>
-            </el-tab-pane>
-          </el-tabs>
+            </div>
+            <el-button v-if="isEditor" class="add-content" @click="addContent">
+              增加日程
+            </el-button>
+          </div>
         </div>
       </template>
     </el-container>
   </div>
+  <div class="contoral-box">
+    <el-button @click="isEditor = !isEditor">{{
+      isEditor ? '预览' : '编辑'
+    }}</el-button
+    ><el-button @click="savePageData">保存</el-button>
+    <!-- <el-button @click="createNewPage">新建</el-button> -->
+  </div>
 </template>
 
 <style lang="scss" scoped>
+.el-button {
+  border-radius: 0;
+}
+
 input {
+  padding: 4px;
   background-color: transparent;
   color: inherit;
   font-size: inherit;
-  border: none;
+  border: 1px solid #707070;
   max-width: 100%;
+  &:focus-visible {
+    box-shadow: none;
+    outline: none;
+    border: 1px solid var(--o-color-primary1);
+  }
 }
 input[readonly] {
-  cursor: auto;
+  cursor: pointer;
+  padding: 0;
   text-align: center;
+  border: none;
   &:focus-visible {
     border: none;
     box-shadow: none;
@@ -488,8 +547,18 @@ input[readonly] {
     }
   }
   .schedule-tabs {
+    position: relative;
     text-align: center;
     margin-top: 24px;
+    :deep(.el-tabs__content) {
+      overflow: visible;
+      .el-button {
+        position: absolute;
+        left: 0;
+        top: -75px;
+        z-index: 1;
+      }
+    }
     :deep(.el-tabs__nav) {
       float: none;
       display: inline-block;
@@ -525,6 +594,7 @@ input[readonly] {
     }
   }
   .schedule-item {
+    width: 100%;
     padding: 24px;
     background-color: var(--o-color-bg2);
     @media (max-width: 1100px) {
@@ -741,6 +811,10 @@ input[readonly] {
         @media screen and (max-width: 1100px) {
           display: none;
         }
+      }
+      .input-time {
+        width: 60px;
+        text-align: center;
       }
     }
     .info .desc {

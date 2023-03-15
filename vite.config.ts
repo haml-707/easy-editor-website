@@ -55,10 +55,29 @@ export default defineConfig({
       compiler: 'vue3',
       customCollections: {
         app: FileSystemIconLoader('./src/assets/svg-icons'),
+        edit: FileSystemIconLoader('./src/assets/svg-edit'),
       },
     }),
     ElementPlus({
       useSource: true,
     }),
   ],
+  server: {
+    proxy: {
+      '/api/': {
+        target: 'https://easyeditor.test.osinfra.cn/',
+        changeOrigin: true,
+      },
+      '/api-omapi/': {
+        target: 'https://omapi.osinfra.cn/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-omapi/, ''),
+      },
+      '/api-meeting/': {
+        target: 'https://meetings.openeuler.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-meeting/, ''),
+      },
+    },
+  },
 });

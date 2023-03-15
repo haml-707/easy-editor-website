@@ -1,0 +1,16 @@
+export default {
+  TITLE: '模板页面自编辑发布平台',
+  PUBLISH_PAGE: '发布页面',
+  CONFIRE_PUBLISH: '请您先预览页面、确认修改无误后再进行发布',
+  CANCEL: '取消',
+  CONFIRM: '确认',
+  CONFIRM_TEXT1: '确定发布后您的修改将 ',
+  CONFIRM_TEXT2: '即时刷新',
+  CONFIRM_TEXT3: '到官网正式环境！',
+  CONFIRM_TEXT4: '请您确认修改内容无误后，在下方输入您的名称',
+  CONFIRM_TEXT5: '并点击确定按钮',
+  REQUIRED: '请填写您的名称',
+  PATTERN_RIGHT: '请正确输入名称',
+  VERIFICATION: '请先登录openEuler账号验证权限！',
+  LOGIN: '前往登录',
+};
