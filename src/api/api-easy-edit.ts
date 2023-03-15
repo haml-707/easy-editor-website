@@ -1,5 +1,18 @@
 import { request } from '@/shared/axios';
 import type { AxiosResponse } from '@/shared/axios';
+import { getUserAuth } from '@/shared/login';
+
+function getHeaderConfig() {
+  const { token } = getUserAuth();
+  const headersConfig = token
+    ? {
+        headers: {
+          token,
+        },
+      }
+    : {};
+  return headersConfig;
+}
 
 /**
  * 创建页面
@@ -8,7 +21,6 @@ import type { AxiosResponse } from '@/shared/axios';
  */
 export function createPage(content: string) {
   const url = '/api/page';
-
   const params = {
     path: 'https://www.openeuler.org/zh/interaction/event-list/',
     folder: '/',
@@ -21,7 +33,7 @@ export function createPage(content: string) {
     contentType: 'txt',
   };
   return request
-    .post(url, params)
+    .post(url, params, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);
@@ -37,7 +49,7 @@ export function createPage(content: string) {
 export function getPageData(id: number) {
   const url = `/api/page/${id}`;
   return request
-    .get(url)
+    .get(url, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);
@@ -63,7 +75,20 @@ export function modifyPageData(id: number, content: string) {
     contentType: 'txt',
   };
   return request
-    .put(url, params)
+    .put(url, params, getHeaderConfig())
+    .then((res: AxiosResponse) => res.data)
+    .catch((e: any) => {
+      console.error(e);
+    });
+}
+
+export function publishPage(path: string) {
+  const url = '/api/publish';
+  const params = {
+    path,
+  };
+  return request
+    .post(url, params, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);

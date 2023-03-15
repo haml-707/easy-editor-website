@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStoreData } from '@/shared/login';
+
+import { publishPage } from '@/api/api-easy-edit';
 
 import { OButton } from '@/components/button';
 import OIcon from '@/components/OIcon.vue';
@@ -8,11 +11,27 @@ import OIcon from '@/components/OIcon.vue';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
 
+import { ElMessage } from 'element-plus';
+
 import type { FormInstance } from 'element-plus';
 
 const { t } = useI18n();
+const { guardAuthClient } = useStoreData();
 
-const userName = ref('haml');
+function getGiteeName(arr: any) {
+  try {
+    const giteeName = arr?.filter((item: any) => {
+      return item.identity === 'gitee';
+    })[0]?.login_name;
+    if (giteeName) {
+      return giteeName;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
+const userName = ref(getGiteeName(guardAuthClient?.value.identities));
 
 const isDialogVisiable = ref(false);
 const formRef = ref<FormInstance>();
@@ -55,8 +74,17 @@ function confirmPublish(verify: FormInstance | undefined) {
   }
   verify.validate(async (res: boolean) => {
     if (res) {
-      console.log(5555);
-      // TODO:
+      publishPage('https://www.openeuler.org/zh/interaction/event-list/').then(
+        (res) => {
+          if (res.statusCode === 200) {
+            ElMessage({
+              type: 'success',
+              message: '发布成功',
+            });
+            toggleDelDlg(false);
+          }
+        }
+      );
     }
   });
 }

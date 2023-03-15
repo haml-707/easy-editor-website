@@ -16,6 +16,7 @@ type queryPermissionParams = {
 export function queryPermission(params: queryPermissionParams) {
   const url = '/api-omapi/oneid/personal/center/user';
   const { token } = getUserAuth();
+
   return request
     .get(url, {
       params,

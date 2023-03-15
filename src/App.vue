@@ -9,7 +9,9 @@ import { useLangStore } from '@/stores';
 import EditHeader from '@/views/edit/EditHeader.vue';
 import EditFooter from '@/views/edit/EditFooter.vue';
 import EditTextTitle from '@/views/edit/EditTextTitle.vue';
+import { refreshInfo } from '@/shared/login';
 
+refreshInfo();
 const { t } = useI18n();
 const route = useRoute();
 const { locale } = useI18n();
