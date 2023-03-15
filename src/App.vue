@@ -1,18 +1,26 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { watch, computed } from 'vue';
+import { watch, computed, ref } from 'vue';
 import AppHeader from './components/AppHeader.vue';
+import AppFooter from './components/AppFooter.vue';
 import { useRoute } from 'vue-router';
 
 import { useLangStore } from '@/stores';
-import EditDisplayZone from '@/views/edit/EditDisplayZone.vue';
+import EditHeader from '@/views/edit/EditHeader.vue';
+import EditFooter from '@/views/edit/EditFooter.vue';
+import EditTextTitle from '@/views/edit/EditTextTitle.vue';
 
+const { t } = useI18n();
 const route = useRoute();
 const { locale } = useI18n();
 const langStore = useLangStore();
 const isEditPage = computed(() => {
   return route.name === 'edit';
 });
+const isPreviewMode = ref(false);
+function getModeType(val: boolean) {
+  isPreviewMode.value = val;
+}
 
 watch(
   () => langStore.lang,
@@ -23,29 +31,35 @@ watch(
 </script>
 
 <template>
-  <div id="app">
-    <header><AppHeader /></header>
-    <main :class="isEditPage ? 'edit-page' : ''">
-      <EditDisplayZone />
-      <RouterView class="content"></RouterView>
-    </main>
-    <footer></footer>
-  </div>
+  <header><AppHeader /></header>
+  <main :class="isEditPage ? 'edit-page' : ''">
+    <component
+      :is="isEditPage ? EditHeader : EditTextTitle"
+      :title="t('edit.TITLE')"
+      @switch-change="getModeType"
+    ></component>
+    <div class="content">
+      <RouterView class="router-view" :mode-type="isPreviewMode"></RouterView>
+    </div>
+    <EditFooter v-if="isEditPage" />
+  </main>
+  <footer>
+    <AppFooter v-show="!isEditPage" />
+  </footer>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 #app {
   background-position: center top;
   background-size: 100% auto;
   background-repeat: repeat;
   background-color: var(--o-color-bg1);
-
   background-image: url(./assets/common/bg/bg.jpg);
 }
 
 main {
   position: relative;
-  margin: 40px auto 0;
+  margin: 0 auto 0;
   max-width: 1416px;
   width: calc(100% - 88px);
   height: 100%;
@@ -59,11 +73,12 @@ main {
 .edit-page {
   max-width: 100%;
   width: 100%;
-  background-color: var(--o-color-bg1);
   > .content {
-    max-width: 1504px;
-    margin: 0 auto;
-    // padding: 0 40px;
+    background-color: var(--o-color-bg1);
+    .router-view {
+      margin: 0 auto;
+      max-width: 1504px;
+    }
   }
 }
 </style>

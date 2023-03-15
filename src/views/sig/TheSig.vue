@@ -30,6 +30,15 @@ interface SIGLIST {
   maillist: string;
 }
 
+const props = defineProps({
+  modeType: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+console.log(props.modeType);
+
 const lang = useLangStore().lang;
 
 const route = useRoute();
@@ -455,7 +464,6 @@ onMounted(() => {
 </template>
 <style lang="scss" scoped>
 .sig-detail {
-  max-width: 1504px;
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
   margin: 0 auto;
   .content {

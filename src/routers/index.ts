@@ -10,6 +10,12 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/TheEdit.vue'),
   },
   {
+    path: '/zh/login',
+    name: 'login',
+    alias: '/en/login',
+    component: () => import('@/views/login/TheLogin.vue'),
+  },
+  {
     path: '/zh/edit/:name',
     name: 'edit',
     alias: '/zh/edit/:name',

@@ -1,24 +1,30 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
+import { useI18n } from 'vue-i18n';
+
 import { useLangStore } from '@/stores';
 
 import OIcon from '@/components/OIcon.vue';
 
-// import { showGuard, logout, getUserAuth, useStoreData } from '@/shared/login';
+import { showGuard, logout, getUserAuth, useStoreData } from '@/shared/login';
 import communityLogoWhite from '@/assets/common/header/openeuler-logo.png';
 // import EasyEditorLogo from '@/assets/common/header/quickissue-logo.png';
 import IconLogin from '~icons/app/icon-login.svg';
 
+const { t } = useI18n();
+
 const lang = computed(() => {
   return useLangStore().lang;
 });
+const { token } = getUserAuth();
+const { guardAuthClient } = useStoreData();
 
-// const jumpToUserZone = () => {
-//   const language = lang.value === 'zh' ? 'zh' : 'en';
-//   const origin = import.meta.env.VITE_LOGIN_ORIGIN;
-//   window.open(`${origin}/${language}/profile`, '_black');
-// };
+const jumpToUserZone = () => {
+  const language = lang.value === 'zh' ? 'zh' : 'en';
+  const origin = import.meta.env.VITE_LOGIN_ORIGIN;
+  window.open(`${origin}/${language}/profile`, '_black');
+};
 </script>
 
 <template>
@@ -32,10 +38,34 @@ const lang = computed(() => {
           ><img class="community-logo" :src="communityLogoWhite"
         /></a>
       </div>
-      <div class="login">
+      <!-- <div class="login">
         <OIcon class="icon">
           <IconLogin />
         </OIcon>
+      </div> -->
+      <div class="opt-user">
+        <div v-if="token">
+          <div class="opt-info">
+            <img
+              v-if="guardAuthClient.photo"
+              :src="guardAuthClient.photo"
+              class="opt-img"
+            />
+            <div v-else class="opt-img"></div>
+            <p class="opt-name" :title="guardAuthClient?.username">
+              {{ guardAuthClient.username }}
+            </p>
+          </div>
+          <ul class="menu-list">
+            <li @click="jumpToUserZone()">{{ t('common.USER_CENTER') }}</li>
+            <li @click="logout()">{{ t('common.LOGOUT') }}</li>
+          </ul>
+        </div>
+        <div v-else class="login" @click="showGuard()">
+          <OIcon class="icon">
+            <IconLogin />
+          </OIcon>
+        </div>
       </div>
       <!-- <div class="language">
         <el-dropdown popper-class="language-change" @command="handleCommand">
@@ -102,11 +132,6 @@ const lang = computed(() => {
         }
       }
     }
-    .api-docs {
-      margin-right: 40px;
-      font-size: var(--o-font-size-h8);
-      color: #fff;
-    }
   }
   &.isabout {
     background: #000;
@@ -132,6 +157,8 @@ const lang = computed(() => {
     display: flex;
     align-items: center;
     color: var(--o-color-text2);
+    font-family: Futura-Medium, Futura;
+    font-weight: 500;
     .community-logo {
       height: 32px;
     }

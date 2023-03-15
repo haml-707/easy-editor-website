@@ -2,6 +2,9 @@
 import { ref, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { OButton } from '@/components/button';
+import OIcon from '@/components/OIcon.vue';
+
 import IconSearch from '~icons/app/icon-search.svg';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
 
@@ -119,7 +122,7 @@ watch(
       </el-table-column>
       <el-table-column label="页面语言" prop="lang" min-width="110">
       </el-table-column>
-      <el-table-column label="目标页面链接" prop="path" min-width="110">
+      <el-table-column label="目标页面链接" prop="path" min-width="310">
         <template #default="scope">
           <a :href="`https://www.openeuler.org`"> {{ scope.row.path }} </a>
         </template>
@@ -127,12 +130,18 @@ watch(
       <el-table-column label="最新修改时间" prop="time" min-width="110">
       </el-table-column>
       <el-table-column min-width="110">
-        <el-button link @click="goEdit('A-Tune')"
+        <OButton
+          class="start-edit"
+          animation
+          type="text"
+          @click="goEdit('A-Tune')"
           >开始编辑
           <template #suffixIcon>
-            <IconArrowRight class="intro-button-icon-pc"></IconArrowRight>
+            <OIcon>
+              <IconArrowRight></IconArrowRight>
+            </OIcon>
           </template>
-        </el-button>
+        </OButton>
       </el-table-column>
     </el-table>
     <el-pagination
@@ -178,6 +187,12 @@ watch(
   }
   .el-table {
     margin-top: 24px;
+    .o-button {
+      .o-icon {
+        font-size: var(--o-font_size-h4);
+        color: var(--o-color-primary1);
+      }
+    }
   }
 }
 </style>

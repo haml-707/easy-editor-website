@@ -55,6 +55,7 @@ export default defineConfig({
       compiler: 'vue3',
       customCollections: {
         app: FileSystemIconLoader('./src/assets/svg-icons'),
+        edit: FileSystemIconLoader('./src/assets/svg-edit'),
       },
     }),
     ElementPlus({
