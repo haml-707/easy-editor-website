@@ -23,13 +23,12 @@ export function createPage(content: string) {
   const url = '/api-edit/page';
   const params = {
     path: 'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
-    name: 'profile/markdown',
+    name: 'markdown',
     title: 'sig 简介',
     description: 'sig 简介',
     isPrivate: false,
     isPublished: false,
-    content:
-      'The A-Tune team is responsible for exploration of optimization technologies and AI-assisted performance analysis',
+    content: content,
     contentType: 'txt',
   };
   return request

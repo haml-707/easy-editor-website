@@ -17,7 +17,7 @@ export const useLangStore = defineStore('lang', {
 export const usePageData = defineStore('edit-data', {
   state: () => {
     return {
-      pageData: [],
+      pageData: [] as any,
     };
   },
   actions: {

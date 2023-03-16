@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, inject } from 'vue';
+import { computed, ref, onMounted, inject, reactive } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import useWindowResize from '@/components/hooks/useWindowResize';
-
 import BreadCrumbs from '@/components/BreadCrumbs.vue';
 import SigMeeting from './SigMeeting.vue';
 import OIcon from '@/components/OIcon.vue';
 import AppEditTemplate from '@/components/AppEditTemplate.vue';
-
 import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
 import AppPaginationMo from '@/components/AppPaginationMo.vue';
+import MdStatement from '@/components/MdStatement.vue';
 
 import IconEmail from '~icons/app/icon-mail.svg';
 import IconGitee from '~icons/app/icon-gitee.svg';
@@ -27,10 +26,12 @@ import {
   getSigRepositoryList,
   getSigList,
 } from '@/api/api-sig';
-import { modifyFloorData, deleteFloor } from '@/api/api-easy-edit';
+import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
+import _ from 'lodash-es';
 
+let templateData = reactive<any>('');
 const params = {
   title: '介绍',
   description: '介绍',
@@ -44,18 +45,36 @@ interface SIGLIST {
   group_name: string;
   maillist: string;
 }
+// const emit = defineEmits(['turn-page', 'jump-page']);
+
 const pageData = computed(() => {
   return usePageData().pageData;
 });
 
 const isDialogVisiable = ref(false);
 const modeType = inject('modeType');
-const EditFloot = function (id: string) {
+const EditFloor = function (type: boolean) {
+  if (type) {
+    templateData = _.cloneDeep(introduction.value);
+  } else {
+    usePageData().pageData.forEach((item: any, index: number) => {
+      if (item.name === 'introduction') {
+        usePageData().pageData[index] = templateData;
+      }
+    });
+  }
+  isDialogVisiable.value = !isDialogVisiable.value;
+};
+const addFloor = function () {
   isDialogVisiable.value = !isDialogVisiable.value;
 };
 const introduction = computed(() => {
   return getFloorData('introduction');
 });
+const markdownData = computed(() => {
+  return getFloorData('markdown');
+});
+const markdown1 = ref('');
 function getFloorData(name: string) {
   try {
     const giteeName = pageData.value?.filter((item: any) => {
@@ -82,6 +101,9 @@ function handleDelFloor(name: string) {
     'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
     name
   );
+}
+function creatFloor(name: string) {
+  createPage(markdown1.value);
 }
 ////////
 const lang = useLangStore().lang;
@@ -241,61 +263,83 @@ onMounted(() => {
         link1="/zh/sig/sig-list/"
       />
       <div class="content">
-        <div id="modals"></div>
-
-        <!-- <Teleport to="#modals">
-          <div>A</div>
-        </Teleport>
-        <Teleport to="#modals">
-          <div>B</div>
-        </Teleport> -->
-
-        <Teleport to="body" :disabled="!isDialogVisiable">
-          <div class="brief-introduction">
-            <h2 class="brief-introduction-title">
-              {{ sigDetailName }}
-              <a :href="giteeHomeLink" target="_blank">
-                <OIcon class="icon"> <IconGitee /> </OIcon
-              ></a>
-            </h2>
-            <el-input
-              v-if="introduction"
-              v-model="introduction.content"
-              :readonly="!isDialogVisiable"
-              :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
-              type="textarea"
-              class="sig-introduction"
-            >
-              {{ sigMemberData.description }}
-            </el-input>
-            <el-button
-              v-show="isDialogVisiable"
-              class="sig-introduction"
-              @click="saveData('introduction')"
-              >保存</el-button
-            >
-            <el-button
-              v-show="isDialogVisiable"
-              class="sig-introduction"
-              @click="handleDelFloor('profile/meeting')"
-              >删除</el-button
-            >
-            <div
-              v-show="!modeType"
-              class="edit-floor square"
-              @click="EditFloot('introduction')"
-            >
-              <OIcon>
-                <IconEdit />
-              </OIcon>
-            </div>
+        <!-- <Teleport to="body" :disabled="!isDialogVisiable"> -->
+        <div class="brief-introduction">
+          <h2 class="brief-introduction-title">
+            {{ sigDetailName }}
+            <a :href="giteeHomeLink" target="_blank">
+              <OIcon class="icon"> <IconGitee /> </OIcon
+            ></a>
+          </h2>
+          <el-input
+            v-if="introduction"
+            v-model="introduction.content"
+            :readonly="!isDialogVisiable"
+            :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
+            type="textarea"
+            class="sig-introduction"
+          >
+            {{ sigMemberData.description }}
+          </el-input>
+          <el-button
+            v-show="isDialogVisiable"
+            class="sig-introduction"
+            @click="EditFloor(false)"
+            >放弃修改</el-button
+          >
+          <el-button
+            v-show="isDialogVisiable"
+            class="sig-introduction"
+            @click="saveData('introduction')"
+            >确认修改</el-button
+          >
+          <el-button
+            v-show="isDialogVisiable"
+            class="sig-introduction"
+            @click="handleDelFloor('profile/meeting')"
+            >删除</el-button
+          >
+          <div
+            v-show="!modeType"
+            class="edit-floor square"
+            @click="EditFloor('introduction')"
+          >
+            <OIcon>
+              <IconEdit />
+            </OIcon>
           </div>
-        </Teleport>
-
-        <div v-show="!modeType" class="add-floor square">
+        </div>
+        <!-- </Teleport> -->
+        <el-input
+          v-if="isDialogVisiable"
+          v-model="markdown1"
+          :readonly="!isDialogVisiable"
+          :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
+          type="textarea"
+          class="editable-floor"
+        >
+          {{ sigMemberData.description }}
+        </el-input>
+        <el-button v-if="isDialogVisiable" @click="creatFloor('markdown')"
+          >保存修改</el-button
+        >
+        <div
+          v-show="!modeType"
+          class="add-floor square"
+          @click="addFloor('markdown')"
+        >
           <OIcon>
             <IconAdd />
           </OIcon>
+        </div>
+
+        <div
+          v-if="markdownData"
+          style="margin-top: 40px"
+          class="markdown-floor"
+        >
+          <h2></h2>
+          <MdStatement :statement="markdownData.content"></MdStatement>
         </div>
         <div v-if="lang === 'zh'" class="meeting">
           <h2>
@@ -543,6 +587,10 @@ onMounted(() => {
   </AppEditTemplate>
 </template>
 <style lang="scss" scoped>
+.editable-floor {
+  position: relative;
+  z-index: 11;
+}
 @mixin title {
   text-align: center;
   position: relative;
