@@ -19,6 +19,7 @@ import IconEmail from '~icons/app/icon-mail.svg';
 import IconGitee from '~icons/app/icon-gitee.svg';
 import IconSearch from '~icons/app/icon-search.svg';
 import IconAdd from '~icons/app/icon-add.svg';
+import IconEdit from '~icons/app/icon-edit.svg';
 
 import {
   getSigDetail,
@@ -26,14 +27,63 @@ import {
   getSigRepositoryList,
   getSigList,
 } from '@/api/api-sig';
+import { modifyFloorData, deleteFloor } from '@/api/api-easy-edit';
+
+import { usePageData } from '@/stores';
+
+const params = {
+  title: '介绍',
+  description: '介绍',
+  content: '',
+  contentType: 'txt',
+  name: '',
+  path: '',
+};
 
 interface SIGLIST {
   group_name: string;
   maillist: string;
 }
+const pageData = computed(() => {
+  return usePageData().pageData;
+});
 
+const isDialogVisiable = ref(false);
 const modeType = inject('modeType');
-
+const EditFloot = function (id: string) {
+  isDialogVisiable.value = !isDialogVisiable.value;
+};
+const introduction = computed(() => {
+  return getFloorData('introduction');
+});
+function getFloorData(name: string) {
+  try {
+    const giteeName = pageData.value?.filter((item: any) => {
+      return item.name === name;
+    })[0];
+    if (giteeName) {
+      return giteeName;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+function saveData(name: string) {
+  params.content = introduction.value?.content;
+  params.name = name;
+  params.path =
+    'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign';
+  modifyFloorData(params).then((res) => {
+    console.log(res);
+  });
+}
+function handleDelFloor(name: string) {
+  deleteFloor(
+    'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
+    name
+  );
+}
+////////
 const lang = useLangStore().lang;
 
 const route = useRoute();
@@ -191,26 +241,58 @@ onMounted(() => {
         link1="/zh/sig/sig-list/"
       />
       <div class="content">
-        <div class="brief-introduction">
-          <h2 class="brief-introduction-title">
-            {{ sigDetailName }}
-            <a :href="giteeHomeLink" target="_blank">
-              <OIcon class="icon"> <IconGitee /> </OIcon
-            ></a>
-          </h2>
-          <p v-if="sigMemberData.description" class="no-meeting">
-            {{ sigMemberData.description }}
-          </p>
-          <p v-else class="no-meeting">
-            {{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')
-            }}<a
-              target="_blank"
-              :href="`https://gitee.com/openeuler/community/tree/master/sig/${sigDetailName}`"
-              >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT2') }}</a
-            >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT3') }}
-          </p>
-        </div>
-        <div v-show="!modeType" class="add-floor">
+        <div id="modals"></div>
+
+        <!-- <Teleport to="#modals">
+          <div>A</div>
+        </Teleport>
+        <Teleport to="#modals">
+          <div>B</div>
+        </Teleport> -->
+
+        <Teleport to="body" :disabled="!isDialogVisiable">
+          <div class="brief-introduction">
+            <h2 class="brief-introduction-title">
+              {{ sigDetailName }}
+              <a :href="giteeHomeLink" target="_blank">
+                <OIcon class="icon"> <IconGitee /> </OIcon
+              ></a>
+            </h2>
+            <el-input
+              v-if="introduction"
+              v-model="introduction.content"
+              :readonly="!isDialogVisiable"
+              :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
+              type="textarea"
+              class="sig-introduction"
+            >
+              {{ sigMemberData.description }}
+            </el-input>
+            <el-button
+              v-show="isDialogVisiable"
+              class="sig-introduction"
+              @click="saveData('introduction')"
+              >保存</el-button
+            >
+            <el-button
+              v-show="isDialogVisiable"
+              class="sig-introduction"
+              @click="handleDelFloor('profile/meeting')"
+              >删除</el-button
+            >
+            <div
+              v-show="!modeType"
+              class="edit-floor square"
+              @click="EditFloot('introduction')"
+            >
+              <OIcon>
+                <IconEdit />
+              </OIcon>
+            </div>
+          </div>
+        </Teleport>
+
+        <div v-show="!modeType" class="add-floor square">
           <OIcon>
             <IconAdd />
           </OIcon>
@@ -229,7 +311,7 @@ onMounted(() => {
             class="calender-box"
             :table-data="sigMeetingData.tableData"
           />
-          <p v-else class="no-meeting">
+          <p v-else class="sig-introduction">
             {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
           </p>
         </div>
@@ -502,6 +584,31 @@ onMounted(() => {
     padding: var(--o-spacing-h5);
   }
 }
+:deep(.el-textarea) {
+  textarea {
+    resize: none;
+    &[readonly] {
+      cursor: text;
+      padding: 0;
+      box-shadow: none;
+      border: none;
+      &:focus-visible {
+        border: none;
+        box-shadow: none;
+        outline: none;
+      }
+    }
+  }
+}
+.is-editing {
+  position: fixed !important;
+  z-index: 12;
+  max-width: 1424px;
+  width: 100%;
+  top: calc(50% - 160px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 .sig-detail {
   max-width: 1504px;
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
@@ -524,7 +631,6 @@ onMounted(() => {
     .brief-introduction {
       position: relative;
       @include section-box;
-      z-index: 11;
       .brief-introduction-title {
         font-size: var(--o-font-size-h3);
         line-height: var(--o-line-height-h3);
@@ -547,11 +653,13 @@ onMounted(() => {
           }
         }
       }
-      p {
+      .sig-introduction {
         margin-top: var(--o-spacing-h5);
         font-size: var(--o-font-size-text);
         line-height: 22px;
         color: var(--o-color-text3);
+        position: relative;
+        z-index: 11;
         @media screen and (max-width: 768px) {
           margin-top: var(--o-spacing-h6);
           font-size: var(--o-font-size-tip);
@@ -562,9 +670,11 @@ onMounted(() => {
     .meeting {
       margin-top: var(--o-spacing-h2);
       color: var(--o-color-text1);
-      .no-meeting {
+      .sig-introduction {
         padding: var(--o-spacing-h5) 0;
         text-align: center;
+        position: relative;
+        z-index: 11;
       }
       h2 {
         @include title;
@@ -807,22 +917,29 @@ onMounted(() => {
         }
       }
     }
-    .add-floor {
+    .square {
       cursor: pointer;
-      position: relative;
       display: flex;
       justify-content: center;
       z-index: 11;
-      padding: 64px 0 24px;
-      box-sizing: border-box;
+      border: 1px solid var(--o-color-brand1);
       .o-icon {
-        border: 1px solid var(--o-color-brand1);
         padding: 8px;
         font-size: 48px;
         color: var(--o-color-brand1);
         // TODO:'阴影'
         box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
       }
+    }
+    .add-floor {
+      position: relative;
+      margin: 64px auto 24px;
+      width: fit-content;
+    }
+    .edit-floor {
+      position: absolute;
+      top: 0;
+      right: -40px;
     }
   }
 }

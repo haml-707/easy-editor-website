@@ -11,6 +11,12 @@ import EditFooter from '@/views/edit/EditFooter.vue';
 import EditTextTitle from '@/views/edit/EditTextTitle.vue';
 import { refreshInfo } from '@/shared/login';
 
+import { createPage } from '@/api/api-easy-edit';
+
+// createPage().then((res) => {
+//   console.log(res);
+// });
+
 refreshInfo();
 const { t } = useI18n();
 const route = useRoute();

@@ -403,7 +403,7 @@ export default {
     MORE: '更多',
     BLOG: '博客',
     LATEST_DYNAMIC: '最新动态',
-    SIG_EMPTY_TEXT1: '这里空空如也，快给你的SIG',
+    SIG_EMPTY_TEXT1: '这里空空如也，快给你的SIG添加简介吧！',
     SIG_EMPTY_TEXT2: '添加简介',
     SIG_EMPTY_TEXT3: '吧!',
     INTRODUCTION: 'SIG简介',

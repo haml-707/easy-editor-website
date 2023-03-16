@@ -13,3 +13,16 @@ export const useLangStore = defineStore('lang', {
     },
   },
 });
+
+export const usePageData = defineStore('edit-data', {
+  state: () => {
+    return {
+      pageData: [],
+    };
+  },
+  actions: {
+    setPageData(data: any) {
+      this.pageData = data;
+    },
+  },
+});

@@ -7,8 +7,16 @@ import OIcon from '@/components/OIcon.vue';
 
 import IconSearch from '~icons/app/icon-search.svg';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
+import { profileData } from '@/api/api-easy-edit';
 
 const router = useRouter();
+profileData().then((res) => {
+  if (res.statusCode === 200) {
+    editData.value = res.data;
+  } else {
+    editData.value = [];
+  }
+});
 
 const editData = ref([
   {
@@ -116,18 +124,18 @@ watch(
     </div>
     <div class="input-container"></div>
     <el-table :data="editData">
-      <el-table-column label="页面名称" prop="name" min-width="110">
+      <el-table-column label="页面名称" prop="siteName" min-width="110">
       </el-table-column>
       <el-table-column label="页面类别" prop="type" min-width="110">
       </el-table-column>
-      <el-table-column label="页面语言" prop="lang" min-width="110">
+      <el-table-column label="页面语言" prop="locale" min-width="110">
       </el-table-column>
       <el-table-column label="目标页面链接" prop="path" min-width="310">
         <template #default="scope">
-          <a :href="`https://www.openeuler.org`"> {{ scope.row.path }} </a>
+          <a :href="scope.row.path" target="_blank"> {{ scope.row.path }} </a>
         </template>
       </el-table-column>
-      <el-table-column label="最新修改时间" prop="time" min-width="110">
+      <el-table-column label="最新修改时间" prop="updated_at" min-width="110">
       </el-table-column>
       <el-table-column min-width="110">
         <OButton
