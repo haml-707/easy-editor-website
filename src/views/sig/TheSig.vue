@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, inject } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -9,7 +9,7 @@ import useWindowResize from '@/components/hooks/useWindowResize';
 import BreadCrumbs from '@/components/BreadCrumbs.vue';
 import SigMeeting from './SigMeeting.vue';
 import OIcon from '@/components/OIcon.vue';
-import AppFooter from '@/components/AppFooter.vue';
+import AppEditTemplate from '@/components/AppEditTemplate.vue';
 
 import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
@@ -18,6 +18,7 @@ import AppPaginationMo from '@/components/AppPaginationMo.vue';
 import IconEmail from '~icons/app/icon-mail.svg';
 import IconGitee from '~icons/app/icon-gitee.svg';
 import IconSearch from '~icons/app/icon-search.svg';
+import IconAdd from '~icons/app/icon-add.svg';
 
 import {
   getSigDetail,
@@ -31,14 +32,7 @@ interface SIGLIST {
   maillist: string;
 }
 
-const props = defineProps({
-  modeType: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-console.log(props.modeType);
+const modeType = inject('modeType');
 
 const lang = useLangStore().lang;
 
@@ -189,266 +183,282 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="sig-detail">
-    <BreadCrumbs
-      bread1="SIG"
-      :bread2="sigDetailName"
-      link1="/zh/sig/sig-list/"
-    />
-    <div class="content">
-      <div class="brief-introduction">
-        <h2 class="brief-introduction-title">
-          {{ sigDetailName }}
-          <a :href="giteeHomeLink" target="_blank">
-            <OIcon class="icon"> <IconGitee /> </OIcon
-          ></a>
-        </h2>
-        <p v-if="sigMemberData.description" class="no-meeting">
-          {{ sigMemberData.description }}
-        </p>
-        <p v-else class="no-meeting">
-          {{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')
-          }}<a
-            target="_blank"
-            :href="`https://gitee.com/openeuler/community/tree/master/sig/${sigDetailName}`"
-            >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT2') }}</a
-          >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT3') }}
-        </p>
-      </div>
-      <div v-if="lang === 'zh'" class="meeting">
-        <h2>
-          <span class="title-bg">{{
-            t('sig.SIG_DETAIL.ORGANIZING_MEETINGS_BG')
-          }}</span>
-          <span class="title-text">{{
-            t('sig.SIG_DETAIL.ORGANIZING_MEETINGS')
-          }}</span>
-        </h2>
-        <SigMeeting
-          v-if="sigMeetingData.tableData"
-          class="calender-box"
-          :table-data="sigMeetingData.tableData"
-        />
-        <p v-else class="no-meeting">
-          {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
-        </p>
-      </div>
-      <div v-if="memberList.length" class="member">
-        <h2>
-          <span class="title-bg">{{ t('sig.SIG_DETAIL.MAINTAINER_BG') }}</span>
-          <span class="title-text">{{ t('sig.SIG_DETAIL.MAINTAINER') }}</span>
-        </h2>
-        <div class="member-box">
-          <h5>{{ sigDetailName + ' ' + t('sig.SIG_DETAIL.MAINTAINER_EN') }}</h5>
-          <ul>
-            <li v-for="item in memberList" :key="item.gitee_id">
-              <div class="member-img">
-                <img
-                  :src="item.avatar_url"
-                  :alt="item.name"
-                  @error="setDefaultImage($event)"
-                />
-              </div>
-              <p class="name">{{ item.gitee_id }}</p>
-              <p class="introduction">
-                <span>Maintainer</span>
-              </p>
-              <div class="icon-link">
-                <a :href="`https://gitee.com/${item.gitee_id}`" target="_blank">
-                  <OIcon class="icon"> <IconGitee /> </OIcon
-                ></a>
-                <a :href="`mailto:${item.email}`">
-                  <OIcon class="icon"> <IconEmail /> </OIcon
-                ></a>
-              </div>
-            </li>
-          </ul>
+  <AppEditTemplate>
+    <div class="sig-detail">
+      <BreadCrumbs
+        bread1="SIG"
+        :bread2="sigDetailName"
+        link1="/zh/sig/sig-list/"
+      />
+      <div class="content">
+        <div class="brief-introduction">
+          <h2 class="brief-introduction-title">
+            {{ sigDetailName }}
+            <a :href="giteeHomeLink" target="_blank">
+              <OIcon class="icon"> <IconGitee /> </OIcon
+            ></a>
+          </h2>
+          <p v-if="sigMemberData.description" class="no-meeting">
+            {{ sigMemberData.description }}
+          </p>
+          <p v-else class="no-meeting">
+            {{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')
+            }}<a
+              target="_blank"
+              :href="`https://gitee.com/openeuler/community/tree/master/sig/${sigDetailName}`"
+              >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT2') }}</a
+            >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT3') }}
+          </p>
         </div>
-      </div>
-      <div class="repository">
-        <h2>
-          <span class="title-bg">{{
-            t('sig.SIG_DETAIL.REPOSITORY_LIST_BG')
-          }}</span>
-          <span class="title-text">{{
-            t('sig.SIG_DETAIL.REPOSITORY_LIST')
-          }}</span>
-        </h2>
-        <div class="repository-box">
-          <h5>
-            {{
-              `${sigDetailName} ${t('sig.SIG_DETAIL.REPOSITORY_LIST')} (${
-                _totalRepositoryList.length
-              })`
-            }}
-          </h5>
-          <div class="repository-filter">
-            <div :class="isIphone ? 'select-box-phone' : 'select-box'">
-              <div class="select-item">
-                <span class="select-item-name">
-                  {{ t('sig.SIG_DETAIL.REPOSITORY_NAME') }}
-                </span>
-                <el-select
-                  v-model="repositoryNameSelected"
-                  filterable
-                  clearable
-                  :placeholder="t('sig.SIG_ALL')"
-                  @change="filterRepositoryList()"
-                >
-                  <template #prefix>
-                    <OIcon>
-                      <IconSearch />
-                    </OIcon>
-                  </template>
-                  <el-option
-                    v-for="item in repositoryNameList"
-                    :key="item"
-                    :label="item"
-                    :value="item"
+        <div v-show="!modeType" class="add-floor">
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="lang === 'zh'" class="meeting">
+          <h2>
+            <span class="title-bg">{{
+              t('sig.SIG_DETAIL.ORGANIZING_MEETINGS_BG')
+            }}</span>
+            <span class="title-text">{{
+              t('sig.SIG_DETAIL.ORGANIZING_MEETINGS')
+            }}</span>
+          </h2>
+          <SigMeeting
+            v-if="sigMeetingData.tableData"
+            class="calender-box"
+            :table-data="sigMeetingData.tableData"
+          />
+          <p v-else class="no-meeting">
+            {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
+          </p>
+        </div>
+        <div v-if="memberList.length" class="member">
+          <h2>
+            <span class="title-bg">{{
+              t('sig.SIG_DETAIL.MAINTAINER_BG')
+            }}</span>
+            <span class="title-text">{{ t('sig.SIG_DETAIL.MAINTAINER') }}</span>
+          </h2>
+          <div class="member-box">
+            <h5>
+              {{ sigDetailName + ' ' + t('sig.SIG_DETAIL.MAINTAINER_EN') }}
+            </h5>
+            <ul>
+              <li v-for="item in memberList" :key="item.gitee_id">
+                <div class="member-img">
+                  <img
+                    :src="item.avatar_url"
+                    :alt="item.name"
+                    @error="setDefaultImage($event)"
                   />
-                </el-select>
-              </div>
-              <div v-if="isIphone" class="split-line"></div>
-              <div class="select-item">
-                <span class="select-item-name"> Maintainer </span>
-                <el-select
-                  v-model="maintainerSelected"
-                  filterable
-                  clearable
-                  :placeholder="t('sig.SIG_ALL')"
-                  @change="filterRepositoryList()"
-                >
-                  <template #prefix>
-                    <OIcon>
-                      <IconSearch />
-                    </OIcon>
-                  </template>
-                  <el-option
-                    v-for="item in maintainerList"
-                    :key="item"
-                    :value="item"
-                    :lable="item"
-                  />
-                </el-select>
-              </div>
-              <div v-if="isIphone" class="split-line"></div>
-              <div class="select-item">
-                <span class="select-item-name"> Committer </span>
-                <el-select
-                  v-model="committerSelected"
-                  filterable
-                  clearable
-                  :placeholder="t('sig.SIG_ALL')"
-                  @change="filterRepositoryList()"
-                >
-                  <template #prefix>
-                    <OIcon>
-                      <IconSearch />
-                    </OIcon>
-                  </template>
-                  <el-option
-                    v-for="item in committerList"
-                    :key="item"
-                    :value="item"
-                    :lable="item"
-                  />
-                </el-select>
+                </div>
+                <p class="name">{{ item.gitee_id }}</p>
+                <p class="introduction">
+                  <span>Maintainer</span>
+                </p>
+                <div class="icon-link">
+                  <a
+                    :href="`https://gitee.com/${item.gitee_id}`"
+                    target="_blank"
+                  >
+                    <OIcon class="icon"> <IconGitee /> </OIcon
+                  ></a>
+                  <a :href="`mailto:${item.email}`">
+                    <OIcon class="icon"> <IconEmail /> </OIcon
+                  ></a>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="repository">
+          <h2>
+            <span class="title-bg">{{
+              t('sig.SIG_DETAIL.REPOSITORY_LIST_BG')
+            }}</span>
+            <span class="title-text">{{
+              t('sig.SIG_DETAIL.REPOSITORY_LIST')
+            }}</span>
+          </h2>
+          <div class="repository-box">
+            <h5>
+              {{
+                `${sigDetailName} ${t('sig.SIG_DETAIL.REPOSITORY_LIST')} (${
+                  _totalRepositoryList.length
+                })`
+              }}
+            </h5>
+            <div class="repository-filter">
+              <div :class="isIphone ? 'select-box-phone' : 'select-box'">
+                <div class="select-item">
+                  <span class="select-item-name">
+                    {{ t('sig.SIG_DETAIL.REPOSITORY_NAME') }}
+                  </span>
+                  <el-select
+                    v-model="repositoryNameSelected"
+                    filterable
+                    clearable
+                    :placeholder="t('sig.SIG_ALL')"
+                    @change="filterRepositoryList()"
+                  >
+                    <template #prefix>
+                      <OIcon>
+                        <IconSearch />
+                      </OIcon>
+                    </template>
+                    <el-option
+                      v-for="item in repositoryNameList"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                    />
+                  </el-select>
+                </div>
+                <div v-if="isIphone" class="split-line"></div>
+                <div class="select-item">
+                  <span class="select-item-name"> Maintainer </span>
+                  <el-select
+                    v-model="maintainerSelected"
+                    filterable
+                    clearable
+                    :placeholder="t('sig.SIG_ALL')"
+                    @change="filterRepositoryList()"
+                  >
+                    <template #prefix>
+                      <OIcon>
+                        <IconSearch />
+                      </OIcon>
+                    </template>
+                    <el-option
+                      v-for="item in maintainerList"
+                      :key="item"
+                      :value="item"
+                      :lable="item"
+                    />
+                  </el-select>
+                </div>
+                <div v-if="isIphone" class="split-line"></div>
+                <div class="select-item">
+                  <span class="select-item-name"> Committer </span>
+                  <el-select
+                    v-model="committerSelected"
+                    filterable
+                    clearable
+                    :placeholder="t('sig.SIG_ALL')"
+                    @change="filterRepositoryList()"
+                  >
+                    <template #prefix>
+                      <OIcon>
+                        <IconSearch />
+                      </OIcon>
+                    </template>
+                    <el-option
+                      v-for="item in committerList"
+                      :key="item"
+                      :value="item"
+                      :lable="item"
+                    />
+                  </el-select>
+                </div>
               </div>
             </div>
-          </div>
-          <el-table v-if="!isIphone" :data="repositoryList">
-            <el-table-column
-              :label="t('sig.SIG_DETAIL.REPOSITORY_NAME')"
-              width="550px"
-            >
-              <template #default="scope">
-                <a
-                  target="_blank"
-                  :href="`https://gitee.com/${scope.row.repo}`"
-                >
-                  {{ scope.row.repo }}
-                </a>
-              </template>
-            </el-table-column>
-            <el-table-column label="Maintainer">
-              <template #default="scope">
-                <a
-                  v-for="(item, index) in scope.row.maintainers"
-                  :key="item"
-                  target="_blank"
-                  :href="`https://gitee.com/${item}`"
-                >
-                  {{ item
-                  }}<span v-show="index !== scope.row.maintainers.length - 1">{{
-                    lang === 'zh' ? '、' : ',&nbsp;'
-                  }}</span>
-                </a>
-              </template>
-            </el-table-column>
-            <el-table-column label="Committer">
-              <template #default="scope">
-                <a
-                  v-for="(item, index) in scope.row.gitee_id"
-                  :key="item"
-                  target="_blank"
-                  :href="`https://gitee.com/${item}`"
-                >
-                  {{ item
-                  }}<span v-show="index !== scope.row.gitee_id.length - 1">{{
-                    lang === 'zh' ? '、' : ',&nbsp;'
-                  }}</span>
-                </a>
-              </template>
-            </el-table-column>
-          </el-table>
-          <MobileRepositoryList
-            v-else
-            :data="repositoryList"
-          ></MobileRepositoryList>
-          <div class="sig-pagination">
-            <el-pagination
-              v-model:currentPage="currentPage"
-              v-model:page-size="pageSize"
-              class="repository-pagin"
-              :hide-on-single-page="true"
-              :page-sizes="[10, 20, 30, 40]"
-              :background="true"
-              :layout="paginLayout"
-              :total="totalRepositoryList.length"
-            >
-              <span class="pagination-slot"
-                >{{ currentPage }}/{{ totalPage }}</span
+            <el-table v-if="!isIphone" :data="repositoryList">
+              <el-table-column
+                :label="t('sig.SIG_DETAIL.REPOSITORY_NAME')"
+                width="550px"
               >
-            </el-pagination>
-            <AppPaginationMo
-              :current-page="currentPage"
-              :total-page="totalRepositoryList.length"
-              @turn-page="turnPage"
-            >
-            </AppPaginationMo>
+                <template #default="scope">
+                  <a
+                    target="_blank"
+                    :href="`https://gitee.com/${scope.row.repo}`"
+                  >
+                    {{ scope.row.repo }}
+                  </a>
+                </template>
+              </el-table-column>
+              <el-table-column label="Maintainer">
+                <template #default="scope">
+                  <a
+                    v-for="(item, index) in scope.row.maintainers"
+                    :key="item"
+                    target="_blank"
+                    :href="`https://gitee.com/${item}`"
+                  >
+                    {{ item
+                    }}<span
+                      v-show="index !== scope.row.maintainers.length - 1"
+                      >{{ lang === 'zh' ? '、' : ',&nbsp;' }}</span
+                    >
+                  </a>
+                </template>
+              </el-table-column>
+              <el-table-column label="Committer">
+                <template #default="scope">
+                  <a
+                    v-for="(item, index) in scope.row.gitee_id"
+                    :key="item"
+                    target="_blank"
+                    :href="`https://gitee.com/${item}`"
+                  >
+                    {{ item
+                    }}<span v-show="index !== scope.row.gitee_id.length - 1">{{
+                      lang === 'zh' ? '、' : ',&nbsp;'
+                    }}</span>
+                  </a>
+                </template>
+              </el-table-column>
+            </el-table>
+            <MobileRepositoryList
+              v-else
+              :data="repositoryList"
+            ></MobileRepositoryList>
+            <div class="sig-pagination">
+              <el-pagination
+                v-model:currentPage="currentPage"
+                v-model:page-size="pageSize"
+                class="repository-pagin"
+                :hide-on-single-page="true"
+                :page-sizes="[10, 20, 30, 40]"
+                :background="true"
+                :layout="paginLayout"
+                :total="totalRepositoryList.length"
+              >
+                <span class="pagination-slot"
+                  >{{ currentPage }}/{{ totalPage }}</span
+                >
+              </el-pagination>
+              <AppPaginationMo
+                :current-page="currentPage"
+                :total-page="totalRepositoryList.length"
+                @turn-page="turnPage"
+              >
+              </AppPaginationMo>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="contribution">
-        <h2>
-          <span class="title-bg">{{
-            t('sig.SIG_DETAIL.CONTRIBUTION_BG')
-          }}</span>
-          <span class="title-text">{{ t('sig.SIG_DETAIL.CONTRIBUTION') }}</span>
-        </h2>
-        <div class="contribution-box">
-          <h5>
-            {{ `${sigDetailName} ${t('sig.SIG_DETAIL.USER_CONTRIBUTOR')}` }}
-          </h5>
-          <ContributList
-            class="contribution-content"
-            :sig="sigDetailName"
-          ></ContributList>
+        <div class="contribution">
+          <h2>
+            <span class="title-bg">{{
+              t('sig.SIG_DETAIL.CONTRIBUTION_BG')
+            }}</span>
+            <span class="title-text">{{
+              t('sig.SIG_DETAIL.CONTRIBUTION')
+            }}</span>
+          </h2>
+          <div class="contribution-box">
+            <h5>
+              {{ `${sigDetailName} ${t('sig.SIG_DETAIL.USER_CONTRIBUTOR')}` }}
+            </h5>
+            <ContributList
+              class="contribution-content"
+              :sig="sigDetailName"
+            ></ContributList>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <AppFooter />
+  </AppEditTemplate>
 </template>
 <style lang="scss" scoped>
 @mixin title {
@@ -512,7 +522,9 @@ onMounted(() => {
       line-height: var(--o-spacing-h4);
     }
     .brief-introduction {
+      position: relative;
       @include section-box;
+      z-index: 11;
       .brief-introduction-title {
         font-size: var(--o-font-size-h3);
         line-height: var(--o-line-height-h3);
@@ -795,17 +807,28 @@ onMounted(() => {
         }
       }
     }
+    .add-floor {
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      z-index: 11;
+      padding: 64px 0 24px;
+      box-sizing: border-box;
+      .o-icon {
+        border: 1px solid var(--o-color-brand1);
+        padding: 8px;
+        font-size: 48px;
+        color: var(--o-color-brand1);
+        // TODO:'阴影'
+        box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+      }
+    }
   }
 }
 @media (max-width: 1100px) {
   .sig-detail {
     padding: 16px 16px var(--o-spacing-h2);
   }
-}
-.mask {
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  height: 100%;
 }
 </style>

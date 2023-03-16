@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { watch, computed, ref } from 'vue';
+import { watch, computed, ref, provide } from 'vue';
 import AppHeader from './components/AppHeader.vue';
 import AppFooter from './components/AppFooter.vue';
 import { useRoute } from 'vue-router';
@@ -23,7 +23,7 @@ const isPreviewMode = ref(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
 }
-
+provide('modeType', isPreviewMode);
 watch(
   () => langStore.lang,
   (val) => {
@@ -79,7 +79,6 @@ main {
     background-color: var(--o-color-bg1);
     .router-view {
       margin: 0 auto;
-      max-width: 1504px;
     }
   }
 }
