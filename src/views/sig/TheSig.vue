@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, inject, reactive, watch, Ref } from 'vue';
+import { computed, ref, onMounted, inject, reactive, watch } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -73,12 +73,13 @@ const markdownData = ref(pageData.value.get('markdown')?.content || '');
 
 function saveData(name: string) {
   params.content = pageData.value.get(name)?.content;
+  if (pageData.value.has('markdown')) {
+    params.content = markdownData.value;
+  }
   params.name = name;
   params.path =
     'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign';
   modifyFloorData(params).then((res: any) => {
-    console.log(res);
-
     if (res.statusCode === 200) {
       ElMessage({
         type: 'success',
@@ -93,8 +94,6 @@ function creatFloor(name: string) {
     saveData(name);
   } else {
     createPage(markdownData.value).then((res: any) => {
-      console.log(res);
-
       if (res.statusCode === 200) {
         ElMessage({
           type: 'success',
