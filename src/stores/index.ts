@@ -17,12 +17,16 @@ export const useLangStore = defineStore('lang', {
 export const usePageData = defineStore('edit-data', {
   state: () => {
     return {
-      pageData: [] as any,
+      pageData: new Map(),
     };
   },
   actions: {
     setPageData(data: any) {
-      this.pageData = data;
+      const mapData = new Map();
+      for (let i = 0; i < data.length; i++) {
+        mapData.set(data[i].name, data[i]);
+      }
+      this.pageData = mapData;
     },
   },
 });

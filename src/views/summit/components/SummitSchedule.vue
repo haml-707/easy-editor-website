@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import IconTime from '~icons/app/icon-time.svg';
 
-import { modifyPageData, getPageData } from '@/api/api-easy-edit';
+import { modifyFloorData, getPageData } from '@/api/api-easy-edit';
 
 import { ElMessage } from 'element-plus';
 
@@ -243,7 +243,7 @@ function addSubtitle2() {
   });
 }
 function savePageData() {
-  modifyPageData(6, JSON.stringify(scheduleData.value)).then(() => {
+  modifyFloorData(6).then(() => {
     ElMessage({
       type: 'success',
       message: '保存成功',

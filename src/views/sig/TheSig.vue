@@ -45,7 +45,6 @@ interface SIGLIST {
   group_name: string;
   maillist: string;
 }
-// const emit = defineEmits(['turn-page', 'jump-page']);
 
 const pageData = computed(() => {
   return usePageData().pageData;
@@ -53,42 +52,31 @@ const pageData = computed(() => {
 
 const isDialogVisiable = ref(false);
 const modeType = inject('modeType');
-const EditFloor = function (type: boolean) {
+const EditFloor = function (type: boolean | string, name: string) {
   if (type) {
-    templateData = _.cloneDeep(introduction.value);
+    templateData = _.cloneDeep(pageData.value.get(name));
+    console.log(templateData);
+    console.log(pageData.value.get(name));
   } else {
-    usePageData().pageData.forEach((item: any, index: number) => {
-      if (item.name === 'introduction') {
-        usePageData().pageData[index] = templateData;
-      }
-    });
+    console.log(templateData);
+
+    pageData.value.set(name, templateData);
   }
   isDialogVisiable.value = !isDialogVisiable.value;
 };
-const addFloor = function () {
+const addFloor = function (name: string) {
+  console.log(name);
+
   isDialogVisiable.value = !isDialogVisiable.value;
 };
-const introduction = computed(() => {
-  return getFloorData('introduction');
-});
+
 const markdownData = computed(() => {
-  return getFloorData('markdown');
+  return pageData.value.get('markdown');
 });
 const markdown1 = ref('');
-function getFloorData(name: string) {
-  try {
-    const giteeName = pageData.value?.filter((item: any) => {
-      return item.name === name;
-    })[0];
-    if (giteeName) {
-      return giteeName;
-    }
-  } catch (error) {
-    return false;
-  }
-}
+
 function saveData(name: string) {
-  params.content = introduction.value?.content;
+  params.content = pageData.value.get(name)?.content;
   params.name = name;
   params.path =
     'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign';
@@ -103,7 +91,11 @@ function handleDelFloor(name: string) {
   );
 }
 function creatFloor(name: string) {
-  createPage(markdown1.value);
+  if (pageData.value.has(name)) {
+    saveData(name);
+  } else {
+    createPage(markdown1.value);
+  }
 }
 ////////
 const lang = useLangStore().lang;
@@ -272,8 +264,8 @@ onMounted(() => {
             ></a>
           </h2>
           <el-input
-            v-if="introduction"
-            v-model="introduction.content"
+            v-if="pageData.get('introduction')"
+            v-model="pageData.get('introduction').content"
             :readonly="!isDialogVisiable"
             :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
             type="textarea"
@@ -284,7 +276,7 @@ onMounted(() => {
           <el-button
             v-show="isDialogVisiable"
             class="sig-introduction"
-            @click="EditFloor(false)"
+            @click="EditFloor(false, 'introduction')"
             >放弃修改</el-button
           >
           <el-button
@@ -302,7 +294,7 @@ onMounted(() => {
           <div
             v-show="!modeType"
             class="edit-floor square"
-            @click="EditFloor('introduction')"
+            @click="EditFloor(true, 'introduction')"
           >
             <OIcon>
               <IconEdit />
@@ -310,21 +302,26 @@ onMounted(() => {
           </div>
         </div>
         <!-- </Teleport> -->
-        <el-input
-          v-if="isDialogVisiable"
-          v-model="markdown1"
-          :readonly="!isDialogVisiable"
-          :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
-          type="textarea"
-          class="editable-floor"
-        >
-          {{ sigMemberData.description }}
-        </el-input>
-        <el-button v-if="isDialogVisiable" @click="creatFloor('markdown')"
-          >保存修改</el-button
-        >
+        <div v-if="isDialogVisiable" class="markdown-edit editable-floor">
+          <el-input
+            v-model="markdownData.content"
+            :readonly="!isDialogVisiable"
+            :rows="20"
+            :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
+            type="textarea"
+          >
+            {{ sigMemberData.description }}
+          </el-input>
+          <el-button
+            v-show="isDialogVisiable"
+            class="sig-introduction"
+            @click="EditFloor(false, 'markdown')"
+            >放弃修改</el-button
+          >
+          <el-button @click="creatFloor('markdown')">确认修改</el-button>
+        </div>
         <div
-          v-show="!modeType"
+          v-show="!modeType && !pageData.has('markdown')"
           class="add-floor square"
           @click="addFloor('markdown')"
         >
@@ -334,12 +331,21 @@ onMounted(() => {
         </div>
 
         <div
-          v-if="markdownData"
+          v-if="markdownData && !isDialogVisiable"
           style="margin-top: 40px"
           class="markdown-floor"
         >
           <h2></h2>
           <MdStatement :statement="markdownData.content"></MdStatement>
+          <div
+            v-show="!modeType"
+            class="edit-floor square"
+            @click="EditFloor(true, 'markdown')"
+          >
+            <OIcon>
+              <IconEdit />
+            </OIcon>
+          </div>
         </div>
         <div v-if="lang === 'zh'" class="meeting">
           <h2>
@@ -590,6 +596,11 @@ onMounted(() => {
 .editable-floor {
   position: relative;
   z-index: 11;
+  background-color: var(--o-color-bg2);
+}
+.markdown-edit {
+  margin-top: 40px;
+  padding: 40px;
 }
 @mixin title {
   text-align: center;
@@ -714,6 +725,9 @@ onMounted(() => {
           line-height: var(--o-line-height-tip);
         }
       }
+    }
+    .markdown-floor {
+      position: relative;
     }
     .meeting {
       margin-top: var(--o-spacing-h2);

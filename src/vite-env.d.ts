@@ -16,3 +16,4 @@ declare module '*.tiff';
 declare module '*.json';
 declare module '*.md';
 declare module '*.mp4';
+declare module 'markdown-it';

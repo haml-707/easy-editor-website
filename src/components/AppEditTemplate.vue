@@ -17,7 +17,6 @@ getAllDataByPath(
     <slot></slot>
     <AppFooter />
     <div :class="!modeType ? 'mask' : ''"></div>
-    <div id="dialog" width="100%">555</div>
   </div>
 </template>
 
