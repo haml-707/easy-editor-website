@@ -116,8 +116,6 @@ export function getAllDataByPath(path: string) {
  * @name delFloor
  */
 export function deleteFloor(path: string, name: string) {
-  console.log(name, path);
-
   const url = `/api-edit/page?path=${path}&name=${name}`;
   return request
     .delete(url, getHeaderConfig())

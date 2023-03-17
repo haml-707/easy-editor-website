@@ -9,12 +9,7 @@
     margin-top: 0 !important;
   }
   --o-color-table: var(--o-color-border2);
-  @media (max-width: 1439px) {
-    width: calc(100% - 48px);
-  }
-  @media (max-width: 1100px) {
-    width: calc(100% - 32px);
-  }
+
   @media (max-width: 768px) {
     min-height: calc(100vh - 395px);
     padding: var(--o-spacing-h5);

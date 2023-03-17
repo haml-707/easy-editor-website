@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, inject, reactive } from 'vue';
+import { computed, ref, onMounted, inject, reactive, watch, Ref } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -13,12 +13,15 @@ import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
 import AppPaginationMo from '@/components/AppPaginationMo.vue';
 import MdStatement from '@/components/MdStatement.vue';
+import { OButton } from '@/components/button';
+import { ElMessage } from 'element-plus';
 
 import IconEmail from '~icons/app/icon-mail.svg';
 import IconGitee from '~icons/app/icon-gitee.svg';
 import IconSearch from '~icons/app/icon-search.svg';
 import IconAdd from '~icons/app/icon-add.svg';
 import IconEdit from '~icons/app/icon-edit.svg';
+import IconWarn from '~icons/edit/icon-warn.svg';
 
 import {
   getSigDetail,
@@ -51,52 +54,88 @@ const pageData = computed(() => {
 });
 
 const isDialogVisiable = ref(false);
-const modeType = inject('modeType');
+const isEditVisiable = ref('');
+const modeType: any = inject('modeType');
 const EditFloor = function (type: boolean | string, name: string) {
   if (type) {
     templateData = _.cloneDeep(pageData.value.get(name));
-    console.log(templateData);
-    console.log(pageData.value.get(name));
+    isEditVisiable.value = name;
   } else {
-    console.log(templateData);
-
+    isEditVisiable.value = '';
     pageData.value.set(name, templateData);
   }
-  isDialogVisiable.value = !isDialogVisiable.value;
 };
 const addFloor = function (name: string) {
-  console.log(name);
-
-  isDialogVisiable.value = !isDialogVisiable.value;
+  isEditVisiable.value = name;
 };
 
-const markdownData = computed(() => {
-  return pageData.value.get('markdown');
-});
-const markdown1 = ref('');
+const markdownData = ref(pageData.value.get('markdown')?.content || '');
 
 function saveData(name: string) {
   params.content = pageData.value.get(name)?.content;
   params.name = name;
   params.path =
     'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign';
-  modifyFloorData(params).then((res) => {
+  modifyFloorData(params).then((res: any) => {
     console.log(res);
+
+    if (res.statusCode === 200) {
+      ElMessage({
+        type: 'success',
+        message: '修改成功',
+      });
+    }
+    isEditVisiable.value = '';
   });
-}
-function handleDelFloor(name: string) {
-  deleteFloor(
-    'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
-    name
-  );
 }
 function creatFloor(name: string) {
   if (pageData.value.has(name)) {
     saveData(name);
   } else {
-    createPage(markdown1.value);
+    createPage(markdownData.value).then((res: any) => {
+      console.log(res);
+
+      if (res.statusCode === 200) {
+        ElMessage({
+          type: 'success',
+          message: '创建成功',
+        });
+        pageData.value.set(name, { content: markdownData.value });
+      }
+    });
   }
+  isEditVisiable.value = '';
 }
+function confirmDel() {
+  deleteFloor(
+    'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
+    isEditVisiable.value
+  ).then(() => {
+    toggleDelDlg(false);
+    pageData.value.delete(isEditVisiable.value);
+    isEditVisiable.value = '';
+  });
+}
+function toggleDelDlg(val: boolean) {
+  isDialogVisiable.value = val;
+}
+watch(
+  () => pageData.value,
+  () => {
+    markdownData.value = pageData.value.get('markdown')?.content || '';
+  },
+  {
+    deep: true,
+  }
+);
+watch(
+  () => modeType.value,
+  () => {
+    if (modeType.value) {
+      isEditVisiable.value = '';
+    }
+  }
+);
 ////////
 const lang = useLangStore().lang;
 
@@ -255,7 +294,7 @@ onMounted(() => {
         link1="/zh/sig/sig-list/"
       />
       <div class="content">
-        <!-- <Teleport to="body" :disabled="!isDialogVisiable"> -->
+        <!-- <Teleport to="body" :disabled="!isEditVisiable"> -->
         <div class="brief-introduction">
           <h2 class="brief-introduction-title">
             {{ sigDetailName }}
@@ -266,7 +305,7 @@ onMounted(() => {
           <el-input
             v-if="pageData.get('introduction')"
             v-model="pageData.get('introduction').content"
-            :readonly="!isDialogVisiable"
+            :readonly="!(isEditVisiable === 'introduction')"
             :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
             type="textarea"
             class="sig-introduction"
@@ -274,22 +313,17 @@ onMounted(() => {
             {{ sigMemberData.description }}
           </el-input>
           <el-button
-            v-show="isDialogVisiable"
+            v-show="isEditVisiable === 'introduction'"
             class="sig-introduction"
             @click="EditFloor(false, 'introduction')"
             >放弃修改</el-button
           >
           <el-button
-            v-show="isDialogVisiable"
+            v-show="isEditVisiable === 'introduction'"
             class="sig-introduction"
             @click="saveData('introduction')"
-            >确认修改</el-button
           >
-          <el-button
-            v-show="isDialogVisiable"
-            class="sig-introduction"
-            @click="handleDelFloor('profile/meeting')"
-            >删除</el-button
+            确认修改</el-button
           >
           <div
             v-show="!modeType"
@@ -301,25 +335,38 @@ onMounted(() => {
             </OIcon>
           </div>
         </div>
+
         <!-- </Teleport> -->
-        <div v-if="isDialogVisiable" class="markdown-edit editable-floor">
+        <div
+          v-if="isEditVisiable === 'markdown'"
+          class="markdown-edit editable-floor"
+        >
           <el-input
-            v-model="markdownData.content"
-            :readonly="!isDialogVisiable"
+            v-model="markdownData"
+            :readonly="!(isEditVisiable === 'markdown')"
             :rows="20"
-            :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
+            placeholder="输入markdown编辑页面吧！"
             type="textarea"
           >
             {{ sigMemberData.description }}
           </el-input>
           <el-button
-            v-show="isDialogVisiable"
+            :readonly="!(isEditVisiable === 'markdown')"
             class="sig-introduction"
             @click="EditFloor(false, 'markdown')"
             >放弃修改</el-button
           >
-          <el-button @click="creatFloor('markdown')">确认修改</el-button>
+          <el-button @click="creatFloor('markdown')">{{
+            pageData.has('markdown') ? '确认修改' : '确认创建'
+          }}</el-button>
+          <el-button
+            v-show="isEditVisiable === 'markdown'"
+            class="sig-introduction"
+            @click="toggleDelDlg(true)"
+            >删除</el-button
+          >
         </div>
+        <!-- 增加页面按钮 -->
         <div
           v-show="!modeType && !pageData.has('markdown')"
           class="add-floor square"
@@ -331,12 +378,12 @@ onMounted(() => {
         </div>
 
         <div
-          v-if="markdownData && !isDialogVisiable"
+          v-if="markdownData && !(isEditVisiable === 'markdown')"
           style="margin-top: 40px"
           class="markdown-floor"
         >
           <h2></h2>
-          <MdStatement :statement="markdownData.content"></MdStatement>
+          <MdStatement :statement="markdownData"></MdStatement>
           <div
             v-show="!modeType"
             class="edit-floor square"
@@ -590,9 +637,39 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <el-dialog
+      v-model="isDialogVisiable"
+      class="publish-dialog"
+      :show-close="false"
+      width="640"
+    >
+      <template #header>
+        <OIcon class="danger1">
+          <IconWarn />
+        </OIcon>
+      </template>
+      <h3>
+        {{ t('edit.CONFIRM_DEL1') }}
+        <span class="danger1">{{ t('edit.CONFIRM_DEL2') }}</span>
+        {{ t('edit.CONFIRM_DEL3') }}
+      </h3>
+      <!-- TODO: 用户名 -->
+      <template #footer>
+        <o-button size="small" @click="toggleDelDlg(false)">{{
+          t('edit.CANCEL')
+        }}</o-button>
+        <o-button size="small" type="primary" @click="confirmDel()">{{
+          t('edit.CONFIRM')
+        }}</o-button>
+      </template>
+    </el-dialog>
   </AppEditTemplate>
 </template>
 <style lang="scss" scoped>
+.danger1 {
+  color: #e02020;
+}
+
 .editable-floor {
   position: relative;
   z-index: 11;

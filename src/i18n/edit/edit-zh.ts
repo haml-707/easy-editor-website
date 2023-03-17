@@ -13,4 +13,7 @@ export default {
   PATTERN_RIGHT: '请正确输入名称',
   VERIFICATION: '请先登录openEuler账号验证权限！',
   LOGIN: '前往登录',
+  CONFIRM_DEL1: '是否确认',
+  CONFIRM_DEL2: '删除',
+  CONFIRM_DEL3: '本楼层？',
 };

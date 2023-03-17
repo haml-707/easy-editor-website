@@ -7,6 +7,7 @@ const props = defineProps({
     default: '',
   },
 });
+
 const mkit = new Markdown({ html: true });
 
 const statementHtml = mkit.render(props.statement);
