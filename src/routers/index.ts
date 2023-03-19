@@ -16,9 +16,9 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/login/TheLogin.vue'),
   },
   {
-    path: '/zh/edit/:name',
+    path: '/zh/edit/:path/:name',
     name: 'edit',
-    alias: '/zh/edit/:name',
+    alias: '/zh/edit/:path/:name',
     component: () => import('@/views/sig/TheSig.vue'),
   },
 ];
@@ -34,5 +34,5 @@ export const router = createRouter({
 router.beforeEach((to) => {
   // 设置语言
   const langStore = useLangStore();
-  langStore.lang = to.fullPath.includes('en') ? 'en' : 'zh';
+  langStore.lang = to.fullPath.includes('/en/') ? 'en' : 'zh';
 });

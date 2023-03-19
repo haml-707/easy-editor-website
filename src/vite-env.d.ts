@@ -17,3 +17,7 @@ declare module '*.json';
 declare module '*.md';
 declare module '*.mp4';
 declare module 'markdown-it';
+declare module '@kangc/v-md-editor/lib/theme/vuepress.js';
+declare module '@kangc/v-md-editor';
+declare module '@kangc/v-md-editor/lib/lang/en-US';
+declare module '@kangc/v-md-editor/lib/lang/zh-CN';

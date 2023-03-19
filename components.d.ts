@@ -8,6 +8,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AppContent: typeof import('./src/components/AppContent.vue')['default']
+    AppEditor: typeof import('./src/components/AppEditor.vue')['default']
     AppEditTemplate: typeof import('./src/components/AppEditTemplate.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']

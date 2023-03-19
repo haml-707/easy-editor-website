@@ -16,7 +16,7 @@ getAllDataByPath(
   <div class="edit-template">
     <slot></slot>
     <AppFooter />
-    <div :class="!modeType ? 'mask' : ''"></div>
+    <div id="edit-dialog" :class="!modeType ? 'mask' : ''"></div>
   </div>
 </template>
 

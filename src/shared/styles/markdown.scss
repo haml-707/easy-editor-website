@@ -1,8 +1,7 @@
 .markdown {
-  min-height: calc(100vh - 443px);
   padding: 40px;
   margin: 0 auto;
-  margin-bottom: var(--o-spacing-h1);
+  margin-top: 40px;
   background-color: var(--o-color-bg2);
   box-shadow: var(--o-shadow-l1);
   & > *:first-child {

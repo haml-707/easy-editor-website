@@ -13,6 +13,8 @@ import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
 import AppPaginationMo from '@/components/AppPaginationMo.vue';
 import MdStatement from '@/components/MdStatement.vue';
+import AppEditor from '@/components/AppEditor.vue';
+
 import { OButton } from '@/components/button';
 import { ElMessage } from 'element-plus';
 
@@ -48,18 +50,29 @@ interface SIGLIST {
   group_name: string;
   maillist: string;
 }
+const lang = useLangStore().lang;
+
+const route = useRoute();
+
+const refData = ref();
+
+const { t } = useI18n();
+const sigDetailName = ref(route.params.name as string);
 
 const pageData = computed(() => {
   return usePageData().pageData;
 });
-
 const isDialogVisiable = ref(false);
 const isEditVisiable = ref('');
 const modeType: any = inject('modeType');
+
+const isEditDiglogVisiable = ref(isEditVisiable.value ? true : false);
+
 const EditFloor = function (type: boolean | string, name: string) {
   if (type) {
     templateData = _.cloneDeep(pageData.value.get(name));
     isEditVisiable.value = name;
+    console.log(isEditVisiable.value);
   } else {
     isEditVisiable.value = '';
     pageData.value.set(name, templateData);
@@ -69,16 +82,31 @@ const addFloor = function (name: string) {
   isEditVisiable.value = name;
 };
 
-const markdownData = ref(pageData.value.get('markdown')?.content || '');
+const markdownData = ref(
+  pageData.value.get('markdown') || {
+    content: '',
+    title: '',
+  }
+);
+const meetingData = ref(
+  pageData.value.get('meeting') || {
+    content: '',
+    title: '',
+  }
+);
+
+const path = ref(
+  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
+);
 
 function saveData(name: string) {
   params.content = pageData.value.get(name)?.content;
-  if (pageData.value.has('markdown')) {
-    params.content = markdownData.value;
+  if (pageData.value.has('markdown') && name === 'markdown') {
+    params.title = markdownData.value.title;
+    params.content = markdownData.value.content;
   }
   params.name = name;
-  params.path =
-    'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign';
+  params.path = path.value;
   modifyFloorData(params).then((res: any) => {
     if (res.statusCode === 200) {
       ElMessage({
@@ -93,23 +121,34 @@ function creatFloor(name: string) {
   if (pageData.value.has(name)) {
     saveData(name);
   } else {
-    createPage(markdownData.value).then((res: any) => {
+    const param = {
+      content: markdownData.value.content,
+      name: name,
+      path: path.value,
+      title: markdownData.value.title,
+      description: '',
+      isPrivate: false,
+      isPublished: false,
+      contentType: 'txt',
+    };
+
+    createPage(param).then((res: any) => {
       if (res.statusCode === 200) {
         ElMessage({
           type: 'success',
           message: '创建成功',
         });
-        pageData.value.set(name, { content: markdownData.value });
+        pageData.value.set(name, {
+          content: markdownData.value.content,
+          title: markdownData.value.title,
+        });
       }
     });
   }
   isEditVisiable.value = '';
 }
 function confirmDel() {
-  deleteFloor(
-    'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
-    isEditVisiable.value
-  ).then(() => {
+  deleteFloor(path.value, isEditVisiable.value).then(() => {
     toggleDelDlg(false);
     pageData.value.delete(isEditVisiable.value);
     isEditVisiable.value = '';
@@ -121,7 +160,14 @@ function toggleDelDlg(val: boolean) {
 watch(
   () => pageData.value,
   () => {
-    markdownData.value = pageData.value.get('markdown')?.content || '';
+    markdownData.value = pageData.value.get('markdown') || {
+      content: '',
+      title: '',
+    };
+    meetingData.value = pageData.value.get('meeting') || {
+      content: '',
+      title: '',
+    };
   },
   {
     deep: true,
@@ -135,12 +181,14 @@ watch(
     }
   }
 );
+watch(
+  () => isEditVisiable.value,
+  (val) => {
+    isEditDiglogVisiable.value = val ? true : false;
+    console.log(isEditDiglogVisiable.value);
+  }
+);
 ////////
-const lang = useLangStore().lang;
-
-const route = useRoute();
-
-const { t } = useI18n();
 
 const screenWidth = useWindowResize();
 const isIphone = computed(() => {
@@ -151,7 +199,6 @@ const paginLayout = computed(() =>
     ? 'prev, slot, jumper, next'
     : 'sizes, prev, pager, next, slot, jumper'
 );
-const sigDetailName = ref(route.params.name as string);
 
 const sigMeetingData: any = ref('');
 const sigMemberData: any = ref('');
@@ -278,6 +325,8 @@ function setDefaultImage(e: any) {
   }
 }
 onMounted(() => {
+  console.log(refData.value);
+
   getSigDetails();
   getOldEmail();
   getSigMembers();
@@ -293,8 +342,8 @@ onMounted(() => {
         link1="/zh/sig/sig-list/"
       />
       <div class="content">
-        <!-- <Teleport to="body" :disabled="!isEditVisiable"> -->
-        <div class="brief-introduction">
+        <!-- <Teleport to="body" :disabled="!(isEditVisiable === 'introduction')"> -->
+        <div ref="refData" class="brief-introduction">
           <h2 class="brief-introduction-title">
             {{ sigDetailName }}
             <a :href="giteeHomeLink" target="_blank">
@@ -306,24 +355,12 @@ onMounted(() => {
             v-model="pageData.get('introduction').content"
             :readonly="!(isEditVisiable === 'introduction')"
             :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
+            autosize
+            :rows="1"
             type="textarea"
             class="sig-introduction"
           >
-            {{ sigMemberData.description }}
           </el-input>
-          <el-button
-            v-show="isEditVisiable === 'introduction'"
-            class="sig-introduction"
-            @click="EditFloor(false, 'introduction')"
-            >放弃修改</el-button
-          >
-          <el-button
-            v-show="isEditVisiable === 'introduction'"
-            class="sig-introduction"
-            @click="saveData('introduction')"
-          >
-            确认修改</el-button
-          >
           <div
             v-show="!modeType"
             class="edit-floor square"
@@ -334,21 +371,26 @@ onMounted(() => {
             </OIcon>
           </div>
         </div>
-
         <!-- </Teleport> -->
         <div
           v-if="isEditVisiable === 'markdown'"
           class="markdown-edit editable-floor"
         >
           <el-input
-            v-model="markdownData"
+            v-model="markdownData.title"
+            :readonly="!(isEditVisiable === 'markdown')"
+            placeholder="输入楼层标题"
+          >
+          </el-input>
+          <!-- <el-input
+            v-model="markdownData.content"
             :readonly="!(isEditVisiable === 'markdown')"
             :rows="20"
-            placeholder="输入markdown编辑页面吧！"
+            placeholder="输入markdown编辑页面"
             type="textarea"
           >
-            {{ sigMemberData.description }}
-          </el-input>
+          </el-input> -->
+          <AppEditor v-model.string="markdownData.content"> </AppEditor>
           <el-button
             :readonly="!(isEditVisiable === 'markdown')"
             class="sig-introduction"
@@ -377,12 +419,16 @@ onMounted(() => {
         </div>
 
         <div
-          v-if="markdownData && !(isEditVisiable === 'markdown')"
+          v-if="markdownData.content && !(isEditVisiable === 'markdown')"
           style="margin-top: 40px"
           class="markdown-floor"
         >
-          <h2></h2>
-          <MdStatement :statement="markdownData"></MdStatement>
+          <h2>
+            <span class="title-text">
+              {{ markdownData.title }}
+            </span>
+          </h2>
+          <MdStatement :statement="markdownData.content"></MdStatement>
           <div
             v-show="!modeType"
             class="edit-floor square"
@@ -406,6 +452,7 @@ onMounted(() => {
             v-if="sigMeetingData.tableData"
             class="calender-box"
             :table-data="sigMeetingData.tableData"
+            :meeting-intro="meetingData.content"
           />
           <p v-else class="sig-introduction">
             {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
@@ -654,6 +701,30 @@ onMounted(() => {
       </h3>
       <!-- TODO: 用户名 -->
       <template #footer>
+        <el-button
+          v-show="isEditVisiable === 'introduction'"
+          class="sig-introduction"
+          @click="EditFloor(false, 'introduction')"
+          >放弃修改</el-button
+        >
+        <el-button
+          v-show="isEditVisiable === 'introduction'"
+          class="sig-introduction"
+          @click="saveData('introduction')"
+        >
+          确认修改</el-button
+        >
+      </template>
+    </el-dialog>
+    <el-dialog
+      v-model="isEditDiglogVisiable"
+      class="edit-dialog"
+      :show-close="false"
+      width="100%"
+      @close="isEditVisiable = ''"
+    >
+      <div v-if="refData" v-html="refData.outerHTML"></div>
+      <template #footer>
         <o-button size="small" @click="toggleDelDlg(false)">{{
           t('edit.CANCEL')
         }}</o-button>
@@ -673,6 +744,16 @@ onMounted(() => {
   position: relative;
   z-index: 11;
   background-color: var(--o-color-bg2);
+}
+.edit-type {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 12;
+  max-width: 1504px;
+  padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
+  margin: 0 auto;
 }
 .markdown-edit {
   margin-top: 40px;
@@ -721,12 +802,13 @@ onMounted(() => {
 }
 :deep(.el-textarea) {
   textarea {
-    resize: none;
+    min-height: 24px;
     &[readonly] {
       cursor: text;
       padding: 0;
       box-shadow: none;
       border: none;
+      resize: none;
       &:focus-visible {
         border: none;
         box-shadow: none;
@@ -804,6 +886,9 @@ onMounted(() => {
     }
     .markdown-floor {
       position: relative;
+      h2 {
+        @include title;
+      }
     }
     .meeting {
       margin-top: var(--o-spacing-h2);
@@ -1084,6 +1169,114 @@ onMounted(() => {
 @media (max-width: 1100px) {
   .sig-detail {
     padding: 16px 16px var(--o-spacing-h2);
+  }
+}
+</style>
+
+<style lang="scss">
+@mixin title {
+  text-align: center;
+  position: relative;
+  height: 64px;
+  @media screen and (max-width: 768px) {
+    height: 30px;
+  }
+  .title-bg {
+    color: var(--o-color-neutral10);
+    font-size: 40px;
+    font-weight: 300;
+    @media screen and (max-width: 768px) {
+      font-size: var(--o-font-size-h8);
+    }
+  }
+  .title-text {
+    font-size: var(--o-font-size-h3);
+    line-height: var(--o-line-height-h3);
+    color: var(--o-color-text1);
+    font-weight: 400;
+    position: absolute;
+    z-index: 1;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    @media screen and (max-width: 768px) {
+      top: 8px;
+      font-size: var(--o-font-size-h8);
+      line-height: var(--o-line-height-h8);
+    }
+  }
+}
+@mixin section-box {
+  // margin-top: var(--o-spacing-h2);
+  background-color: var(--o-color-bg2);
+  padding: var(--o-spacing-h2);
+  @media screen and (max-width: 768px) {
+    margin-top: var(--o-spacing-h5);
+    padding: var(--o-spacing-h5);
+  }
+}
+.edit-dialog {
+  padding: var(--o-spacing-h2);
+  background-color: var(--o-color-bg1);
+  .el-dialog__header {
+    display: none;
+  }
+  .el-dialog__body {
+    margin: 0 auto;
+    max-width: 1424px;
+    padding: 0;
+    background-color: var(--o-color-bg2);
+    .brief-introduction {
+      position: relative;
+      @include section-box;
+      .brief-introduction-title {
+        font-size: var(--o-font-size-h3);
+        line-height: var(--o-line-height-h3);
+        color: var(--o-color-text1);
+        font-weight: 300;
+        display: flex;
+        align-items: center;
+        @media screen and (max-width: 768px) {
+          font-size: var(--o-font-size-h8);
+          line-height: var(--o-line-height-h8);
+        }
+        a {
+          margin-left: var(--o-spacing-h4);
+          font-size: var(--o-font-size-h5);
+          display: flex;
+          align-items: center;
+          @media screen and (max-width: 768px) {
+            margin-left: var(--o-spacing-h6);
+            font-size: var(--o-font-size-h8);
+          }
+        }
+      }
+      .sig-introduction {
+        margin-top: var(--o-spacing-h5);
+        font-size: var(--o-font-size-text);
+        line-height: 22px;
+        color: var(--o-color-text3);
+        position: relative;
+        z-index: 11;
+        @media screen and (max-width: 768px) {
+          margin-top: var(--o-spacing-h6);
+          font-size: var(--o-font-size-tip);
+          line-height: var(--o-line-height-tip);
+        }
+      }
+    }
+  }
+  .el-dialog__footer {
+    padding: 40px 0 0 0;
+    margin: 0 auto;
+    max-width: 1424px;
+    display: flex;
+    gap: 0 24px;
+    justify-content: center;
+    // background-color: var(--o-color-bg2);
+  }
+  .edit-floor {
+    display: none;
   }
 }
 </style>

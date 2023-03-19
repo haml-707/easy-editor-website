@@ -19,18 +19,8 @@ function getHeaderConfig() {
  * @name createPage
  * @return {Array}
  */
-export function createPage(content: string) {
+export function createPage(params: any) {
   const url = '/api-edit/page';
-  const params = {
-    path: 'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
-    name: 'markdown',
-    title: 'sig 简介',
-    description: 'sig 简介',
-    isPrivate: false,
-    isPublished: false,
-    content: content,
-    contentType: 'txt',
-  };
   return request
     .post(url, params, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)

@@ -6,6 +6,7 @@ import { TableData, DayData } from '@/shared/@types/type-calendar';
 import { useI18n } from 'vue-i18n';
 
 import { OButton } from '@/components/button';
+import MdStatement from '@/components/MdStatement.vue';
 
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
 import IconDown from '~icons/app/icon-chevron-down.svg';
@@ -21,6 +22,11 @@ const props = defineProps({
     default: () => {
       return {};
     },
+  },
+  meetingIntro: {
+    type: String,
+    default:
+      'SIG 版本规划工作会议遵循开源、开放原则，议题收集、技术讨论、会议纪要等各讨论过程均对外开放。',
   },
 });
 const { t } = useI18n();
@@ -58,9 +64,7 @@ const detailItem = [
   { text: '回放链接', key: 'video_url', isLink: true },
 ];
 const activityType = ['线下', '线上', '线上 + 线下'];
-const meetingTip = ref(
-  'SIG 版本规划工作会议遵循开源、开放原则，议题收集、技术讨论、会议纪要等各讨论过程均对外开放。'
-);
+
 const windowWidth = ref(useWindowResize());
 
 function setMeetingDay() {
@@ -178,7 +182,9 @@ const watchData = watch(
           >
         </p>
         <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
-        <p class="meeting-tip">{{ meetingTip }}</p>
+        <p class="meeting-tip">
+          <MdStatement :statement="meetingIntro"></MdStatement>
+        </p>
       </div>
     </div>
     <div class="detail-list">
@@ -423,7 +429,7 @@ const watchData = watch(
     .info-body {
       padding: var(--o-spacing-h4) var(--o-spacing-h2);
       background-color: var(--o-color-bg2);
-      overflow-y: hidden;
+      overflow-y: scroll;
       height: 274px;
       @media screen and (max-width: 768px) {
         padding: var(--o-spacing-h5);

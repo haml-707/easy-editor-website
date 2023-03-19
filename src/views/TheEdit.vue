@@ -61,7 +61,7 @@ const pageName = ref('');
 // });
 
 const goEdit = (path: string) => {
-  router.push(`/zh/edit/${path}`);
+  router.push(`/zh/edit/sig/${path}`);
 };
 
 const handleSizeChange = (val: number) => {
@@ -142,7 +142,7 @@ watch(
           class="start-edit"
           animation
           type="text"
-          @click="goEdit('A-Tune')"
+          @click="goEdit('sig-OpenDesign')"
           >开始编辑
           <template #suffixIcon>
             <OIcon>
