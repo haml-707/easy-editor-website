@@ -94,6 +94,12 @@ const meetingData = ref(
     title: '',
   }
 );
+const introductData = ref(
+  pageData.value.get('introduction') || {
+    content: '',
+    title: '',
+  }
+);
 
 const path = ref(
   `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
@@ -104,7 +110,12 @@ function saveData(name: string) {
   if (pageData.value.has('markdown') && name === 'markdown') {
     params.title = markdownData.value.title;
     params.content = markdownData.value.content;
+  } else if (pageData.value.has('introduction') && name === 'introduction') {
+    params.content = introductData.value.content;
   }
+  console.log(name);
+  console.log(introductData.value.content);
+
   params.name = name;
   params.path = path.value;
   modifyFloorData(params).then((res: any) => {
@@ -131,7 +142,6 @@ function creatFloor(name: string) {
       isPublished: false,
       contentType: 'txt',
     };
-
     createPage(param).then((res: any) => {
       if (res.statusCode === 200) {
         ElMessage({
@@ -165,6 +175,10 @@ watch(
       title: '',
     };
     meetingData.value = pageData.value.get('meeting') || {
+      content: '',
+      title: '',
+    };
+    introductData.value = pageData.value.get('introduction') || {
       content: '',
       title: '',
     };
@@ -332,6 +346,9 @@ onMounted(() => {
   getSigMembers();
   getRepositoryList();
 });
+function log(val) {
+  console.log(val);
+}
 </script>
 <template>
   <AppEditTemplate>
@@ -351,13 +368,12 @@ onMounted(() => {
             ></a>
           </h2>
           <el-input
-            v-if="pageData.get('introduction')"
-            v-model="pageData.get('introduction').content"
+            @input="log"
+            v-model="introductData.content"
             :readonly="!(isEditVisiable === 'introduction')"
             :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
             autosize
             :rows="1"
-            type="textarea"
             class="sig-introduction"
           >
           </el-input>
@@ -728,9 +744,12 @@ onMounted(() => {
         <o-button size="small" @click="toggleDelDlg(false)">{{
           t('edit.CANCEL')
         }}</o-button>
-        <o-button size="small" type="primary" @click="confirmDel()">{{
-          t('edit.CONFIRM')
-        }}</o-button>
+        <o-button
+          size="small"
+          type="primary"
+          @click="saveData('introduction')"
+          >{{ t('edit.CONFIRM') }}</o-button
+        >
       </template>
     </el-dialog>
   </AppEditTemplate>
