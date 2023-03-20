@@ -7,6 +7,7 @@ import { useRoute } from 'vue-router';
 import useWindowResize from '@/components/hooks/useWindowResize';
 import BreadCrumbs from '@/components/BreadCrumbs.vue';
 import SigMeeting from './SigMeeting.vue';
+import SigIntroduction from './SigIntroduction.vue';
 import MarkdownEdit from './MarkdownEdit.vue';
 import OIcon from '@/components/OIcon.vue';
 import AppEditTemplate from '@/components/AppEditTemplate.vue';
@@ -53,8 +54,6 @@ interface SIGLIST {
 const lang = useLangStore().lang;
 
 const route = useRoute();
-
-const refData = ref();
 
 const { t } = useI18n();
 const sigDetailName = ref(route.params.name as string);
@@ -354,10 +353,10 @@ onMounted(() => {
       <BreadCrumbs
         bread1="SIG"
         :bread2="sigDetailName"
-        link1="/zh/sig/sig-list/"
+        link1="https://www.openeuler.org/zh/sig/sig-list/"
       />
       <div class="content">
-        <div ref="refData" class="brief-introduction">
+        <!-- <div class="brief-introduction">
           <h2 class="brief-introduction-title">
             {{ sigDetailName }}
             <a :href="giteeHomeLink" target="_blank">
@@ -373,6 +372,21 @@ onMounted(() => {
             class="sig-introduction"
           >
           </el-input>
+          <div
+            v-show="!modeType"
+            class="edit-floor square"
+            @click="EditFloor(true, 'introduction')"
+          >
+            <OIcon>
+              <IconEdit />
+            </OIcon>
+          </div>
+        </div> -->
+        <div class="introduction">
+          <SigIntroduction
+            v-model="introductData"
+            :is-edit-style="isEditDiglogVisiable"
+          ></SigIntroduction>
           <div
             v-show="!modeType"
             class="edit-floor square"
@@ -422,7 +436,7 @@ onMounted(() => {
         <div class="meeting">
           <SigMeeting
             v-if="sigMeetingData.tableData"
-            v-model="meetingData.content"
+            v-model="meetingData"
             class="calender-box"
             :table-data="sigMeetingData.tableData"
           />
@@ -697,18 +711,23 @@ onMounted(() => {
     >
       <SigMeeting
         v-if="sigMeetingData.tableData && isEditVisiable === 'meeting'"
-        v-model="meetingData.content"
+        v-model="meetingData"
         :table-data="sigMeetingData.tableData"
-        :edit-style="isEditDiglogVisiable"
+        :is-edit-style="isEditDiglogVisiable"
       ></SigMeeting>
+      <SigIntroduction
+        v-if="isEditVisiable === 'introduction'"
+        v-model="introductData"
+        :is-edit-style="isEditDiglogVisiable"
+      ></SigIntroduction>
       <MarkdownEdit
         v-if="isEditVisiable === 'markdown'"
         v-model="markdownData"
+        :is-edit-style="isEditDiglogVisiable"
         @handle-del="toggleDelDlg(true)"
-        :edit-style="isEditDiglogVisiable"
       />
       <template #footer>
-        <o-button size="small" @click="toggleDelDlg(false)">{{
+        <o-button size="small" @click="isDialogVisiable = false">{{
           t('edit.CANCEL')
         }}</o-button>
         <o-button
@@ -831,6 +850,9 @@ onMounted(() => {
       font-weight: 400;
       color: var(--o-color-text1);
       line-height: var(--o-spacing-h4);
+    }
+    .introduction {
+      position: relative;
     }
     .brief-introduction {
       position: relative;

@@ -37,11 +37,12 @@ const props = defineProps({
     },
   },
   modelValue: {
-    type: String,
-    default:
-      'SIG 版本规划工作会议遵循开源、开放原则，议题收集、技术讨论、会议纪要等各讨论过程均对外开放。',
+    type: Object as any,
+    default: () => {
+      return {};
+    },
   },
-  editStyle: {
+  isEditStyle: {
     type: Boolean,
     default: false,
   },
@@ -59,7 +60,7 @@ const previewShown = ref(false);
 
 function hanleChangePreview(val: boolean, isPreview?: boolean) {
   if (!val && !isPreview) {
-    tempData.value = usePageData().tempData.get('meeting')?.content;
+    tempData.value = usePageData().tempData.get('meeting');
   }
   previewShown.value = val;
 }
@@ -232,19 +233,19 @@ const watchData = watch(
           <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
           <div class="meeting-tip">
             <MdStatement
-              v-if="!editStyle || previewShown"
-              :statement="modelValue"
+              v-if="!isEditStyle || previewShown"
+              :statement="tempData.content"
             ></MdStatement>
             <div v-else class="edit-box">
               <el-input
-                v-model="tempData"
-                :readonly="!editStyle"
+                v-model="tempData.content"
+                :readonly="!isEditStyle"
                 placeholder="输入markdown编辑页面"
                 type="textarea"
               >
               </el-input>
             </div>
-            <div v-if="editStyle" class="icon-box">
+            <div v-if="isEditStyle" class="icon-box">
               <OIcon>
                 <IconDone
                   v-if="!previewShown"
@@ -405,7 +406,7 @@ const watchData = watch(
         </div>
       </div>
     </div>
-    <div v-if="editStyle" class="edit-mask"></div>
+    <div v-if="isEditStyle" class="edit-mask"></div>
   </div>
 </template>
 <style lang="scss" scoped>

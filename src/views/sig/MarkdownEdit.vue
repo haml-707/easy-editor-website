@@ -22,16 +22,13 @@ const props = defineProps({
       return {};
     },
   },
-  editStyle: {
+  isEditStyle: {
     type: Boolean,
     default: false,
   },
 });
 const previewShown = ref('');
 
-const pageData = computed(() => {
-  return usePageData().pageData;
-});
 const emit = defineEmits(['update:modelValue', 'handle-del']);
 
 const tempData = computed({
@@ -41,8 +38,6 @@ const tempData = computed({
   },
 });
 function hanleChangePreview(val: string, isFallback: boolean) {
-  console.log(val);
-
   if (!isFallback) {
     tempData.value[val] = usePageData().tempData.get('markdown')[val];
   }
@@ -54,17 +49,17 @@ function delFloor() {
 </script>
 <template>
   <div class="markdown-edit editable-floor">
-    <!-- <div v-if="!editStyle || previewShown" class="markdown-preview"> -->
-    <!-- <h2 v-if="!editStyle || previewShown === 'title'" class="title">
+    <!-- <div v-if="!isEditStyle || previewShown" class="markdown-preview"> -->
+    <!-- <h2 v-if="!isEditStyle || previewShown === 'title'" class="title">
       <span class="title-text">
         {{ modelValue.title }}
       </span>
     </h2> -->
     <div class="markdown-title">
       <el-input
-        :class="!editStyle || previewShown === 'title' ? 'is-edit' : ''"
+        :class="!isEditStyle || previewShown === 'title' ? 'is-edit' : ''"
         v-model="tempData.title"
-        :readonly="!editStyle || previewShown === 'title'"
+        :readonly="!isEditStyle || previewShown === 'title'"
         placeholder="输入楼层标题"
       >
       </el-input>
@@ -83,14 +78,14 @@ function delFloor() {
     </div>
     <div class="markdown-body">
       <MdStatement
-        v-if="!editStyle || previewShown === 'content'"
+        v-if="!isEditStyle || previewShown === 'content'"
         class="markdown-main"
         :statement="modelValue.content"
       ></MdStatement>
       <div v-else class="edit-textarea">
         <el-input
           v-model="tempData.content"
-          :readonly="!editStyle"
+          :readonly="!isEditStyle"
           :autosize="{ minRows: 20, maxRows: 25 }"
           placeholder="输入markdown编辑页面"
           type="textarea"
@@ -103,7 +98,6 @@ function delFloor() {
             v-if="previewShown === 'content'"
             @click="hanleChangePreview('', true)"
           />
-
           <IconDone v-else @click="hanleChangePreview('content', true)" />
         </OIcon>
         <OIcon @click="hanleChangePreview('content', false)">
@@ -124,7 +118,7 @@ function delFloor() {
     <!-- </div> -->
     <!-- <div v-else class="markdown-edit"></div> -->
 
-    <div v-if="editStyle" class="icon-box"></div>
+    <div v-if="isEditStyle" class="icon-box"></div>
     <!-- <AppEditor v-model.string="tempData.content"> </AppEditor> -->
   </div>
   <div class="del-dox" @click="delFloor"></div>
@@ -200,6 +194,24 @@ function delFloor() {
   .edit-textarea {
     margin-top: 40px;
     background-color: var(--o-color-bg2);
+    .el-textarea {
+      textarea {
+        &::-webkit-scrollbar-track {
+          border-radius: 4px;
+          background-color: var(--o-color-bg2);
+        }
+
+        &::-webkit-scrollbar {
+          width: 6px;
+          background-color: var(--o-color-bg2);
+        }
+
+        &::-webkit-scrollbar-thumb {
+          border-radius: 4px;
+          background: var(--o-color-division1);
+        }
+      }
+    }
   }
   .icon-box {
     position: absolute;
