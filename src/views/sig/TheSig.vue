@@ -7,13 +7,13 @@ import { useRoute } from 'vue-router';
 import useWindowResize from '@/components/hooks/useWindowResize';
 import BreadCrumbs from '@/components/BreadCrumbs.vue';
 import SigMeeting from './SigMeeting.vue';
+import MarkdownEdit from './MarkdownEdit.vue';
 import OIcon from '@/components/OIcon.vue';
 import AppEditTemplate from '@/components/AppEditTemplate.vue';
 import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
 import AppPaginationMo from '@/components/AppPaginationMo.vue';
 import MdStatement from '@/components/MdStatement.vue';
-import AppEditor from '@/components/AppEditor.vue';
 
 import { OButton } from '@/components/button';
 import { ElMessage } from 'element-plus';
@@ -72,7 +72,6 @@ const EditFloor = function (type: boolean | string, name: string) {
   if (type) {
     templateData = _.cloneDeep(pageData.value.get(name));
     isEditVisiable.value = name;
-    console.log(isEditVisiable.value);
   } else {
     isEditVisiable.value = '';
     pageData.value.set(name, templateData);
@@ -112,9 +111,9 @@ function saveData(name: string) {
     params.content = markdownData.value.content;
   } else if (pageData.value.has('introduction') && name === 'introduction') {
     params.content = introductData.value.content;
+  } else if (pageData.value.has('meeting') && name === 'meeting') {
+    params.content = meetingData.value.content;
   }
-  console.log(name);
-  console.log(introductData.value.content);
 
   params.name = name;
   params.path = path.value;
@@ -125,6 +124,7 @@ function saveData(name: string) {
         message: '修改成功',
       });
     }
+    usePageData().tempData.set(name, usePageData().pageData.get(name));
     isEditVisiable.value = '';
   });
 }
@@ -159,6 +159,10 @@ function creatFloor(name: string) {
 }
 function confirmDel() {
   deleteFloor(path.value, isEditVisiable.value).then(() => {
+    ElMessage({
+      type: 'success',
+      message: '删除成功',
+    });
     toggleDelDlg(false);
     pageData.value.delete(isEditVisiable.value);
     isEditVisiable.value = '';
@@ -199,7 +203,6 @@ watch(
   () => isEditVisiable.value,
   (val) => {
     isEditDiglogVisiable.value = val ? true : false;
-    console.log(isEditDiglogVisiable.value);
   }
 );
 ////////
@@ -339,16 +342,11 @@ function setDefaultImage(e: any) {
   }
 }
 onMounted(() => {
-  console.log(refData.value);
-
   getSigDetails();
   getOldEmail();
   getSigMembers();
   getRepositoryList();
 });
-function log(val) {
-  console.log(val);
-}
 </script>
 <template>
   <AppEditTemplate>
@@ -359,7 +357,6 @@ function log(val) {
         link1="/zh/sig/sig-list/"
       />
       <div class="content">
-        <!-- <Teleport to="body" :disabled="!(isEditVisiable === 'introduction')"> -->
         <div ref="refData" class="brief-introduction">
           <h2 class="brief-introduction-title">
             {{ sigDetailName }}
@@ -368,12 +365,11 @@ function log(val) {
             ></a>
           </h2>
           <el-input
-            @input="log"
             v-model="introductData.content"
             :readonly="!(isEditVisiable === 'introduction')"
             :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
+            type="textarea"
             autosize
-            :rows="1"
             class="sig-introduction"
           >
           </el-input>
@@ -387,42 +383,7 @@ function log(val) {
             </OIcon>
           </div>
         </div>
-        <!-- </Teleport> -->
-        <div
-          v-if="isEditVisiable === 'markdown'"
-          class="markdown-edit editable-floor"
-        >
-          <el-input
-            v-model="markdownData.title"
-            :readonly="!(isEditVisiable === 'markdown')"
-            placeholder="输入楼层标题"
-          >
-          </el-input>
-          <!-- <el-input
-            v-model="markdownData.content"
-            :readonly="!(isEditVisiable === 'markdown')"
-            :rows="20"
-            placeholder="输入markdown编辑页面"
-            type="textarea"
-          >
-          </el-input> -->
-          <AppEditor v-model.string="markdownData.content"> </AppEditor>
-          <el-button
-            :readonly="!(isEditVisiable === 'markdown')"
-            class="sig-introduction"
-            @click="EditFloor(false, 'markdown')"
-            >放弃修改</el-button
-          >
-          <el-button @click="creatFloor('markdown')">{{
-            pageData.has('markdown') ? '确认修改' : '确认创建'
-          }}</el-button>
-          <el-button
-            v-show="isEditVisiable === 'markdown'"
-            class="sig-introduction"
-            @click="toggleDelDlg(true)"
-            >删除</el-button
-          >
-        </div>
+
         <!-- 增加页面按钮 -->
         <div
           v-show="!modeType && !pageData.has('markdown')"
@@ -444,7 +405,10 @@ function log(val) {
               {{ markdownData.title }}
             </span>
           </h2>
-          <MdStatement :statement="markdownData.content"></MdStatement>
+          <MdStatement
+            class="markdown-main"
+            :statement="markdownData.content"
+          ></MdStatement>
           <div
             v-show="!modeType"
             class="edit-floor square"
@@ -455,24 +419,25 @@ function log(val) {
             </OIcon>
           </div>
         </div>
-        <div v-if="lang === 'zh'" class="meeting">
-          <h2>
-            <span class="title-bg">{{
-              t('sig.SIG_DETAIL.ORGANIZING_MEETINGS_BG')
-            }}</span>
-            <span class="title-text">{{
-              t('sig.SIG_DETAIL.ORGANIZING_MEETINGS')
-            }}</span>
-          </h2>
+        <div class="meeting">
           <SigMeeting
             v-if="sigMeetingData.tableData"
+            v-model="meetingData.content"
             class="calender-box"
             :table-data="sigMeetingData.tableData"
-            :meeting-intro="meetingData.content"
           />
           <p v-else class="sig-introduction">
             {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
           </p>
+          <div
+            v-show="!modeType"
+            class="edit-floor square"
+            @click="EditFloor(true, 'meeting')"
+          >
+            <OIcon>
+              <IconEdit />
+            </OIcon>
+          </div>
         </div>
         <div v-if="memberList.length" class="member">
           <h2>
@@ -717,18 +682,9 @@ function log(val) {
       </h3>
       <!-- TODO: 用户名 -->
       <template #footer>
-        <el-button
-          v-show="isEditVisiable === 'introduction'"
-          class="sig-introduction"
-          @click="EditFloor(false, 'introduction')"
-          >放弃修改</el-button
-        >
-        <el-button
-          v-show="isEditVisiable === 'introduction'"
-          class="sig-introduction"
-          @click="saveData('introduction')"
-        >
-          确认修改</el-button
+        <o-button size="small" @click="toggleDelDlg(false)">取消</o-button>
+        <o-button size="small" type="primary" @click="confirmDel()">
+          确认</o-button
         >
       </template>
     </el-dialog>
@@ -739,7 +695,18 @@ function log(val) {
       width="100%"
       @close="isEditVisiable = ''"
     >
-      <div v-if="refData" v-html="refData.outerHTML"></div>
+      <SigMeeting
+        v-if="sigMeetingData.tableData && isEditVisiable === 'meeting'"
+        v-model="meetingData.content"
+        :table-data="sigMeetingData.tableData"
+        :edit-style="isEditDiglogVisiable"
+      ></SigMeeting>
+      <MarkdownEdit
+        v-if="isEditVisiable === 'markdown'"
+        v-model="markdownData"
+        @handle-del="toggleDelDlg(true)"
+        :edit-style="isEditDiglogVisiable"
+      />
       <template #footer>
         <o-button size="small" @click="toggleDelDlg(false)">{{
           t('edit.CANCEL')
@@ -747,7 +714,7 @@ function log(val) {
         <o-button
           size="small"
           type="primary"
-          @click="saveData('introduction')"
+          @click="creatFloor(isEditVisiable)"
           >{{ t('edit.CONFIRM') }}</o-button
         >
       </template>
@@ -762,7 +729,7 @@ function log(val) {
 .editable-floor {
   position: relative;
   z-index: 11;
-  background-color: var(--o-color-bg2);
+  // background-color: var(--o-color-bg2);
 }
 .edit-type {
   position: fixed;
@@ -775,8 +742,8 @@ function log(val) {
   margin: 0 auto;
 }
 .markdown-edit {
-  margin-top: 40px;
-  padding: 40px;
+  // margin-top: 40px;
+  // padding: 40px;
 }
 @mixin title {
   text-align: center;
@@ -821,8 +788,9 @@ function log(val) {
 }
 :deep(.el-textarea) {
   textarea {
-    min-height: 24px;
+    min-height: 56px !important;
     &[readonly] {
+      min-height: 21px !important;
       cursor: text;
       padding: 0;
       box-shadow: none;
@@ -908,8 +876,13 @@ function log(val) {
       h2 {
         @include title;
       }
+      .markdown-main {
+        margin-top: 40px;
+        padding: 40px;
+      }
     }
     .meeting {
+      position: relative;
       margin-top: var(--o-spacing-h2);
       color: var(--o-color-text1);
       .sig-introduction {
@@ -1244,7 +1217,7 @@ function log(val) {
     margin: 0 auto;
     max-width: 1424px;
     padding: 0;
-    background-color: var(--o-color-bg2);
+    // background-color: var(--o-color-bg2);
     .brief-introduction {
       position: relative;
       @include section-box;

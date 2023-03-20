@@ -1,15 +1,28 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted, reactive, PropType, watch } from 'vue';
+import {
+  ref,
+  nextTick,
+  onMounted,
+  computed,
+  reactive,
+  PropType,
+  watch,
+} from 'vue';
 
 import { isValidKey, isBrowser } from '@/shared/utils';
 import { TableData, DayData } from '@/shared/@types/type-calendar';
 import { useI18n } from 'vue-i18n';
+import { usePageData } from '@/stores';
 
 import { OButton } from '@/components/button';
 import MdStatement from '@/components/MdStatement.vue';
+import OIcon from '@/components/OIcon.vue';
 
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
 import IconDown from '~icons/app/icon-chevron-down.svg';
+import IconEdit from '~icons/app/icon-edit.svg';
+import IconDone from '~icons/app/icon-done.svg';
+import IconClose from '~icons/app/icon-close.svg';
 
 import notFoundImg from '@/assets/common/404/404.png';
 
@@ -23,12 +36,34 @@ const props = defineProps({
       return {};
     },
   },
-  meetingIntro: {
+  modelValue: {
     type: String,
     default:
       'SIG 版本规划工作会议遵循开源、开放原则，议题收集、技术讨论、会议纪要等各讨论过程均对外开放。',
   },
+  editStyle: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const emit = defineEmits(['update:modelValue']);
+const tempData = computed({
+  get: () => props.modelValue,
+  set: (val) => {
+    emit('update:modelValue', val);
+  },
+});
+
+const previewShown = ref(false);
+
+function hanleChangePreview(val: boolean, isPreview?: boolean) {
+  if (!val && !isPreview) {
+    tempData.value = usePageData().tempData.get('meeting')?.content;
+  }
+  previewShown.value = val;
+}
+
 const { t } = useI18n();
 
 let currentMeet = reactive<TableData>({
@@ -169,69 +204,187 @@ const watchData = watch(
 );
 </script>
 <template>
-  <div class="main-body">
-    <div class="communication-info">
-      <div class="info-head">{{ t('sig.SIG_DETAIL.COMMUNICATION_INFO') }}</div>
-      <div class="info-body">
-        <h5>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}</h5>
-        <p class="email">
-          <span>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}:</span>
-          <a
-            :href="oldEmail ? `mailto:${oldEmail}` : `mailto:dev@openeuler.org`"
-            >{{ oldEmail || 'dev@openeuler.org' }}</a
-          >
-        </p>
-        <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
-        <p class="meeting-tip">
-          <MdStatement :statement="meetingIntro"></MdStatement>
-        </p>
-      </div>
-    </div>
-    <div class="detail-list">
-      <div class="detail-head">
-        {{ t('sig.SIG_DETAIL.LATEST_MEETING') + ':' }}
-        <span>{{ currentDay }}</span>
-      </div>
-      <div class="meeting-list">
-        <div
-          v-if="
-            (renderData.timeData.length && renderData.date) ||
-            renderData.timeData.length
-          "
-          class="demo-collapse"
-        >
-          <el-collapse
-            v-model="activeName"
-            accordion
-            @change="changeCollapse()"
-          >
-            <div
-              v-for="(item, index) in renderData.timeData"
-              :key="item.id"
-              class="collapse-box"
+  <div class="meeting">
+    <h2>
+      <span class="title-bg">{{
+        t('sig.SIG_DETAIL.ORGANIZING_MEETINGS_BG')
+      }}</span>
+      <span class="title-text">{{
+        t('sig.SIG_DETAIL.ORGANIZING_MEETINGS')
+      }}</span>
+    </h2>
+    <div class="main-body">
+      <div class="communication-info">
+        <div class="info-head">
+          {{ t('sig.SIG_DETAIL.COMMUNICATION_INFO') }}
+        </div>
+        <div class="info-body">
+          <h5>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}</h5>
+          <p class="email">
+            <span>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}:</span>
+            <a
+              :href="
+                oldEmail ? `mailto:${oldEmail}` : `mailto:dev@openeuler.org`
+              "
+              >{{ oldEmail || 'dev@openeuler.org' }}</a
             >
-              <el-collapse-item :name="index">
-                <template #title>
-                  <div class="meet-item">
-                    <div class="meet-left">
-                      <div class="left-top">
-                        <p class="meet-name">{{ item.name || item.title }}</p>
-                        <p class="time-tip">{{ handleTimeTip(item) }}</p>
+          </p>
+          <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
+          <div class="meeting-tip">
+            <MdStatement
+              v-if="!editStyle || previewShown"
+              :statement="modelValue"
+            ></MdStatement>
+            <div v-else class="edit-box">
+              <el-input
+                v-model="tempData"
+                :readonly="!editStyle"
+                placeholder="输入markdown编辑页面"
+                type="textarea"
+              >
+              </el-input>
+            </div>
+            <div v-if="editStyle" class="icon-box">
+              <OIcon>
+                <IconDone
+                  v-if="!previewShown"
+                  @click="hanleChangePreview(true)"
+                />
+                <IconEdit v-else @click="hanleChangePreview(false, true)" />
+              </OIcon>
+              <OIcon @click="hanleChangePreview(false)">
+                <IconClose />
+              </OIcon>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-list">
+        <div class="detail-head">
+          {{ t('sig.SIG_DETAIL.LATEST_MEETING') + ':' }}
+          <span>{{ currentDay }}</span>
+        </div>
+        <div class="meeting-list">
+          <div
+            v-if="
+              (renderData.timeData.length && renderData.date) ||
+              renderData.timeData.length
+            "
+            class="demo-collapse"
+          >
+            <el-collapse
+              v-model="activeName"
+              accordion
+              @change="changeCollapse()"
+            >
+              <div
+                v-for="(item, index) in renderData.timeData"
+                :key="item.id"
+                class="collapse-box"
+              >
+                <el-collapse-item :name="index">
+                  <template #title>
+                    <div class="meet-item">
+                      <div class="meet-left">
+                        <div class="left-top">
+                          <p class="meet-name">{{ item.name || item.title }}</p>
+                          <p class="time-tip">{{ handleTimeTip(item) }}</p>
+                        </div>
+                        <div
+                          v-if="item.group_name"
+                          class="group-name more-detail"
+                        >
+                          {{ t('sig.SIG_DETAIL.SIG_GROUP') }}
+                          {{ item.group_name }}
+                        </div>
+                        <div v-else class="group-name more-detail">
+                          openEuler
+                        </div>
                       </div>
-                      <div
-                        v-if="item.group_name"
-                        class="group-name more-detail"
-                      >
-                        {{ t('sig.SIG_DETAIL.SIG_GROUP') }}
-                        {{ item.group_name }}
+                      <div class="item-right">
+                        <OButton
+                          v-if="item.schedules"
+                          animation
+                          type="text"
+                          @click.stop="goDetail(index)"
+                        >
+                          {{ t('sig.SIG_DETAIL.LEARN_MORE') }}
+                          <template #suffixIcon>
+                            <OIcon><icon-arrow-right></icon-arrow-right></OIcon>
+                          </template>
+                        </OButton>
+                        <div class="detail-time">
+                          <span class="start-time"
+                            ><i v-if="!item.schedules">{{ item.startTime }}</i>
+                            <i v-else>{{ item.schedules[0].start }}</i></span
+                          >
+                          <span v-if="windowWidth < 768">-</span>
+                          <span class="end-time">
+                            <i v-if="!item.schedules">{{ item.endTime }}</i>
+                            <i v-else>{{
+                              item.schedules[item.schedules.length - 1].end
+                            }}</i>
+                          </span>
+                        </div>
+                        <div class="extend">
+                          <OIcon
+                            :class="{
+                              reversal:
+                                isCollapse && activeName == index.toString(),
+                            }"
+                          >
+                            <icon-down></icon-down>
+                          </OIcon>
+                        </div>
                       </div>
-                      <div v-else class="group-name more-detail">openEuler</div>
                     </div>
-                    <div class="item-right">
+                  </template>
+                  <div class="meet-detail">
+                    <template v-for="keys in detailItem" :key="keys.key">
+                      <div
+                        v-if="isValidKey(keys.key, item) && item[keys.key]"
+                        class="meeting-item"
+                      >
+                        <div class="item-title">{{ keys.text }}:</div>
+                        <p
+                          v-if="
+                            !keys.isLink &&
+                            keys.key !== 'activity_type' &&
+                            keys.key !== 'date'
+                          "
+                        >
+                          {{ item[keys.key] }}
+                        </p>
+                        <p
+                          v-else-if="
+                            keys.isLink &&
+                            item[keys.key] &&
+                            !(item[keys.key] as string).startsWith('http')
+                          "
+                        >
+                          {{ item[keys.key] }}
+                        </p>
+                        <a
+                          v-else-if="keys.isLink"
+                          :href="item[keys.key]"
+                          target="_blank"
+                          >{{ item[keys.key] }}</a
+                        >
+                        <p
+                          v-else-if="
+                            keys.key === 'activity_type' && item.activity_type
+                          "
+                        >
+                          {{ activityType[item.activity_type - 1] }}
+                        </p>
+                        <p v-else>{{ currentDay }}</p>
+                      </div>
+                    </template>
+                    <div v-if="item.schedules" class="mo-learn-more">
                       <OButton
-                        v-if="item.schedules"
                         animation
-                        type="text"
+                        size="mini"
+                        type="outline"
                         @click.stop="goDetail(index)"
                       >
                         {{ t('sig.SIG_DETAIL.LEARN_MORE') }}
@@ -239,101 +392,114 @@ const watchData = watch(
                           <OIcon><icon-arrow-right></icon-arrow-right></OIcon>
                         </template>
                       </OButton>
-                      <div class="detail-time">
-                        <span class="start-time"
-                          ><i v-if="!item.schedules">{{ item.startTime }}</i>
-                          <i v-else>{{ item.schedules[0].start }}</i></span
-                        >
-                        <span v-if="windowWidth < 768">-</span>
-                        <span class="end-time">
-                          <i v-if="!item.schedules">{{ item.endTime }}</i>
-                          <i v-else>{{
-                            item.schedules[item.schedules.length - 1].end
-                          }}</i>
-                        </span>
-                      </div>
-                      <div class="extend">
-                        <OIcon
-                          :class="{
-                            reversal:
-                              isCollapse && activeName == index.toString(),
-                          }"
-                        >
-                          <icon-down></icon-down>
-                        </OIcon>
-                      </div>
                     </div>
                   </div>
-                </template>
-                <div class="meet-detail">
-                  <template v-for="keys in detailItem" :key="keys.key">
-                    <div
-                      v-if="isValidKey(keys.key, item) && item[keys.key]"
-                      class="meeting-item"
-                    >
-                      <div class="item-title">{{ keys.text }}:</div>
-                      <p
-                        v-if="
-                          !keys.isLink &&
-                          keys.key !== 'activity_type' &&
-                          keys.key !== 'date'
-                        "
-                      >
-                        {{ item[keys.key] }}
-                      </p>
-                      <p
-                        v-else-if="
-                            keys.isLink &&
-                            item[keys.key] &&
-                            !(item[keys.key] as string).startsWith('http')
-                          "
-                      >
-                        {{ item[keys.key] }}
-                      </p>
-                      <a
-                        v-else-if="keys.isLink"
-                        :href="item[keys.key]"
-                        target="_blank"
-                        >{{ item[keys.key] }}</a
-                      >
-                      <p
-                        v-else-if="
-                          keys.key === 'activity_type' && item.activity_type
-                        "
-                      >
-                        {{ activityType[item.activity_type - 1] }}
-                      </p>
-                      <p v-else>{{ currentDay }}</p>
-                    </div>
-                  </template>
-                  <div v-if="item.schedules" class="mo-learn-more">
-                    <OButton
-                      animation
-                      size="mini"
-                      type="outline"
-                      @click.stop="goDetail(index)"
-                    >
-                      {{ t('sig.SIG_DETAIL.LEARN_MORE') }}
-                      <template #suffixIcon>
-                        <OIcon><icon-arrow-right></icon-arrow-right></OIcon>
-                      </template>
-                    </OButton>
-                  </div>
-                </div>
-              </el-collapse-item>
-            </div>
-          </el-collapse>
-        </div>
-        <div v-else class="empty">
-          <img :src="notFoundImg" alt="" />
-          <p>{{ t('sig.SIG_DETAIL.EMPTY_TEXT') }}</p>
+                </el-collapse-item>
+              </div>
+            </el-collapse>
+          </div>
+          <div v-else class="empty">
+            <img :src="notFoundImg" alt="" />
+            <p>{{ t('sig.SIG_DETAIL.EMPTY_TEXT') }}</p>
+          </div>
         </div>
       </div>
     </div>
+    <div v-if="editStyle" class="edit-mask"></div>
   </div>
 </template>
 <style lang="scss" scoped>
-.calendar-title {
+.edit-mask {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba($color: #fff, $alpha: 0.24);
+}
+@mixin title {
+  text-align: center;
+  position: relative;
+  height: 64px;
+  @media screen and (max-width: 768px) {
+    height: 30px;
+  }
+  .title-bg {
+    color: var(--o-color-neutral10);
+    font-size: 40px;
+    font-weight: 300;
+    @media screen and (max-width: 768px) {
+      font-size: var(--o-font-size-h8);
+    }
+  }
+  .title-text {
+    font-size: var(--o-font-size-h3);
+    line-height: var(--o-line-height-h3);
+    color: var(--o-color-text1);
+    font-weight: 400;
+    position: absolute;
+    z-index: 1;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    @media screen and (max-width: 768px) {
+      top: 8px;
+      font-size: var(--o-font-size-h8);
+      line-height: var(--o-line-height-h8);
+    }
+  }
+}
+h2 {
+  @include title;
+}
+.meeting {
+  position: relative;
+}
+
+:deep(.el-textarea) {
+  textarea {
+    min-height: 56px !important;
+    &[readonly] {
+      min-height: 21px !important;
+      cursor: text;
+      padding: 0;
+      box-shadow: none;
+      border: none;
+      resize: none;
+      &:focus-visible {
+        border: none;
+        box-shadow: none;
+        outline: none;
+      }
+    }
+  }
+}
+.meeting-tip {
+  position: relative;
+  z-index: 1;
+  .icon-box {
+    position: absolute;
+    top: 0;
+    right: -48px;
+    gap: 8px 0;
+
+    display: flex;
+    flex-direction: column;
+    .o-icon {
+      // TODO:
+      box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+      font-size: 40px;
+      border: 1px solid #555;
+      &:hover {
+        color: inherit;
+      }
+      &:first-child {
+        background-color: var(--o-color-brand1);
+        color: var(--o-color-text2);
+      }
+    }
+  }
+}
+.o-icon .calendar-title {
   text-align: center;
   font-size: var(--o-font-size-h3);
   font-weight: 400;
@@ -400,18 +566,20 @@ const watchData = watch(
   font-size: var(--o-font-size-h7);
   transition: color 0.2s;
   &:hover {
-    color: var(--o-color-brand1);
-    svg {
-      color: var(--o-color-brand2);
-      fill: var(--o-color-brand2);
-    }
+    // color: var(--o-color-brand1);
+    // svg {
+    //   color: var(--o-color-brand2);
+    //   fill: var(--o-color-brand2);
+    // }
   }
 }
 .main-body {
+  margin-top: 40px;
   display: flex;
   box-shadow: var(--o-shadow-l2);
   .communication-info {
     max-width: 456px;
+    width: 100%;
     @media screen and (max-width: 768px) {
       max-width: 100%;
     }
@@ -429,7 +597,7 @@ const watchData = watch(
     .info-body {
       padding: var(--o-spacing-h4) var(--o-spacing-h2);
       background-color: var(--o-color-bg2);
-      overflow-y: scroll;
+      // overflow-y: scroll;
       height: 274px;
       @media screen and (max-width: 768px) {
         padding: var(--o-spacing-h5);
@@ -447,7 +615,8 @@ const watchData = watch(
         }
       }
 
-      p {
+      p,
+      .meeting-tip {
         margin-top: var(--o-spacing-h5);
         font-size: var(--o-font-size-text);
         line-height: var(--o-line-height-tip);

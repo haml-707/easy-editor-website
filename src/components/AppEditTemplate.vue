@@ -30,6 +30,6 @@ getAllDataByPath(
   z-index: 10;
   width: 100%;
   height: 100%;
-  background: rgba($color: #fff, $alpha: 0.44);
+  background: rgba($color: #fff, $alpha: 0.24);
 }
 </style>

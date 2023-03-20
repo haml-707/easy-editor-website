@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Markdown from 'markdown-it';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
   statement: {
@@ -10,7 +11,13 @@ const props = defineProps({
 
 const mkit = new Markdown({ html: true });
 
-const statementHtml = mkit.render(props.statement);
+const statementHtml = ref(mkit.render(props.statement));
+watch(
+  () => props.statement,
+  (val) => {
+    statementHtml.value = mkit.render(val);
+  }
+);
 </script>
 
 <template>

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import _ from 'lodash-es';
 
 // 语言
 export const useLangStore = defineStore('lang', {
@@ -18,6 +19,7 @@ export const usePageData = defineStore('edit-data', {
   state: () => {
     return {
       pageData: new Map(),
+      tempData: new Map(),
     };
   },
   actions: {
@@ -27,6 +29,10 @@ export const usePageData = defineStore('edit-data', {
         mapData.set(data[i].name, data[i]);
       }
       this.pageData = mapData;
+      this.tempData = _.cloneDeep(mapData);
+    },
+    setTempData(data: any) {
+      this.tempData = data;
     },
   },
 });
