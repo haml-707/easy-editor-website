@@ -88,7 +88,7 @@ watch(
 <template>
   <div class="edit-table">
     <h2 class="edit-table-title">可自编辑页面</h2>
-    <div class="select-box">
+    <!-- <div class="select-box">
       <div class="select-item">
         <div class="select-label">页面名称</div>
         <el-select v-model="pageName" filterable clearable>
@@ -106,7 +106,7 @@ watch(
         </el-select>
       </div>
       <div class="select-item">
-        <div class="select-label">页面名称</div>
+        <div class="select-label">页面类别</div>
         <el-select v-model="pageName" filterable clearable>
           <template #prefix>
             <OIcon>
@@ -121,7 +121,7 @@ watch(
           />
         </el-select>
       </div>
-    </div>
+    </div> -->
     <div class="input-container"></div>
     <el-table :data="editData">
       <el-table-column label="页面名称" prop="siteName" min-width="110">

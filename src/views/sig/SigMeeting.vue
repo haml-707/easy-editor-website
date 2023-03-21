@@ -20,7 +20,6 @@ import OIcon from '@/components/OIcon.vue';
 
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
 import IconDown from '~icons/app/icon-chevron-down.svg';
-import IconEdit from '~icons/app/icon-edit.svg';
 import IconDone from '~icons/app/icon-done.svg';
 import IconClose from '~icons/app/icon-close.svg';
 
@@ -58,8 +57,8 @@ const tempData = computed({
 
 const previewShown = ref(false);
 
-function hanleChangePreview(val: boolean, isPreview?: boolean) {
-  if (!val && !isPreview) {
+function hanleChangePreview(val: boolean, isFallback?: boolean) {
+  if (isFallback) {
     tempData.value = JSON.parse(
       JSON.stringify(usePageData().tempData.get('meeting'))
     );
@@ -234,28 +233,29 @@ const watchData = watch(
           </p>
           <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
           <div class="meeting-tip">
-            <MdStatement
-              v-if="!isEditStyle || previewShown"
-              :statement="tempData.content"
-            ></MdStatement>
-            <div v-else class="edit-box">
+            <div v-if="isEditStyle && previewShown" class="edit-box">
               <el-input
                 v-model="tempData.content"
                 :readonly="!isEditStyle"
+                :autosize="{ minRows: 2, maxRows: 3 }"
                 placeholder="输入markdown编辑页面"
+                maxlength="100"
                 type="textarea"
               >
               </el-input>
             </div>
-            <div v-if="isEditStyle" class="icon-box">
+            <MdStatement
+              v-else
+              :statement="tempData.content"
+              class="markdown-main"
+              @click="isEditStyle ? hanleChangePreview(true) : ''"
+            ></MdStatement>
+
+            <div v-if="isEditStyle && previewShown" class="icon-box">
               <OIcon>
-                <IconDone
-                  v-if="!previewShown"
-                  @click="hanleChangePreview(true)"
-                />
-                <IconEdit v-else @click="hanleChangePreview(false, true)" />
+                <IconDone @click="hanleChangePreview(false)" />
               </OIcon>
-              <OIcon @click="hanleChangePreview(false)">
+              <OIcon @click="hanleChangePreview(false, true)">
                 <IconClose />
               </OIcon>
             </div>
@@ -479,6 +479,12 @@ h2 {
 .meeting-tip {
   position: relative;
   z-index: 1;
+  max-height: 80px;
+  // overflow-y: scroll;
+  // overflow-x: hidden;
+  :deep(.el-textarea__inner) {
+    resize: none;
+  }
   .icon-box {
     position: absolute;
     top: 0;
@@ -574,6 +580,12 @@ h2 {
     //   color: var(--o-color-brand2);
     //   fill: var(--o-color-brand2);
     // }
+  }
+}
+.markdown-main {
+  border: 1px solid transparent;
+  &:hover {
+    border: 1px solid var(--o-color-brand1);
   }
 }
 .main-body {

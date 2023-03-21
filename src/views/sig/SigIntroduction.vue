@@ -3,7 +3,6 @@ import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePageData } from '@/stores';
 
-import IconEdit from '~icons/app/icon-edit.svg';
 import OIcon from '@/components/OIcon.vue';
 
 import IconDone from '~icons/app/icon-done.svg';
@@ -31,10 +30,12 @@ const tempData = computed({
   },
 });
 
-const previewShown = ref(false);
+const previewShown = ref(true);
 
-function hanleChangePreview(val: boolean, isPreview?: boolean) {
-  if (!val && !isPreview) {
+function hanleChangePreview(val: boolean, isFallback?: boolean) {
+  console.log(previewShown.value, props.isEditStyle);
+
+  if (isFallback) {
     tempData.value = JSON.parse(
       JSON.stringify(usePageData().tempData.get('introduction'))
     );
@@ -56,34 +57,43 @@ const sigDetailName = ref(route.params.name as string);
         <OIcon class="icon"> <IconGitee /> </OIcon
       ></a>
     </h2>
-    <MdStatement
-      v-if="!isEditStyle || previewShown"
-      :statement="tempData.content"
-      class="sig-introduction"
-    ></MdStatement>
-    <div v-else class="edit-box sig-introduction">
-      <el-input
-        v-model="tempData.content"
-        :readonly="!isEditStyle"
-        :autosize="{ minRows: 2, maxRows: 25 }"
-        placeholder="输入markdown编辑页面"
-        type="textarea"
-      >
-      </el-input>
-    </div>
-    <div v-if="isEditStyle" class="icon-box">
-      <OIcon>
-        <IconDone v-if="!previewShown" @click="hanleChangePreview(true)" />
-        <IconEdit v-else @click="hanleChangePreview(false, true)" />
-      </OIcon>
-      <OIcon @click="hanleChangePreview(false)">
-        <IconClose />
-      </OIcon>
+    <div class="sig-introduction">
+      <div v-if="isEditStyle && previewShown" class="edit-box">
+        <el-input
+          v-model="tempData.content"
+          :readonly="!isEditStyle"
+          :autosize="{ minRows: 2, maxRows: 20 }"
+          placeholder="输入markdown编辑页面"
+          maxlength="100"
+          type="textarea"
+        >
+        </el-input>
+      </div>
+      <MdStatement
+        v-else
+        :calss="isEditStyle ? 'border' : ''"
+        :statement="tempData.content"
+        class="markdown-main"
+        @click="isEditStyle ? hanleChangePreview(true) : ''"
+      ></MdStatement>
+      <div v-if="isEditStyle && previewShown" class="icon-box">
+        <OIcon>
+          <IconDone @click="hanleChangePreview(false)" />
+        </OIcon>
+        <OIcon @click="hanleChangePreview(false, true)">
+          <IconClose />
+        </OIcon>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss">
+.border {
+  &:hover {
+    border: 1px solid var(--o-color-brand1);
+  }
+}
 @mixin section-box {
   margin-top: var(--o-spacing-h2);
   background-color: var(--o-color-bg2);
@@ -92,6 +102,9 @@ const sigDetailName = ref(route.params.name as string);
     margin-top: var(--o-spacing-h5);
     padding: var(--o-spacing-h5);
   }
+}
+.markdown-main {
+  border: 1px solid transparent;
 }
 .el-dialog {
   background-color: var(--o-color-bg1);
@@ -144,6 +157,7 @@ const sigDetailName = ref(route.params.name as string);
     }
   }
   .sig-introduction {
+    position: relative;
     margin-top: var(--o-spacing-h5);
     font-size: var(--o-font-size-text);
     line-height: 22px;

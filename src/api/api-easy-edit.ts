@@ -52,8 +52,6 @@ export function getPageData(id: number) {
 
 export function modifyFloorData(params: any) {
   const url = `/api-edit/page?path=${params.path}&name=${params.name}`;
-  console.log(params);
-
   return request
     .put(url, params, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)

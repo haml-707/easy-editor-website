@@ -56,7 +56,7 @@ const lang = useLangStore().lang;
 const route = useRoute();
 
 const { t, locale } = useI18n();
-const params = {
+let params = {
   title: '介绍',
   description: '介绍',
   content: '',
@@ -95,6 +95,7 @@ const markdownData = ref(
   pageData.value.get('markdown') || {
     content: '',
     title: '',
+    description: '',
   }
 );
 const meetingData = ref(
@@ -109,6 +110,11 @@ const introductData = ref(
     title: '',
   }
 );
+const dataMap = {
+  markdown: markdownData,
+  meeting: meetingData,
+  introduction: introductData,
+};
 
 const path = ref(
   `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
@@ -117,14 +123,12 @@ const path = ref(
 function saveData(name: string) {
   params.content = pageData.value.get(name)?.content;
   if (pageData.value.has('markdown') && name === 'markdown') {
-    params.title = markdownData.value.title;
-    params.content = markdownData.value.content;
+    params = markdownData.value;
   } else if (pageData.value.has('introduction') && name === 'introduction') {
     params.content = introductData.value.content;
   } else if (pageData.value.has('meeting') && name === 'meeting') {
     params.content = meetingData.value.content;
   }
-
   params.name = name;
   params.path = path.value;
   modifyFloorData(params).then((res: any) => {
@@ -147,9 +151,10 @@ function creatFloor(name: string) {
       name: name,
       path: path.value,
       title: markdownData.value.title,
-      description: '',
+      description: markdownData.value.description,
       isPrivate: false,
-      isPublished: false,
+      type: 'sig',
+      locale: locale.value,
       contentType: 'txt',
     };
     createPage(param).then((res: any) => {
@@ -161,6 +166,7 @@ function creatFloor(name: string) {
         pageData.value.set(name, {
           content: markdownData.value.content,
           title: markdownData.value.title,
+          description: markdownData.value.description,
         });
       }
     });
@@ -201,6 +207,14 @@ watch(
     deep: true,
   }
 );
+
+function handleCancel() {
+  isEditDiglogVisiable.value = false;
+  isEditVisiable.value;
+  dataMap[isEditVisiable.value].value = JSON.parse(
+    JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
+  );
+}
 watch(
   () => modeType.value,
   () => {
@@ -367,32 +381,6 @@ onMounted(() => {
         link1="https://www.openeuler.org/zh/sig/sig-list/"
       />
       <div class="content">
-        <!-- <div class="brief-introduction">
-          <h2 class="brief-introduction-title">
-            {{ sigDetailName }}
-            <a :href="giteeHomeLink" target="_blank">
-              <OIcon class="icon"> <IconGitee /> </OIcon
-            ></a>
-          </h2>
-          <el-input
-            v-model="introductData.content"
-            :readonly="!(isEditVisiable === 'introduction')"
-            :placeholder="t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')"
-            type="textarea"
-            autosize
-            class="sig-introduction"
-          >
-          </el-input>
-          <div
-            v-show="!modeType"
-            class="edit-floor square"
-            @click="EditFloor(true, 'introduction')"
-          >
-            <OIcon>
-              <IconEdit />
-            </OIcon>
-          </div>
-        </div> -->
         <div class="introduction">
           <SigIntroduction
             v-model="introductData"
@@ -426,6 +414,7 @@ onMounted(() => {
           class="markdown-floor"
         >
           <h2>
+            <span class="title-bg">{{ markdownData.description }}</span>
             <span class="title-text">
               {{ markdownData.title }}
             </span>
@@ -458,6 +447,31 @@ onMounted(() => {
             v-show="!modeType"
             class="edit-floor square"
             @click="EditFloor(true, 'meeting')"
+          >
+            <OIcon>
+              <IconEdit />
+            </OIcon>
+          </div>
+        </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown')"
+          class="add-floor square"
+          @click="addFloor('markdown/1')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData"
+            :is-edit-style="isEditDiglogVisiable"
+            @handle-del="toggleDelDlg(true)"
+          />
+          <div
+            v-show="!modeType"
+            class="edit-floor square"
+            @click="EditFloor(true, 'markdown/1')"
           >
             <OIcon>
               <IconEdit />
@@ -738,7 +752,7 @@ onMounted(() => {
         @handle-del="toggleDelDlg(true)"
       />
       <template #footer>
-        <o-button size="small" @click="isDialogVisiable = false">{{
+        <o-button size="small" @click="handleCancel">{{
           t('edit.CANCEL')
         }}</o-button>
         <o-button

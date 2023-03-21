@@ -1,14 +1,22 @@
 <script lang="ts" setup>
-import { inject } from 'vue';
+import { inject, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
 import AppFooter from '@/components/AppFooter.vue';
 
 import { getAllDataByPath } from '@/api/api-easy-edit';
 import { usePageData } from '@/stores';
 
+const route = useRoute();
+
+const sigDetailName = ref(route.params.name as string);
+
+const path = ref(
+  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
+);
+
 const modeType = inject('modeType');
-getAllDataByPath(
-  'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign'
-).then((res) => {
+getAllDataByPath(path.value).then((res) => {
   usePageData().setPageData(res.data);
 });
 </script>

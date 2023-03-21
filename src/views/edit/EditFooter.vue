@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStoreData } from '@/shared/login';
 import { useRoute } from 'vue-router';
@@ -25,20 +25,10 @@ const sigDetailName = ref(route.params.name as string);
 const path = ref(
   `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
 );
-function getGiteeName(arr: any) {
-  try {
-    const giteeName = arr?.filter((item: any) => {
-      return item.identity === 'gitee';
-    })[0]?.login_name;
-    if (giteeName) {
-      return giteeName;
-    }
-  } catch (error) {
-    return false;
-  }
-}
 
-const userName = ref(getGiteeName(guardAuthClient?.value.identities));
+const userName = computed(() => {
+  return guardAuthClient?.value.username;
+});
 
 const isDialogVisiable = ref(false);
 const formRef = ref<FormInstance>();

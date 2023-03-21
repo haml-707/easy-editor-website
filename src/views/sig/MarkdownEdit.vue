@@ -45,14 +45,27 @@ function delFloor() {
 <template>
   <div class="markdown-edit editable-floor">
     <div class="markdown-title" @click="hanleChangePreview('title', true)">
-      <el-input
-        v-model="tempData.title"
-        :class="isEditStyle ? 'is-edit' : ''"
-        :readonly="!isEditStyle || previewShown !== 'title'"
-        placeholder="输入楼层标题"
-      >
-      </el-input>
-      <div v-if="previewShown === 'title'" class="icon-box">
+      <h2 class="title" :class="isEditStyle ? 'is-edit' : ''">
+        <span class="title-bg">
+          <el-input
+            v-model="tempData.description"
+            :readonly="!isEditStyle || previewShown !== 'title'"
+            maxlength="100"
+            placeholder="QUICKSTART"
+          >
+          </el-input
+        ></span>
+        <span class="title-text">
+          <el-input
+            v-model="tempData.title"
+            :readonly="!isEditStyle || previewShown !== 'title'"
+            placeholder="输入楼层标题"
+            maxlength="100"
+          >
+          </el-input>
+        </span>
+      </h2>
+      <div v-if="previewShown === 'title' && isEditStyle" class="icon-box">
         <OIcon>
           <IconDone @click.stop="hanleChangePreview('', true)" />
         </OIcon>
@@ -63,15 +76,16 @@ function delFloor() {
     </div>
     <div class="markdown-body">
       <div
-        v-if="!isEditStyle || previewShown === 'content'"
+        v-if="isEditStyle && previewShown === 'content'"
         class="edit-textarea"
         @click="hanleChangePreview('content', true)"
       >
         <el-input
           v-model="tempData.content"
           :readonly="!isEditStyle"
-          :autosize="{ minRows: 4, maxRows: 25 }"
+          :autosize="{ minRows: 4, maxRows: 20 }"
           placeholder="输入markdown编辑页面"
+          maxlength="1000"
           type="textarea"
         >
         </el-input>
@@ -79,10 +93,11 @@ function delFloor() {
       <MdStatement
         v-else
         class="markdown-main"
+        :class="isEditStyle ? 'border' : ''"
         :statement="modelValue.content"
-        @click="hanleChangePreview('content', true)"
+        @click="isEditStyle ? hanleChangePreview('content', true) : ''"
       ></MdStatement>
-      <div v-if="previewShown === 'content'" class="icon-box">
+      <div v-if="previewShown === 'content' && isEditStyle" class="icon-box">
         <OIcon>
           <IconDone @click="hanleChangePreview('', true)" />
         </OIcon>
@@ -92,7 +107,7 @@ function delFloor() {
       </div>
     </div>
   </div>
-  <div class="del-dox" @click="delFloor"></div>
+  <div v-show="isEditStyle" class="del-dox" @click="delFloor"></div>
 </template>
 
 <style lang="scss">
@@ -125,12 +140,10 @@ function delFloor() {
     input {
       min-height: 56px !important;
       &[readonly] {
-        min-height: 21px !important;
         cursor: text;
         padding: 0;
         box-shadow: none;
         border: none;
-        resize: none;
         &:focus-visible {
           border: none;
           box-shadow: none;
@@ -147,8 +160,17 @@ function delFloor() {
     margin-top: 40px;
     padding: 40px;
     border: 1px solid transparent;
+  }
+}
+.border {
+  &:hover {
+    border: 1px solid var(--o-color-brand1);
+  }
+}
+.is-edit {
+  .el-input__wrapper {
     &:hover {
-      border: 1px solid var(--o-color-brand1);
+      box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
     }
   }
 }
@@ -156,16 +178,12 @@ function delFloor() {
   .markdown-title {
     position: relative;
     .el-input {
-      .el-input__wrapper {
+      .el-input__wrapper:not(:focus) {
         box-shadow: none;
       }
-    }
-    .is-edit {
-      .el-input__wrapper {
-        box-shadow: none;
-        &:hover {
-          box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
-        }
+      .is-focus {
+        background-color: var(--o-color-bg1);
+        box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
       }
     }
   }
@@ -234,10 +252,19 @@ function delFloor() {
   @media screen and (max-width: 768px) {
     height: 30px;
   }
+
   .title-bg {
-    color: var(--o-color-neutral10);
     font-size: 40px;
     font-weight: 300;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    &:hover {
+      z-index: 10;
+    }
+    .el-input__inner {
+      color: var(--o-color-neutral10) !important;
+    }
     @media screen and (max-width: 768px) {
       font-size: var(--o-font-size-h8);
     }
