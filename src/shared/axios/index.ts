@@ -138,7 +138,7 @@ const responseInterceptorId = request.interceptors.response.use(
       loadingInstance.close();
     }
     const { config } = err;
-    if (!(config as RequestConfig).$doException) {
+    if (!(config as RequestConfig)?.$doException) {
       ElMessage({
         type: 'error',
         message: err.toString(),

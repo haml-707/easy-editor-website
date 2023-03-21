@@ -2,6 +2,7 @@
 import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStoreData } from '@/shared/login';
+import { useRoute } from 'vue-router';
 
 import { publishPage } from '@/api/api-easy-edit';
 
@@ -17,7 +18,13 @@ import type { FormInstance } from 'element-plus';
 
 const { t } = useI18n();
 const { guardAuthClient } = useStoreData();
+const route = useRoute();
 
+const sigDetailName = ref(route.params.name as string);
+
+const path = ref(
+  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
+);
 function getGiteeName(arr: any) {
   try {
     const giteeName = arr?.filter((item: any) => {
@@ -74,17 +81,15 @@ function confirmPublish(verify: FormInstance | undefined) {
   }
   verify.validate(async (res: boolean) => {
     if (res) {
-      publishPage('https://www.openeuler.org/zh/interaction/event-list/').then(
-        (res) => {
-          if (res.statusCode === 200) {
-            ElMessage({
-              type: 'success',
-              message: '发布成功',
-            });
-            toggleDelDlg(false);
-          }
+      publishPage(path.value, ruleForm.name).then((res) => {
+        if (res.statusCode === 200) {
+          ElMessage({
+            type: 'success',
+            message: '发布成功',
+          });
+          toggleDelDlg(false);
         }
-      );
+      });
     }
   });
 }

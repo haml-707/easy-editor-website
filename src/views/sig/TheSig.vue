@@ -32,20 +32,20 @@ import {
   getSigRepositoryList,
   getSigList,
 } from '@/api/api-sig';
-import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
+import {
+  modifyFloorData,
+  deleteFloor,
+  createPage,
+  getLast,
+} from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
 import _ from 'lodash-es';
+getLast().then((res) => {
+  console.log(res);
+});
 
 let templateData = reactive<any>('');
-const params = {
-  title: '介绍',
-  description: '介绍',
-  content: '',
-  contentType: 'txt',
-  name: '',
-  path: '',
-};
 
 interface SIGLIST {
   group_name: string;
@@ -55,7 +55,18 @@ const lang = useLangStore().lang;
 
 const route = useRoute();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const params = {
+  title: '介绍',
+  description: '介绍',
+  content: '',
+  contentType: 'txt',
+  name: '',
+  path: '',
+  type: 'sig',
+  locale: locale.value,
+  is_private: false,
+};
 const sigDetailName = ref(route.params.name as string);
 
 const pageData = computed(() => {

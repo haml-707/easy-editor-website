@@ -3,19 +3,12 @@ import { computed, ref } from 'vue';
 
 import { usePageData } from '@/stores';
 
-import IconEdit from '~icons/app/icon-edit.svg';
 import OIcon from '@/components/OIcon.vue';
 
 import IconDone from '~icons/app/icon-done.svg';
 import IconClose from '~icons/app/icon-close.svg';
 
 const props = defineProps({
-  markdownData: {
-    type: Object as any,
-    default: () => {
-      return {};
-    },
-  },
   modelValue: {
     type: Object as any,
     default: () => {
@@ -28,11 +21,6 @@ const props = defineProps({
   },
 });
 const previewShown = ref('');
-
-const editType = ref({
-  title: false,
-  content: false,
-});
 
 const emit = defineEmits(['update:modelValue', 'handle-del']);
 
@@ -56,71 +44,53 @@ function delFloor() {
 </script>
 <template>
   <div class="markdown-edit editable-floor">
-    <div class="markdown-title">
+    <div class="markdown-title" @click="hanleChangePreview('title', true)">
       <el-input
         v-model="tempData.title"
-        :class="!isEditStyle || previewShown === 'title' ? 'is-edit' : ''"
-        :readonly="!isEditStyle || previewShown === 'title'"
+        :class="isEditStyle ? 'is-edit' : ''"
+        :readonly="!isEditStyle || previewShown !== 'title'"
         placeholder="输入楼层标题"
       >
       </el-input>
-      <div class="icon-box">
+      <div v-if="previewShown === 'title'" class="icon-box">
         <OIcon>
-          <IconEdit
-            v-if="previewShown === 'title'"
-            @click="hanleChangePreview('', true)"
-          />
-          <IconDone v-else @click="hanleChangePreview('title', true)" />
+          <IconDone @click.stop="hanleChangePreview('', true)" />
         </OIcon>
-        <OIcon @click="hanleChangePreview('title', false)">
+        <OIcon @click.stop="hanleChangePreview('title', false)">
           <IconClose />
         </OIcon>
       </div>
     </div>
     <div class="markdown-body">
-      <MdStatement
+      <div
         v-if="!isEditStyle || previewShown === 'content'"
-        class="markdown-main"
-        :statement="modelValue.content"
-      ></MdStatement>
-      <div v-else class="edit-textarea">
+        class="edit-textarea"
+        @click="hanleChangePreview('content', true)"
+      >
         <el-input
           v-model="tempData.content"
           :readonly="!isEditStyle"
-          :autosize="{ minRows: 20, maxRows: 25 }"
+          :autosize="{ minRows: 4, maxRows: 25 }"
           placeholder="输入markdown编辑页面"
           type="textarea"
         >
         </el-input>
       </div>
-      <div class="icon-box">
+      <MdStatement
+        v-else
+        class="markdown-main"
+        :statement="modelValue.content"
+        @click="hanleChangePreview('content', true)"
+      ></MdStatement>
+      <div v-if="previewShown === 'content'" class="icon-box">
         <OIcon>
-          <IconEdit
-            v-if="previewShown === 'content'"
-            @click="hanleChangePreview('', true)"
-          />
-          <IconDone v-else @click="hanleChangePreview('content', true)" />
+          <IconDone @click="hanleChangePreview('', true)" />
         </OIcon>
         <OIcon @click="hanleChangePreview('content', false)">
           <IconClose />
         </OIcon>
       </div>
     </div>
-
-    <!-- <div
-        v-show="!modeType"
-        class="edit-floor square"
-        @click="EditFloor(true, 'markdown')"
-      >
-        <OIcon>
-          <IconEdit />
-        </OIcon>
-      </div> -->
-    <!-- </div> -->
-    <!-- <div v-else class="markdown-edit"></div> -->
-
-    <div v-if="isEditStyle" class="icon-box"></div>
-    <!-- <AppEditor v-model.string="tempData.content"> </AppEditor> -->
   </div>
   <div class="del-dox" @click="delFloor"></div>
 </template>
@@ -170,19 +140,35 @@ function delFloor() {
     }
   }
 }
-.is-edit {
-  .el-input__wrapper {
-    box-shadow: none !important;
-  }
-}
+
 .markdown-body {
   position: relative;
   .markdown-main {
     margin-top: 40px;
     padding: 40px;
+    border: 1px solid transparent;
+    &:hover {
+      border: 1px solid var(--o-color-brand1);
+    }
   }
 }
 .markdown-edit {
+  .markdown-title {
+    position: relative;
+    .el-input {
+      .el-input__wrapper {
+        box-shadow: none;
+      }
+    }
+    .is-edit {
+      .el-input__wrapper {
+        box-shadow: none;
+        &:hover {
+          box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
+        }
+      }
+    }
+  }
   .el-input {
     height: 64px;
     font-size: 36px;
@@ -197,6 +183,7 @@ function delFloor() {
     background-color: var(--o-color-bg2);
     .el-textarea {
       textarea {
+        padding: 40px;
         &::-webkit-scrollbar-track {
           border-radius: 4px;
           background-color: var(--o-color-bg2);

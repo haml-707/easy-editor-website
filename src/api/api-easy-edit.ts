@@ -52,6 +52,8 @@ export function getPageData(id: number) {
 
 export function modifyFloorData(params: any) {
   const url = `/api-edit/page?path=${params.path}&name=${params.name}`;
+  console.log(params);
+
   return request
     .put(url, params, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)
@@ -60,10 +62,11 @@ export function modifyFloorData(params: any) {
     });
 }
 
-export function publishPage(path: string) {
+export function publishPage(path: string, publisher: string) {
   const url = '/api-edit/publish';
   const params = {
     path,
+    publisher,
   };
   return request
     .post(url, params, getHeaderConfig())
@@ -109,6 +112,16 @@ export function deleteFloor(path: string, name: string) {
   const url = `/api-edit/page?path=${path}&name=${name}`;
   return request
     .delete(url, getHeaderConfig())
+    .then((res: AxiosResponse) => res.data)
+    .catch((e: any) => {
+      console.error(e);
+    });
+}
+
+export function getLast() {
+  const url = `/api-edit/publish/latest?path=https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign`;
+  return request
+    .get(url, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);
