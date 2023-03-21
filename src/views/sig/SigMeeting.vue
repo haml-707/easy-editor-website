@@ -55,7 +55,7 @@ const tempData = computed({
   },
 });
 
-const previewShown = ref(false);
+const previewShown = ref(true);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (isFallback) {
@@ -247,6 +247,7 @@ const watchData = watch(
             <MdStatement
               v-else
               :statement="tempData.content"
+              :class="isEditStyle ? 'border' : ''"
               class="markdown-main"
               @click="isEditStyle ? hanleChangePreview(true) : ''"
             ></MdStatement>
@@ -259,6 +260,14 @@ const watchData = watch(
                 <IconClose />
               </OIcon>
             </div>
+            <OButton class="view-history" animation type="text"
+              >查看历史会议纪要
+              <template #suffixIcon>
+                <OIcon>
+                  <IconArrowRight></IconArrowRight>
+                </OIcon>
+              </template>
+            </OButton>
           </div>
         </div>
       </div>
@@ -476,7 +485,16 @@ h2 {
     }
   }
 }
+.border {
+  &:hover {
+    border: 1px solid var(--o-color-brand1);
+  }
+}
 .meeting-tip {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
   position: relative;
   z-index: 1;
   max-height: 80px;
@@ -583,10 +601,8 @@ h2 {
   }
 }
 .markdown-main {
+  min-height: 24px;
   border: 1px solid transparent;
-  &:hover {
-    border: 1px solid var(--o-color-brand1);
-  }
 }
 .main-body {
   margin-top: 40px;
@@ -640,6 +656,12 @@ h2 {
           margin-top: var(--o-spacing-h8);
           font-size: var(--o-font-size-tip);
           line-height: var(--o-line-height-tip);
+        }
+      }
+      .view-history {
+        padding: 0;
+        .o-icon {
+          color: var(--o-color-brand1);
         }
       }
       .meeting-title {
@@ -704,6 +726,7 @@ h2 {
           background-color: var(--o-color-bg2);
         }
         .el-collapse-item__wrap {
+          background-color: #e5e8f0;
           border: 0;
           .el-collapse-item__content {
             padding: 0;
@@ -922,7 +945,7 @@ h2 {
         .el-collapse-item__wrap {
           border: none;
           padding: var(--o-spacing-h6) var(--o-spacing-h5);
-          background-color: var(--o-collapse-color-bg2);
+          background-color: #e5e8f0;
           @media screen and (max-width: 768px) {
             padding: var(--o-spacing-h6);
             background-color: var(--o-color-bg1);

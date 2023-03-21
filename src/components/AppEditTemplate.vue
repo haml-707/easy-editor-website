@@ -6,6 +6,7 @@ import AppFooter from '@/components/AppFooter.vue';
 
 import { getAllDataByPath } from '@/api/api-easy-edit';
 import { usePageData } from '@/stores';
+import imgLogo from '@/assets/common/header/logo.png';
 
 const route = useRoute();
 
@@ -22,6 +23,11 @@ getAllDataByPath(path.value).then((res) => {
 </script>
 <template>
   <div class="edit-template">
+    <div class="app-header">
+      <div class="center">
+        <img :src="imgLogo" alt="" />
+      </div>
+    </div>
     <slot></slot>
     <AppFooter />
     <div id="edit-dialog" :class="!modeType ? 'mask' : ''"></div>
@@ -38,6 +44,23 @@ getAllDataByPath(path.value).then((res) => {
   z-index: 10;
   width: 100%;
   height: 100%;
-  background: rgba($color: #fff, $alpha: 0.24);
+  background: rgba($color: #fff, $alpha: 0.44);
+}
+.app-header {
+  height: 80px;
+  background-color: var(--o-color-bg2);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  .center {
+    width: 100%;
+    margin: 0 auto;
+    max-width: 1504px;
+    padding: 0 44px;
+    img {
+      cursor: pointer;
+      width: 139px;
+    }
+  }
 }
 </style>

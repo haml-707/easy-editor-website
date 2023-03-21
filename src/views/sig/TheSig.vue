@@ -110,6 +110,36 @@ const introductData = ref(
     title: '',
   }
 );
+// const markdownData1 = ref(
+//   pageData.value.get('markdown1') || {
+//     content: '',
+//     title: '',
+//   }
+// );
+// const markdownData2 = ref(
+//   pageData.value.get('markdown2') || {
+//     content: '',
+//     title: '',
+//   }
+// );
+// const markdownData3 = ref(
+//   pageData.value.get('markdown3') || {
+//     content: '',
+//     title: '',
+//   }
+// );
+// const markdownData4 = ref(
+//   pageData.value.get('markdown4') || {
+//     content: '',
+//     title: '',
+//   }
+// );
+// const markdownData5 = ref(
+//   pageData.value.get('markdown5') || {
+//     content: '',
+//     title: '',
+//   }
+// );
 const dataMap = {
   markdown: markdownData,
   meeting: meetingData,
@@ -752,14 +782,16 @@ onMounted(() => {
         @handle-del="toggleDelDlg(true)"
       />
       <template #footer>
-        <o-button size="small" @click="handleCancel">{{
-          t('edit.CANCEL')
-        }}</o-button>
+        <o-button size="small" @click="handleCancel">
+          {{ pageData.has(isEditVisiable) ? '放弃修改' : '放弃创建' }}</o-button
+        >
         <o-button
           size="small"
           type="primary"
           @click="creatFloor(isEditVisiable)"
-          >{{ t('edit.CONFIRM') }}</o-button
+          >{{
+            pageData.has(isEditVisiable) ? '确认修改' : '确认创建'
+          }}</o-button
         >
       </template>
     </el-dialog>
@@ -773,7 +805,6 @@ onMounted(() => {
 .editable-floor {
   position: relative;
   z-index: 11;
-  // background-color: var(--o-color-bg2);
 }
 .edit-type {
   position: fixed;
@@ -785,10 +816,7 @@ onMounted(() => {
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
   margin: 0 auto;
 }
-.markdown-edit {
-  // margin-top: 40px;
-  // padding: 40px;
-}
+
 @mixin title {
   text-align: center;
   position: relative;
@@ -848,19 +876,13 @@ onMounted(() => {
     }
   }
 }
-.is-editing {
-  position: fixed !important;
-  z-index: 12;
-  max-width: 1424px;
-  width: 100%;
-  top: calc(50% - 160px);
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
 .sig-detail {
   max-width: 1504px;
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
   margin: 0 auto;
+  @media (max-width: 1680px) {
+    max-width: 1304px;
+  }
   .content {
     width: 100%;
     margin-top: var(--o-spacing-h2);
@@ -926,6 +948,7 @@ onMounted(() => {
       .markdown-main {
         margin-top: 40px;
         padding: 40px;
+        box-shadow: var(--o-shadow-l2);
       }
     }
     .meeting {
@@ -963,6 +986,7 @@ onMounted(() => {
       }
       .member-box {
         @include section-box;
+        box-shadow: var(--o-shadow-l2);
         h5 {
           font-size: var(--o-font-size-h6);
           line-height: var(--o-line-height-h6);
@@ -1033,6 +1057,7 @@ onMounted(() => {
         @include title;
       }
       .repository-box {
+        box-shadow: var(--o-shadow-l2);
         @include section-box;
         h5 {
           font-size: var(--o-font-size-h6);
@@ -1103,6 +1128,7 @@ onMounted(() => {
         @include title;
       }
       .contribution-box {
+        box-shadow: var(--o-shadow-l2);
         @include section-box;
         h5 {
           font-size: var(--o-font-size-h6);
@@ -1201,7 +1227,7 @@ onMounted(() => {
     .edit-floor {
       position: absolute;
       top: 0;
-      right: -40px;
+      right: -104px;
     }
   }
 }

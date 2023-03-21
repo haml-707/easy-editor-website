@@ -8,6 +8,7 @@ import OIcon from '@/components/OIcon.vue';
 import IconSearch from '~icons/app/icon-search.svg';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
 import { profileData } from '@/api/api-easy-edit';
+import { getUrlParams } from '@/shared/utils';
 
 const router = useRouter();
 profileData().then((res) => {
@@ -23,21 +24,7 @@ const editData = ref([
     name: 'A-Tune',
     type: '峰会',
     lang: '中文',
-    path: '../zh/sig/sig-detail/?name=A-Tune',
-    time: '2023-3-08',
-  },
-  {
-    name: 'A-Tune',
-    type: '峰会',
-    lang: '中文',
-    path: '../zh/sig/sig-detail/?name=A-Tune',
-    time: '2023-3-08',
-  },
-  {
-    name: 'A-Tune',
-    type: '峰会',
-    lang: '中文',
-    path: '../zh/sig/sig-detail/?name=A-Tune',
+    path: 'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
     time: '2023-3-08',
   },
 ]);
@@ -61,7 +48,7 @@ const pageName = ref('');
 // });
 
 const goEdit = (path: string) => {
-  router.push(`/zh/edit/sig/${path}`);
+  router.push(`/zh/edit/sig/${getUrlParams(path)?.name}`);
 };
 
 const handleSizeChange = (val: number) => {
@@ -88,7 +75,7 @@ watch(
 <template>
   <div class="edit-table">
     <h2 class="edit-table-title">可自编辑页面</h2>
-    <!-- <div class="select-box">
+    <div class="select-box">
       <div class="select-item">
         <div class="select-label">页面名称</div>
         <el-select v-model="pageName" filterable clearable>
@@ -98,7 +85,7 @@ watch(
             </OIcon>
           </template>
           <el-option
-            v-for="item in 3"
+            v-for="item in 0"
             :key="item"
             :label="item"
             :value="item"
@@ -114,14 +101,14 @@ watch(
             </OIcon>
           </template>
           <el-option
-            v-for="item in 3"
+            v-for="item in 0"
             :key="item"
             :label="item"
             :value="item"
           />
         </el-select>
       </div>
-    </div> -->
+    </div>
     <div class="input-container"></div>
     <el-table :data="editData">
       <el-table-column label="页面名称" prop="siteName" min-width="110">
@@ -137,19 +124,21 @@ watch(
       </el-table-column>
       <el-table-column label="最新修改时间" prop="updated_at" min-width="110">
       </el-table-column>
-      <el-table-column min-width="110">
-        <OButton
-          class="start-edit"
-          animation
-          type="text"
-          @click="goEdit('sig-OpenDesign')"
-          >开始编辑
-          <template #suffixIcon>
-            <OIcon>
-              <IconArrowRight></IconArrowRight>
-            </OIcon>
-          </template>
-        </OButton>
+      <el-table-column min-width="110" prop="path">
+        <template #default="scope">
+          <OButton
+            class="start-edit"
+            animation
+            type="text"
+            @click="goEdit(scope.row.path)"
+            >开始编辑
+            <template #suffixIcon>
+              <OIcon>
+                <IconArrowRight></IconArrowRight>
+              </OIcon>
+            </template>
+          </OButton>
+        </template>
       </el-table-column>
     </el-table>
     <el-pagination
@@ -195,6 +184,7 @@ watch(
   }
   .el-table {
     margin-top: 24px;
+    // margin-top: 40px;
     .o-button {
       .o-icon {
         font-size: var(--o-font_size-h4);

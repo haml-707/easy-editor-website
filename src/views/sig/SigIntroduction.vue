@@ -33,8 +33,6 @@ const tempData = computed({
 const previewShown = ref(true);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
-  console.log(previewShown.value, props.isEditStyle);
-
   if (isFallback) {
     tempData.value = JSON.parse(
       JSON.stringify(usePageData().tempData.get('introduction'))
@@ -71,7 +69,7 @@ const sigDetailName = ref(route.params.name as string);
       </div>
       <MdStatement
         v-else
-        :calss="isEditStyle ? 'border' : ''"
+        :class="isEditStyle ? 'border' : ''"
         :statement="tempData.content"
         class="markdown-main"
         @click="isEditStyle ? hanleChangePreview(true) : ''"
@@ -104,6 +102,7 @@ const sigDetailName = ref(route.params.name as string);
   }
 }
 .markdown-main {
+  min-height: 24px;
   border: 1px solid transparent;
 }
 .el-dialog {
@@ -133,6 +132,7 @@ const sigDetailName = ref(route.params.name as string);
 }
 .brief-introduction {
   position: relative;
+  box-shadow: var(--o-shadow-l2);
   @include section-box;
   .brief-introduction-title {
     font-size: var(--o-font-size-h3);

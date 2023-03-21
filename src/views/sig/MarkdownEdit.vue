@@ -85,7 +85,7 @@ function delFloor() {
           :readonly="!isEditStyle"
           :autosize="{ minRows: 4, maxRows: 20 }"
           placeholder="输入markdown编辑页面"
-          maxlength="1000"
+          maxlength="10000"
           type="textarea"
         >
         </el-input>
@@ -122,6 +122,7 @@ function delFloor() {
   right: 40px;
   width: 64px;
   height: 64px;
+  background-color: var(--o-color-bg2);
   border: 1px solid #e02020;
   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
   &::after {
@@ -156,10 +157,31 @@ function delFloor() {
 
 .markdown-body {
   position: relative;
+  padding: 24px;
+  margin-top: 40px;
+  background-color: var(--o-color-bg2);
+  box-shadow: 0px 1px 5px 0px rgba(45, 47, 51, 0.1);
+
   .markdown-main {
-    margin-top: 40px;
-    padding: 40px;
+    padding: 16px;
     border: 1px solid transparent;
+    max-height: 586px;
+    height: 100%;
+    overflow: auto;
+    &::-webkit-scrollbar-track {
+      border-radius: 4px;
+      background-color: var(--o-color-bg2);
+    }
+
+    &::-webkit-scrollbar {
+      width: 8px;
+      background-color: var(--o-color-bg2);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background: #ccc;
+    }
   }
 }
 .border {
@@ -178,7 +200,7 @@ function delFloor() {
   .markdown-title {
     position: relative;
     .el-input {
-      .el-input__wrapper:not(:focus) {
+      .el-input__wrapper:not(.is-focus) {
         box-shadow: none;
       }
       .is-focus {
@@ -197,24 +219,23 @@ function delFloor() {
     }
   }
   .edit-textarea {
-    margin-top: 40px;
     background-color: var(--o-color-bg2);
     .el-textarea {
       textarea {
-        padding: 40px;
+        padding: 16px;
         &::-webkit-scrollbar-track {
           border-radius: 4px;
           background-color: var(--o-color-bg2);
         }
 
         &::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
           background-color: var(--o-color-bg2);
         }
 
         &::-webkit-scrollbar-thumb {
           border-radius: 4px;
-          background: var(--o-color-division1);
+          background: #ccc;
         }
       }
     }
@@ -259,6 +280,7 @@ function delFloor() {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    width: 100%;
     &:hover {
       z-index: 10;
     }
@@ -279,6 +301,7 @@ function delFloor() {
     top: 16px;
     left: 50%;
     transform: translateX(-50%);
+    width: 100%;
     @media screen and (max-width: 768px) {
       top: 8px;
       font-size: var(--o-font-size-h8);
