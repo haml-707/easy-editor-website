@@ -60,7 +60,9 @@ const previewShown = ref(false);
 
 function hanleChangePreview(val: boolean, isPreview?: boolean) {
   if (!val && !isPreview) {
-    tempData.value = usePageData().tempData.get('meeting');
+    tempData.value = JSON.parse(
+      JSON.stringify(usePageData().tempData.get('meeting'))
+    );
   }
   previewShown.value = val;
 }

@@ -29,6 +29,11 @@ const props = defineProps({
 });
 const previewShown = ref('');
 
+const editType = ref({
+  title: false,
+  content: false,
+});
+
 const emit = defineEmits(['update:modelValue', 'handle-del']);
 
 const tempData = computed({
@@ -39,7 +44,9 @@ const tempData = computed({
 });
 function hanleChangePreview(val: string, isFallback: boolean) {
   if (!isFallback) {
-    tempData.value[val] = usePageData().tempData.get('markdown')[val];
+    tempData.value[val] = JSON.parse(
+      JSON.stringify(usePageData().tempData.get('markdown')[val])
+    );
   }
   previewShown.value = val;
 }
@@ -49,16 +56,10 @@ function delFloor() {
 </script>
 <template>
   <div class="markdown-edit editable-floor">
-    <!-- <div v-if="!isEditStyle || previewShown" class="markdown-preview"> -->
-    <!-- <h2 v-if="!isEditStyle || previewShown === 'title'" class="title">
-      <span class="title-text">
-        {{ modelValue.title }}
-      </span>
-    </h2> -->
     <div class="markdown-title">
       <el-input
-        :class="!isEditStyle || previewShown === 'title' ? 'is-edit' : ''"
         v-model="tempData.title"
+        :class="!isEditStyle || previewShown === 'title' ? 'is-edit' : ''"
         :readonly="!isEditStyle || previewShown === 'title'"
         placeholder="输入楼层标题"
       >

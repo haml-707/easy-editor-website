@@ -35,7 +35,9 @@ const previewShown = ref(false);
 
 function hanleChangePreview(val: boolean, isPreview?: boolean) {
   if (!val && !isPreview) {
-    tempData.value = usePageData().tempData.get('introduction');
+    tempData.value = JSON.parse(
+      JSON.stringify(usePageData().tempData.get('introduction'))
+    );
   }
   previewShown.value = val;
 }

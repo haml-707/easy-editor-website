@@ -30,6 +30,7 @@ export const usePageData = defineStore('edit-data', {
       }
       this.pageData = mapData;
       this.tempData = _.cloneDeep(mapData);
+      console.log(this.tempData);
     },
     setTempData(data: any) {
       this.tempData = data;
