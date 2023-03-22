@@ -35,4 +35,10 @@ router.beforeEach((to) => {
   // 设置语言
   const langStore = useLangStore();
   langStore.lang = to.fullPath.includes('/en/') ? 'en' : 'zh';
+  // const loginStore = useLoginStore();
+
+  // 如已登录，直接进入
+  // if (loginStore.isLogined) {
+  //   return true;
+  // }
 });

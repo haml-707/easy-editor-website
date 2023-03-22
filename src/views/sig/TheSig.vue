@@ -241,7 +241,7 @@ watch(
 function handleCancel() {
   isEditDiglogVisiable.value = false;
   isEditVisiable.value;
-  dataMap[isEditVisiable.value].value = JSON.parse(
+  dataMap[isEditVisiable.value as keyof typeof dataMap].value = JSON.parse(
     JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
   );
 }
