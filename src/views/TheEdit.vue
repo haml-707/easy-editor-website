@@ -21,11 +21,11 @@ profileData().then((res) => {
 
 const editData = ref([
   {
-    name: 'A-Tune',
-    type: '峰会',
-    lang: '中文',
+    siteName: 'sig-Open-OpenDesign',
+    type: 'sig',
+    locale: 'zh',
     path: 'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
-    time: '2023-3-08',
+    updated_at: '2023-3-08',
   },
 ]);
 const total = ref(0);
@@ -111,11 +111,11 @@ watch(
     </div>
     <div class="input-container"></div>
     <el-table :data="editData">
-      <el-table-column label="页面名称" prop="siteName" min-width="110">
+      <el-table-column label="页面名称" prop="siteName" min-width="150">
       </el-table-column>
-      <el-table-column label="页面类别" prop="type" min-width="110">
+      <el-table-column label="页面类别" prop="type" min-width="80">
       </el-table-column>
-      <el-table-column label="页面语言" prop="locale" min-width="110">
+      <el-table-column label="页面语言" prop="locale" min-width="80">
       </el-table-column>
       <el-table-column label="目标页面链接" prop="path" min-width="310">
         <template #default="scope">

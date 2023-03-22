@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePageData } from '@/stores';
 
@@ -22,6 +22,7 @@ const props = defineProps({
   },
 });
 
+const textareaRef = ref();
 const emit = defineEmits(['update:modelValue']);
 const tempData = computed({
   get: () => props.modelValue,
@@ -37,6 +38,11 @@ function hanleChangePreview(val: boolean, isFallback?: boolean) {
     tempData.value = JSON.parse(
       JSON.stringify(usePageData().tempData.get('introduction'))
     );
+  }
+  if (!previewShown.value) {
+    nextTick(() => {
+      textareaRef.value.focus();
+    });
   }
   previewShown.value = val;
 }
@@ -56,23 +62,26 @@ const sigDetailName = ref(route.params.name as string);
       ></a>
     </h2>
     <div class="sig-introduction">
-      <div v-if="isEditStyle && previewShown" class="edit-box">
+      <div v-show="isEditStyle && previewShown" class="edit-box">
         <el-input
+          ref="textareaRef"
           v-model="tempData.content"
           :readonly="!isEditStyle"
           :autosize="{ minRows: 2, maxRows: 20 }"
           placeholder="输入markdown编辑页面"
-          maxlength="100"
+          maxlength="1000"
           type="textarea"
+          @blur="hanleChangePreview(false)"
+          @focus="hanleChangePreview(true)"
         >
         </el-input>
       </div>
       <MdStatement
-        v-else
+        v-show="!(isEditStyle && previewShown)"
         :class="isEditStyle ? 'border' : ''"
         :statement="tempData.content"
         class="markdown-main"
-        @click="isEditStyle ? hanleChangePreview(true) : ''"
+        @click.stop="isEditStyle ? hanleChangePreview(true) : ''"
       ></MdStatement>
       <div v-if="isEditStyle && previewShown" class="icon-box">
         <OIcon>
@@ -83,10 +92,19 @@ const sigDetailName = ref(route.params.name as string);
         </OIcon>
       </div>
     </div>
+    <div v-if="isEditStyle" class="edit-mask"></div>
   </div>
 </template>
 
 <style lang="scss">
+.edit-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba($color: #fff, $alpha: 0.72);
+}
 .border {
   &:hover {
     border: 1px solid var(--o-color-brand1);
@@ -104,6 +122,7 @@ const sigDetailName = ref(route.params.name as string);
 .markdown-main {
   min-height: 24px;
   border: 1px solid transparent;
+  padding: 16px;
 }
 .el-dialog {
   background-color: var(--o-color-bg1);
@@ -117,9 +136,10 @@ const sigDetailName = ref(route.params.name as string);
   display: flex;
   flex-direction: column;
   .o-icon {
+    cursor: pointer;
     // TODO:
     box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
-    font-size: 40px;
+    font-size: 24px;
     border: 1px solid #555;
     &:hover {
       color: inherit;
@@ -164,6 +184,9 @@ const sigDetailName = ref(route.params.name as string);
     color: var(--o-color-text3);
     position: relative;
     z-index: 11;
+    textarea {
+      padding: 16px;
+    }
     @media screen and (max-width: 768px) {
       margin-top: var(--o-spacing-h6);
       font-size: var(--o-font-size-tip);

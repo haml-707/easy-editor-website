@@ -255,6 +255,11 @@ $color: #fff;
   :deep(.app-content) {
     padding-bottom: 0;
   }
+  .app-content {
+    @media (max-width: 1680px) {
+      max-width: 1300px;
+    }
+  }
   .cookie-privacy {
     line-height: 48px;
     width: 100%;

@@ -3,7 +3,7 @@ export default {
   PUBLISH_PAGE: '发布页面',
   CONFIRE_PUBLISH: '请您先预览页面、确认修改无误后再进行发布',
   CANCEL: '取消',
-  CONFIRM: '确认',
+  CONFIRM: '确定',
   CONFIRM_TEXT1: '确定发布后您的修改将 ',
   CONFIRM_TEXT2: '即时刷新',
   CONFIRM_TEXT3: '到官网正式环境！',
@@ -16,4 +16,6 @@ export default {
   CONFIRM_DEL1: '是否确认',
   CONFIRM_DEL2: '删除',
   CONFIRM_DEL3: '本楼层？',
+  MARKDOWN_TEMPLATE:
+    '# 一级标题\n## 二级标题\n### 三级标题\n#### 四级标题\n\n**粗体**\n\n*斜体*\n\n~~删除线~~\n- 无序列表\n1. 有序列表\n[链接](https://www.openeuler.org/zh/)\n\n![Description](https://www.openeuler.org/assets/img-list1.6b3ad842.jpg)\n',
 };

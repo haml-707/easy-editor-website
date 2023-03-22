@@ -13,7 +13,6 @@ function handleChange() {
 </script>
 <template>
   <div class="edit-dispaly-zone">
-    <div></div>
     <div class="edit-switch">
       <span :class="!isPreviewMode ? 'active-switch' : ''">编辑模式</span
       ><el-switch v-model="isPreviewMode" @change="handleChange"></el-switch
@@ -41,9 +40,14 @@ function handleChange() {
   padding: 0 44px;
   max-width: 1504px;
   margin: 20px auto 26px;
-  justify-content: space-between;
+  @media (max-width: 1680px) {
+    max-width: 1300px;
+  }
   .edit-switch {
+    margin-left: 154px;
+    flex: 1;
     display: flex;
+    justify-content: center;
     align-items: center;
     color: var(--o-color-info3);
     span {

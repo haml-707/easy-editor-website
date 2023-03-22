@@ -44,7 +44,7 @@ getAllDataByPath(path.value).then((res) => {
   z-index: 10;
   width: 100%;
   height: 100%;
-  background: rgba($color: #fff, $alpha: 0.44);
+  background: rgba($color: #fff, $alpha: 0.72);
 }
 .app-header {
   height: 80px;
@@ -57,6 +57,9 @@ getAllDataByPath(path.value).then((res) => {
     margin: 0 auto;
     max-width: 1504px;
     padding: 0 44px;
+    @media (max-width: 1680px) {
+      max-width: 1300px;
+    }
     img {
       cursor: pointer;
       width: 139px;

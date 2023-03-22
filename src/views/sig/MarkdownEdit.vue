@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, nextTick } from 'vue';
 
 import { usePageData } from '@/stores';
 
@@ -20,6 +20,7 @@ const props = defineProps({
     default: false,
   },
 });
+const textareaRef = ref();
 const previewShown = ref('');
 
 const emit = defineEmits(['update:modelValue', 'handle-del']);
@@ -36,6 +37,11 @@ function hanleChangePreview(val: string, isFallback: boolean) {
       JSON.stringify(usePageData().tempData.get('markdown')[val])
     );
   }
+  if (!previewShown.value) {
+    nextTick(() => {
+      textareaRef.value.focus();
+    });
+  }
   previewShown.value = val;
 }
 function delFloor() {
@@ -51,7 +57,7 @@ function delFloor() {
             v-model="tempData.description"
             :readonly="!isEditStyle || previewShown !== 'title'"
             maxlength="100"
-            placeholder="QUICKSTART"
+            placeholder="输入英文标题"
           >
           </el-input
         ></span>
@@ -76,22 +82,25 @@ function delFloor() {
     </div>
     <div class="markdown-body">
       <div
-        v-if="isEditStyle && previewShown === 'content'"
+        v-show="isEditStyle && previewShown === 'content'"
         class="edit-textarea"
         @click="hanleChangePreview('content', true)"
       >
         <el-input
+          ref="textareaRef"
           v-model="tempData.content"
           :readonly="!isEditStyle"
           :autosize="{ minRows: 4, maxRows: 20 }"
           placeholder="输入markdown编辑页面"
           maxlength="10000"
           type="textarea"
+          @blur="hanleChangePreview('', true)"
+          @focus="hanleChangePreview('content', true)"
         >
         </el-input>
       </div>
       <MdStatement
-        v-else
+        v-show="!(isEditStyle && previewShown === 'content')"
         class="markdown-main"
         :class="isEditStyle ? 'border' : ''"
         :statement="modelValue.content"
@@ -174,7 +183,7 @@ function delFloor() {
     }
 
     &::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
       background-color: var(--o-color-bg2);
     }
 
@@ -222,15 +231,16 @@ function delFloor() {
     background-color: var(--o-color-bg2);
     .el-textarea {
       textarea {
+        overflow: auto;
+        // box-sizing: content-box;
         padding: 16px;
+        padding-right: 100px;
         &::-webkit-scrollbar-track {
           border-radius: 4px;
-          background-color: var(--o-color-bg2);
         }
 
         &::-webkit-scrollbar {
-          width: 8px;
-          background-color: var(--o-color-bg2);
+          width: 6px;
         }
 
         &::-webkit-scrollbar-thumb {
@@ -242,16 +252,17 @@ function delFloor() {
   }
   .icon-box {
     position: absolute;
-    top: 0;
+    top: 24px;
     right: -48px;
     gap: 8px 0;
 
     display: flex;
     flex-direction: column;
     .o-icon {
+      cursor: pointer;
       // TODO:
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
-      font-size: 40px;
+      font-size: 24px;
       border: 1px solid #555;
       &:hover {
         color: inherit;

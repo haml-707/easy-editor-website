@@ -93,7 +93,7 @@ const addFloor = function (name: string) {
 
 const markdownData = ref(
   pageData.value.get('markdown') || {
-    content: '',
+    content: t('edit.MARKDOWN_TEMPLATE'),
     title: '',
     description: '',
   }
@@ -151,8 +151,8 @@ const path = ref(
 );
 
 function saveData(name: string) {
-  params.content = pageData.value.get(name)?.content;
-  if (pageData.value.has('markdown') && name === 'markdown') {
+  // params.content = pageData.value.get(name)?.content;
+  if (pageData.value.has(name) && name === 'markdown') {
     params = markdownData.value;
   } else if (pageData.value.has('introduction') && name === 'introduction') {
     params.content = introductData.value.content;
@@ -439,7 +439,7 @@ onMounted(() => {
         </div>
 
         <div
-          v-if="markdownData.content && !(isEditVisiable === 'markdown')"
+          v-if="markdownData.name && !(isEditVisiable === 'markdown')"
           style="margin-top: 40px"
           class="markdown-floor"
         >
@@ -753,7 +753,7 @@ onMounted(() => {
       <template #footer>
         <o-button size="small" @click="toggleDelDlg(false)">取消</o-button>
         <o-button size="small" type="primary" @click="confirmDel()">
-          确认</o-button
+          确定</o-button
         >
       </template>
     </el-dialog>
@@ -881,7 +881,7 @@ onMounted(() => {
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
   margin: 0 auto;
   @media (max-width: 1680px) {
-    max-width: 1304px;
+    max-width: 1300px;
   }
   .content {
     width: 100%;
@@ -904,6 +904,7 @@ onMounted(() => {
     .brief-introduction {
       position: relative;
       @include section-box;
+      padding: 24px;
       .brief-introduction-title {
         font-size: var(--o-font-size-h3);
         line-height: var(--o-line-height-h3);
@@ -942,6 +943,7 @@ onMounted(() => {
     }
     .markdown-floor {
       position: relative;
+      z-index: 11;
       h2 {
         @include title;
       }
@@ -1290,11 +1292,12 @@ onMounted(() => {
     margin: 0 auto;
     max-width: 1424px;
     padding: 0;
-    // background-color: var(--o-color-bg2);
     .brief-introduction {
       position: relative;
       @include section-box;
       .brief-introduction-title {
+        padding: 16px;
+        padding-bottom: 0;
         font-size: var(--o-font-size-h3);
         line-height: var(--o-line-height-h3);
         color: var(--o-color-text1);
@@ -1317,6 +1320,7 @@ onMounted(() => {
         }
       }
       .sig-introduction {
+        // padding: 16px;
         margin-top: var(--o-spacing-h5);
         font-size: var(--o-font-size-text);
         line-height: 22px;

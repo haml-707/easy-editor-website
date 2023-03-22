@@ -47,6 +47,7 @@ const props = defineProps({
   },
 });
 
+const textareaRef = ref();
 const emit = defineEmits(['update:modelValue']);
 const tempData = computed({
   get: () => props.modelValue,
@@ -57,11 +58,16 @@ const tempData = computed({
 
 const previewShown = ref(true);
 
-function hanleChangePreview(val: boolean, isFallback?: boolean) {
+async function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (isFallback) {
     tempData.value = JSON.parse(
       JSON.stringify(usePageData().tempData.get('meeting'))
     );
+  }
+  if (!previewShown.value) {
+    nextTick(() => {
+      textareaRef.value.focus();
+    });
   }
   previewShown.value = val;
 }
@@ -199,6 +205,7 @@ const watchData = watch(
           activeBoxs.click();
           watchData();
         }
+        textareaRef.value.focus();
       });
     }
   },
@@ -233,23 +240,27 @@ const watchData = watch(
           </p>
           <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
           <div class="meeting-tip">
-            <div v-if="isEditStyle && previewShown" class="edit-box">
+            <div v-show="isEditStyle && previewShown" class="edit-box">
               <el-input
+                ref="textareaRef"
                 v-model="tempData.content"
+                :autofocus="true"
                 :readonly="!isEditStyle"
                 :autosize="{ minRows: 2, maxRows: 3 }"
                 placeholder="输入markdown编辑页面"
-                maxlength="100"
+                maxlength="1000"
                 type="textarea"
+                @blur="hanleChangePreview(false)"
+                @focus="hanleChangePreview(true)"
               >
               </el-input>
             </div>
             <MdStatement
-              v-else
+              v-show="!(isEditStyle && previewShown)"
               :statement="tempData.content"
               :class="isEditStyle ? 'border' : ''"
               class="markdown-main"
-              @click="isEditStyle ? hanleChangePreview(true) : ''"
+              @click.stop="isEditStyle ? hanleChangePreview(true) : ''"
             ></MdStatement>
 
             <div v-if="isEditStyle && previewShown" class="icon-box">
@@ -424,9 +435,10 @@ const watchData = watch(
 .edit-mask {
   position: absolute;
   top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: rgba($color: #fff, $alpha: 0.24);
+  background: rgba($color: #fff, $alpha: 0.72);
 }
 @mixin title {
   text-align: center;
@@ -449,7 +461,7 @@ const watchData = watch(
     color: var(--o-color-text1);
     font-weight: 400;
     position: absolute;
-    z-index: 1;
+    // z-index: 1;
     top: 16px;
     left: 50%;
     transform: translateX(-50%);
@@ -469,6 +481,7 @@ h2 {
 
 :deep(.el-textarea) {
   textarea {
+    padding: 16px;
     min-height: 56px !important;
     &[readonly] {
       min-height: 21px !important;
@@ -476,7 +489,6 @@ h2 {
       padding: 0;
       box-shadow: none;
       border: none;
-      resize: none;
       &:focus-visible {
         border: none;
         box-shadow: none;
@@ -496,25 +508,25 @@ h2 {
   height: 100%;
   justify-content: space-between;
   position: relative;
-  z-index: 1;
-  max-height: 80px;
-  // overflow-y: scroll;
-  // overflow-x: hidden;
-  :deep(.el-textarea__inner) {
-    resize: none;
+  // max-height: 80px;
+  .edit-box {
+    z-index: 1;
   }
   .icon-box {
     position: absolute;
     top: 0;
     right: -48px;
     gap: 8px 0;
+    z-index: 1;
 
     display: flex;
     flex-direction: column;
     .o-icon {
+      cursor: pointer;
+
       // TODO:
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
-      font-size: 40px;
+      font-size: 24px;
       border: 1px solid #555;
       &:hover {
         color: inherit;
@@ -601,6 +613,8 @@ h2 {
   }
 }
 .markdown-main {
+  position: relative;
+  z-index: 11;
   min-height: 24px;
   border: 1px solid transparent;
 }
@@ -626,16 +640,17 @@ h2 {
       }
     }
     .info-body {
-      padding: var(--o-spacing-h4) var(--o-spacing-h2);
+      padding: var(--o-spacing-h4) 24px;
       background-color: var(--o-color-bg2);
       // overflow-y: scroll;
-      height: 274px;
+      min-height: 274px;
       @media screen and (max-width: 768px) {
         padding: var(--o-spacing-h5);
         font-size: var(--o-font-size-tip);
         min-height: 0;
       }
       h5 {
+        padding: 0 16px;
         font-size: var(--o-font-size-h6);
         line-height: var(--o-line-height-h6);
         font-weight: 400;
@@ -658,8 +673,14 @@ h2 {
           line-height: var(--o-line-height-tip);
         }
       }
+      .meeting-tip {
+        margin-top: 0;
+      }
+      p {
+        padding: 0 16px;
+      }
       .view-history {
-        padding: 0;
+        padding: 0 16px;
         .o-icon {
           color: var(--o-color-brand1);
         }
@@ -923,9 +944,9 @@ h2 {
 
     .meeting-list {
       padding: var(--o-spacing-h8) 0 0 var(--o-spacing-h8);
-      height: 274px;
+      min-height: 274px;
+      height: calc(100% - 60px);
       background-color: var(--o-color-bg2);
-      overflow-y: scroll;
       .el-collapse {
         border: none;
         --el-collapse-header-height: 96px;
