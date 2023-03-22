@@ -483,7 +483,7 @@ onMounted(() => {
             </OIcon>
           </div>
         </div>
-        <div
+        <!-- <div
           v-show="!modeType && !pageData.has('markdown')"
           class="add-floor square"
           @click="addFloor('markdown/1')"
@@ -507,7 +507,7 @@ onMounted(() => {
               <IconEdit />
             </OIcon>
           </div>
-        </div>
+        </div> -->
         <div v-if="memberList.length" class="member">
           <h2>
             <span class="title-bg">{{
