@@ -57,9 +57,6 @@ getAllDataByPath(path.value).then((res) => {
     margin: 0 auto;
     max-width: 1504px;
     padding: 0 44px;
-    @media (max-width: 1680px) {
-      max-width: 1300px;
-    }
     img {
       cursor: pointer;
       width: 139px;

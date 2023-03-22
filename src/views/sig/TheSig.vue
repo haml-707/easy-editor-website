@@ -418,7 +418,7 @@ onMounted(() => {
           ></SigIntroduction>
           <div
             v-show="!modeType"
-            class="edit-floor square"
+            class="edit-floor square first-floor"
             @click="EditFloor(true, 'introduction')"
           >
             <OIcon>
@@ -463,7 +463,7 @@ onMounted(() => {
             </OIcon>
           </div>
         </div>
-        <div class="meeting">
+        <div class="meeting" v-if="locale === 'zh'">
           <SigMeeting
             v-if="sigMeetingData.tableData"
             v-model="meetingData"
@@ -1228,8 +1228,11 @@ onMounted(() => {
     }
     .edit-floor {
       position: absolute;
-      top: 0;
+      top: 104px;
       right: -104px;
+      &.first-floor {
+        top: 0;
+      }
     }
   }
 }

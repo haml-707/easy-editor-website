@@ -18,7 +18,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/zh/edit/:path/:name',
     name: 'edit',
-    alias: '/zh/edit/:path/:name',
+    alias: '/en/edit/:path/:name',
     component: () => import('@/views/sig/TheSig.vue'),
   },
 ];

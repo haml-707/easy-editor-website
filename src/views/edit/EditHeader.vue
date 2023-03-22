@@ -40,9 +40,9 @@ function handleChange() {
   padding: 0 44px;
   max-width: 1504px;
   margin: 20px auto 26px;
-  @media (max-width: 1680px) {
-    max-width: 1300px;
-  }
+  // @media (max-width: 1680px) {
+  //   max-width: 1300px;
+  // }
   .edit-switch {
     margin-left: 154px;
     flex: 1;

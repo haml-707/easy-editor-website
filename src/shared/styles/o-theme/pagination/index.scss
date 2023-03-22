@@ -14,13 +14,15 @@
 
   .el-pager {
     gap: 0 8px;
-    li {
+    .number {
       color: var(--o-pagination-color);
-      background: var(--o-pagination-bg);
       border-radius: 0;
       line-height: var(--o-pagination-page-line_height);
       height: 36px;
       width: 36px;
+      &:not(.is-active):not(:hover) {
+        background-color: var(--o-pagination-bg) !important;
+      }
       &:hover {
         color: var(--o-pagination-page-font_color-hover);
         background-color: var(--o-pagination-page-bg-active);

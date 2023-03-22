@@ -118,6 +118,8 @@ function setMeetingDay() {
   }
 }
 // 判断会议时间修改提示
+const isActive = ref(false);
+
 function handleTimeTip(item: DayData) {
   const startTime = new Date(
     currentMeet.date + ' ' + item.startTime + ':00'
@@ -127,10 +129,13 @@ function handleTimeTip(item: DayData) {
   ).getTime();
   const newDate = new Date().getTime();
   if (newDate > startTime && newDate < endTime) {
+    isActive.value = true;
     return '正在进行';
   } else if (newDate < startTime) {
+    isActive.value = true;
     return '即将开始';
   } else {
+    isActive.value = false;
     return '精彩回顾';
   }
 }
@@ -311,7 +316,12 @@ const watchData = watch(
                       <div class="meet-left">
                         <div class="left-top">
                           <p class="meet-name">{{ item.name || item.title }}</p>
-                          <p class="time-tip">{{ handleTimeTip(item) }}</p>
+                          <p
+                            class="time-tip"
+                            :class="{ 'active-tip': isActive }"
+                          >
+                            {{ handleTimeTip(item) }}
+                          </p>
                         </div>
                         <div
                           v-if="item.group_name"
@@ -914,7 +924,7 @@ h2 {
   }
   :deep(.detail-list) {
     flex: 1;
-    background-color: var(--o-color-bg1);
+    background-color: var(--o-color-bg2);
     .right-title {
       display: flex;
       height: 40px;
@@ -924,7 +934,7 @@ h2 {
         margin-bottom: 0;
         padding-bottom: var(--o-spacing-h5);
         justify-content: center;
-        background-color: var(--o-color-bg1);
+        background-color: var(--o-color-bg2);
       }
       .el-tabs__header {
         margin: 0;
@@ -945,7 +955,6 @@ h2 {
     .meeting-list {
       padding: var(--o-spacing-h8) 0 0 var(--o-spacing-h8);
       min-height: 274px;
-      height: calc(100% - 60px);
       background-color: var(--o-color-bg2);
       .el-collapse {
         border: none;
@@ -1031,13 +1040,17 @@ h2 {
               color: var(--o-color-text1);
               line-height: var(--o-line-height-h7);
             }
+
             .time-tip {
-              background-color: var(--o-color-yellow5);
+              background-color: var(--o-color-neutral9);
               color: var(--o-color-black);
               font-size: var(--o-font-size-tip);
               line-height: var(--o-line-height-tip);
               white-space: nowrap;
               padding: 0 8px;
+              &.active-tip {
+                background-color: var(--o-color-yellow5);
+              }
             }
             .el-collapse-item__content {
               padding: 0 20px;

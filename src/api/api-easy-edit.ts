@@ -79,8 +79,8 @@ export function publishPage(path: string, publisher: string) {
  * @return {Array}
  */
 
-export function profileData() {
-  const url = '/api-edit/page/profile';
+export function profileData(params: { siteName: string; type: string }) {
+  const url = `/api-edit/page/profile?name=${params.siteName}&type=${params.type}`;
   return request
     .get(url, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)

@@ -74,9 +74,9 @@ const jumpToUserZone = () => {
     align-items: center;
     max-width: 1504px;
     height: 80px;
-    @media (max-width: 1680px) {
-      max-width: 1300px;
-    }
+    // @media (max-width: 1680px) {
+    //   max-width: 1300px;
+    // }
     .new-issue {
       flex-shrink: 0;
       .o-button {
