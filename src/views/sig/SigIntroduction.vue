@@ -35,6 +35,8 @@ const previewShown = ref(true);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (isFallback) {
+    console.log(isFallback);
+
     try {
       tempData.value = JSON.parse(
         JSON.stringify(usePageData().tempData.get('introduction'))
@@ -53,7 +55,7 @@ function hanleChangePreview(val: boolean, isFallback?: boolean) {
 function onBlurEvent() {
   setTimeout(() => {
     hanleChangePreview(false);
-  }, 100);
+  }, 200);
 }
 const route = useRoute();
 const sigDetailName = ref(route.params.name as string);
@@ -169,6 +171,7 @@ const sigDetailName = ref(route.params.name as string);
     font-weight: 300;
     display: flex;
     align-items: center;
+    padding: 0 16px;
     @media screen and (max-width: 768px) {
       font-size: var(--o-font-size-h8);
       line-height: var(--o-line-height-h8);

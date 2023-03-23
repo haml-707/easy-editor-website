@@ -1,5 +1,12 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import {
+  createRouter,
+  createWebHistory,
+  RouteRecordRaw,
+  useRoute,
+} from 'vue-router';
 import { useLangStore } from '@/stores';
+import { getUserAuth, isLogined } from '@/shared/login';
+import { getUrlParam } from '@/shared/utils';
 
 export const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/zh/' },
@@ -31,14 +38,36 @@ export const router = createRouter({
   },
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to, from, next) => {
   // 设置语言
   const langStore = useLangStore();
   langStore.lang = to.fullPath.includes('/en/') ? 'en' : 'zh';
-  // const loginStore = useLoginStore();
 
-  // 如已登录，直接进入
-  // if (loginStore.isLogined) {
-  //   return true;
-  // }
+  if (getUserAuth().token) {
+    if (to.fullPath.includes('login')) {
+      console.log(666);
+      next({
+        path: getUrlParam('redirect') || '/',
+      });
+    } else {
+      next();
+    }
+  } else {
+    console.log(777);
+    if (to.fullPath.includes('login')) {
+      next();
+    } else {
+      console.log(777);
+      next({
+        path: `/zh/login`,
+        query: { redirect: to.fullPath },
+      });
+    }
+  }
+
+  // await isLogined()
+  //   .then(() => {})
+  //   .catch(() => {
+
+  //   });
 });

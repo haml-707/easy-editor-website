@@ -90,6 +90,7 @@ const markdownData = ref(
     description: '',
   }
 );
+
 const meetingData = ref(
   pageData.value.get('meeting') || {
     content: '',
@@ -165,8 +166,6 @@ function saveData(name: string) {
   });
 }
 function creatFloor(name: string) {
-  console.log(name);
-
   if (pageData.value.has(name)) {
     saveData(name);
   } else {
@@ -192,6 +191,7 @@ function creatFloor(name: string) {
           title: markdownData.value.title,
           description: markdownData.value.description,
         });
+        console.log(markdownData.value.name);
       }
     });
   }
@@ -215,8 +215,9 @@ watch(
   () => pageData.value,
   () => {
     markdownData.value = pageData.value.get('markdown') || {
-      content: '',
+      content: t('edit.MARKDOWN_TEMPLATE'),
       title: '',
+      description: '',
     };
     meetingData.value = pageData.value.get('meeting') || {
       content: '',
@@ -910,6 +911,7 @@ onMounted(() => {
         font-weight: 300;
         display: flex;
         align-items: center;
+        padding: 0 16px;
         @media screen and (max-width: 768px) {
           font-size: var(--o-font-size-h8);
           line-height: var(--o-line-height-h8);
@@ -1296,6 +1298,8 @@ onMounted(() => {
     .brief-introduction {
       position: relative;
       @include section-box;
+      padding: 40px 24px;
+
       .brief-introduction-title {
         padding: 16px;
         padding-bottom: 0;

@@ -82,7 +82,7 @@ async function hanleChangePreview(val: boolean, isFallback?: boolean) {
 function onBlurEvent() {
   setTimeout(() => {
     hanleChangePreview(false);
-  }, 100);
+  }, 200);
 }
 
 const { t } = useI18n();

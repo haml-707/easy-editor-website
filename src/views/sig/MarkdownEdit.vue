@@ -21,7 +21,7 @@ const props = defineProps({
   },
 });
 const textareaRef = ref();
-const previewShown = ref('');
+const previewShown = ref('content');
 
 const emit = defineEmits(['update:modelValue', 'handle-del']);
 
@@ -40,9 +40,6 @@ function hanleChangePreview(val: string, isFallback: boolean) {
     } catch (error) {
       console.log(error);
     }
-    tempData.value[val] = JSON.parse(
-      JSON.stringify(usePageData().tempData.get('markdown')[val])
-    );
   }
   if (!previewShown.value) {
     nextTick(() => {
@@ -57,7 +54,7 @@ function delFloor() {
 function onBlurEvent() {
   setTimeout(() => {
     hanleChangePreview('', true);
-  }, 100);
+  }, 200);
 }
 </script>
 <template>
