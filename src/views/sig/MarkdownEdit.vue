@@ -129,8 +129,8 @@ function delFloor() {
   top: 50%;
   transform: translateY(-50%);
   right: 40px;
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   background-color: var(--o-color-bg2);
   border: 1px solid #e02020;
   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);

@@ -32,18 +32,10 @@ import {
   getSigRepositoryList,
   getSigList,
 } from '@/api/api-sig';
-import {
-  modifyFloorData,
-  deleteFloor,
-  createPage,
-  getLast,
-} from '@/api/api-easy-edit';
+import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
 import _ from 'lodash-es';
-getLast().then((res) => {
-  console.log(res);
-});
 
 let templateData = reactive<any>('');
 
@@ -1215,7 +1207,7 @@ onMounted(() => {
       border: 1px solid var(--o-color-brand1);
       .o-icon {
         padding: 8px;
-        font-size: 48px;
+        font-size: 32px;
         color: var(--o-color-brand1);
         // TODO:'阴影'
         box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
