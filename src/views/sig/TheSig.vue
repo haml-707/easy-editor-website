@@ -48,18 +48,22 @@ const lang = useLangStore().lang;
 const route = useRoute();
 
 const { t, locale } = useI18n();
+const sigDetailName = ref(route.params.name as string);
+
+const path = ref(
+  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
+);
 let params = {
   title: '介绍',
   description: '介绍',
   content: '',
-  contentType: 'txt',
+  contentType: 'text/plain',
   name: '',
-  path: '',
+  path: path.value,
   type: 'sig',
   locale: locale.value,
   is_private: false,
 };
-const sigDetailName = ref(route.params.name as string);
 
 const pageData = computed(() => {
   return usePageData().pageData;
@@ -97,60 +101,62 @@ const meetingData = ref(
     title: '',
   }
 );
+
 const introductData = ref(
   pageData.value.get('introduction') || {
     content: '',
     title: '',
   }
 );
-// const markdownData1 = ref(
-//   pageData.value.get('markdown1') || {
-//     content: '',
-//     title: '',
-//   }
-// );
-// const markdownData2 = ref(
-//   pageData.value.get('markdown2') || {
-//     content: '',
-//     title: '',
-//   }
-// );
-// const markdownData3 = ref(
-//   pageData.value.get('markdown3') || {
-//     content: '',
-//     title: '',
-//   }
-// );
-// const markdownData4 = ref(
-//   pageData.value.get('markdown4') || {
-//     content: '',
-//     title: '',
-//   }
-// );
-// const markdownData5 = ref(
-//   pageData.value.get('markdown5') || {
-//     content: '',
-//     title: '',
-//   }
-// );
+const markdownData1 = ref(
+  pageData.value.get('markdown1') || {
+    content: t('edit.MARKDOWN_TEMPLATE'),
+    description: '',
+    title: '',
+  }
+);
+const markdownData2 = ref(
+  pageData.value.get('markdown2') || {
+    content: t('edit.MARKDOWN_TEMPLATE'),
+    description: '',
+    title: '',
+  }
+);
+const markdownData3 = ref(
+  pageData.value.get('markdown3') || {
+    content: t('edit.MARKDOWN_TEMPLATE'),
+    description: '',
+    title: '',
+  }
+);
+const markdownData4 = ref(
+  pageData.value.get('markdown4') || {
+    content: t('edit.MARKDOWN_TEMPLATE'),
+    description: '',
+    title: '',
+  }
+);
+const markdownData5 = ref(
+  pageData.value.get('markdown5') || {
+    content: t('edit.MARKDOWN_TEMPLATE'),
+    description: '',
+    title: '',
+  }
+);
 const dataMap = {
   markdown: markdownData,
+  markdown1: markdownData1,
+  markdown2: markdownData2,
+  markdown3: markdownData3,
+  markdown4: markdownData4,
+  markdown5: markdownData5,
   meeting: meetingData,
   introduction: introductData,
 };
 
-const path = ref(
-  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
-);
-
 function saveData(name: string) {
-  // params.content = pageData.value.get(name)?.content;
-  if (pageData.value.has(name) && name === 'markdown') {
-    params = markdownData.value;
-  } else if (pageData.value.has('introduction') && name === 'introduction') {
-    params.content = introductData.value.content;
-  } else if (pageData.value.has('meeting') && name === 'meeting') {
-    params.content = meetingData.value.content;
+  if (pageData.value.has(name)) {
+    params = dataMap[name as keyof typeof dataMap].value;
   }
   params.name = name;
   params.path = path.value;
@@ -165,6 +171,7 @@ function saveData(name: string) {
     isEditVisiable.value = '';
   });
 }
+// 新键楼层 如果存在 调用保存
 function creatFloor(name: string) {
   if (pageData.value.has(name)) {
     saveData(name);
@@ -178,7 +185,7 @@ function creatFloor(name: string) {
       isPrivate: false,
       type: 'sig',
       locale: locale.value,
-      contentType: 'txt',
+      contentType: 'text/plain',
     };
     createPage(param).then((res: any) => {
       if (res.statusCode === 200) {
@@ -214,26 +221,34 @@ function toggleDelDlg(val: boolean) {
 watch(
   () => pageData.value,
   () => {
-    // console.log(pageData.value.get('markdown'));
-
-    markdownData.value = pageData.value.get('markdown') || {
-      content: t('edit.MARKDOWN_TEMPLATE'),
+    // TODO:删除 tmpData
+    const tmpData = {
+      content: '',
       title: '',
       description: '',
     };
-    meetingData.value = pageData.value.get('meeting') || {
-      content: '',
-      title: '',
-    };
-    introductData.value = pageData.value.get('introduction') || {
-      content: '',
-      title: '',
-    };
+    for (const key in dataMap) {
+      if (pageData.value.has(key)) {
+        if (key?.includes('markdown')) {
+          tmpData.content = t('edit.MARKDOWN_TEMPLATE');
+          dataMap[key as keyof typeof dataMap].value =
+            pageData.value.get(key) || tmpData;
+        } else {
+          dataMap[key as keyof typeof dataMap].value =
+            pageData.value.get(key) || tmpData;
+        }
+      }
+    }
   },
   {
     deep: true,
   }
 );
+
+function handleChangeEditDialog() {
+  markdownData.value =
+    dataMap[isEditVisiable.value as keyof typeof dataMap].value;
+}
 
 function handleCancel() {
   isEditDiglogVisiable.value = false;
@@ -246,6 +261,7 @@ function handleCancel() {
     console.log(error);
   }
 }
+// 切换预览模式 清除编辑状态
 watch(
   () => modeType.value,
   () => {
@@ -254,6 +270,7 @@ watch(
     }
   }
 );
+// isEditVisiable 字符串转布尔值
 watch(
   () => isEditVisiable.value,
   (val) => {
@@ -429,7 +446,7 @@ onMounted(() => {
         </div>
 
         <!-- 增加页面按钮 -->
-        <div
+        <!-- <div
           v-show="!modeType && !pageData.has('markdown')"
           class="add-floor square"
           @click="addFloor('markdown')"
@@ -440,7 +457,7 @@ onMounted(() => {
         </div>
 
         <div
-          v-if="markdownData.name"
+          v-if="markdownData1.name"
           style="margin-top: 40px"
           class="markdown-floor"
         >
@@ -458,6 +475,31 @@ onMounted(() => {
             v-show="!modeType"
             class="edit-floor square"
             @click="EditFloor(true, 'markdown')"
+          >
+            <OIcon>
+              <IconEdit />
+            </OIcon>
+          </div>
+        </div> -->
+        <div
+          v-show="!modeType && !pageData.has('markdown')"
+          class="add-floor square"
+          @click="addFloor('markdown1')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="markdownData.name" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData"
+            :is-edit-style="isEditDiglogVisiable"
+            @handle-del="toggleDelDlg(true)"
+          />
+          <div
+            v-show="!modeType"
+            class="edit-floor square"
+            @click="EditFloor(true, 'markdown1')"
           >
             <OIcon>
               <IconEdit />
@@ -484,16 +526,16 @@ onMounted(() => {
             </OIcon>
           </div>
         </div>
-        <!-- <div
-          v-show="!modeType && !pageData.has('markdown')"
+        <div
+          v-show="!modeType && !pageData.has('markdown1')"
           class="add-floor square"
-          @click="addFloor('markdown/1')"
+          @click="addFloor('markdown1')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
         </div>
-        <div class="markdown-floor">
+        <div v-if="markdownData1.name" class="markdown-floor">
           <MarkdownEdit
             v-model="markdownData"
             :is-edit-style="isEditDiglogVisiable"
@@ -502,13 +544,13 @@ onMounted(() => {
           <div
             v-show="!modeType"
             class="edit-floor square"
-            @click="EditFloor(true, 'markdown/1')"
+            @click="EditFloor(true, 'markdown1')"
           >
             <OIcon>
               <IconEdit />
             </OIcon>
           </div>
-        </div> -->
+        </div>
         <div v-if="memberList.length" class="member">
           <h2>
             <span class="title-bg">{{
@@ -763,6 +805,7 @@ onMounted(() => {
       class="edit-dialog"
       :show-close="false"
       width="100%"
+      @open="handleChangeEditDialog()"
       @close="isEditVisiable = ''"
     >
       <SigMeeting
@@ -777,7 +820,7 @@ onMounted(() => {
         :is-edit-style="isEditDiglogVisiable"
       ></SigIntroduction>
       <MarkdownEdit
-        v-if="isEditVisiable === 'markdown'"
+        v-if="isEditVisiable.includes('markdown')"
         v-model="markdownData"
         :is-edit-style="isEditDiglogVisiable"
         @handle-del="toggleDelDlg(true)"
@@ -956,6 +999,7 @@ onMounted(() => {
       }
     }
     .markdown-floor {
+      margin-top: 40px;
       position: relative;
       z-index: 11;
       h2 {

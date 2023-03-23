@@ -58,7 +58,10 @@ function onBlurEvent() {
 }
 </script>
 <template>
-  <div class="markdown-edit editable-floor">
+  <div
+    class="markdown-edit editable-floor"
+    :class="isEditStyle ? 'edit-style' : ''"
+  >
     <div class="markdown-title" @click="hanleChangePreview('title', true)">
       <h2 class="title" :class="isEditStyle ? 'is-edit' : ''">
         <span class="title-bg">
@@ -140,6 +143,13 @@ function onBlurEvent() {
 .el-dialog {
   background-color: var(--o-color-bg1);
 }
+.edit-style {
+  .markdown-body {
+    .markdown-main {
+      max-height: 586px;
+    }
+  }
+}
 .del-dox {
   cursor: pointer;
   position: absolute;
@@ -191,7 +201,6 @@ function onBlurEvent() {
   .markdown-main {
     padding: 16px;
     border: 1px solid transparent;
-    max-height: 586px;
     height: 100%;
     overflow: auto;
     &::-webkit-scrollbar-track {
