@@ -20,15 +20,7 @@ interface EditData {
 
 const router = useRouter();
 
-const editData = ref([
-  {
-    siteName: 'sig-Open-OpenDesign',
-    type: 'sig',
-    locale: 'zh',
-    path: 'https://www.openeuler.org/zh/sig/sig-detail/?name=sig-OpenDesign',
-    updated_at: '2023-3-08',
-  },
-]);
+const editData = ref<EditData[]>([]);
 const total = ref(0);
 const pageSize = ref(10);
 const currentPage = ref(1);
@@ -43,14 +35,17 @@ const pageNameList = ref<string[]>([]);
 const pageTypeList = ref<string[]>([]);
 pageNameList.value = [];
 pageTypeList.value = [];
-editData.value.forEach((item) => {
-  if (!pageNameList.value.includes(item.siteName)) {
-    pageNameList.value.push(item.siteName);
-  }
-  if (!pageTypeList.value.includes(item.type)) {
-    pageTypeList.value.push(item.type);
-  }
-});
+
+function filterOption() {
+  editData.value.forEach((item) => {
+    if (!pageNameList.value.includes(item.siteName)) {
+      pageNameList.value.push(item.siteName);
+    }
+    if (!pageTypeList.value.includes(item.type)) {
+      pageTypeList.value.push(item.type);
+    }
+  });
+}
 
 const optionQuery = reactive({
   siteName: '',
@@ -95,11 +90,11 @@ function getPageData(isFirstGet: boolean) {
         });
       }
     } else {
-      // editData.value = [];
+      editData.value = [];
     }
   });
 }
-
+getPageData(true);
 watch(
   () => optionQuery,
   () => {
@@ -108,7 +103,6 @@ watch(
   },
   {
     deep: true,
-    immediate: true,
   }
 );
 </script>
@@ -220,6 +214,14 @@ watch(
       align-items: center;
       .select-label {
         margin-right: 24px;
+      }
+      :deep(.el-select) {
+        .el-input__wrapper:not(.is-focus) {
+          box-shadow: var(--o-shadow-l1);
+        }
+        .el-input__prefix-inner {
+          color: var(--o-color-neutral8);
+        }
       }
     }
   }
