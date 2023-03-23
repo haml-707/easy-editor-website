@@ -438,7 +438,7 @@ onMounted(() => {
         </div>
 
         <div
-          v-if="markdownData.name && !(isEditVisiable === 'markdown')"
+          v-if="markdownData.name"
           style="margin-top: 40px"
           class="markdown-floor"
         >

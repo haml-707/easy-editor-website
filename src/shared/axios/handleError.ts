@@ -7,6 +7,12 @@ export default (err: AxiosError) => {
       err.code = '';
       err.message = '有response但没有response.status的情况';
     }
+    if (response?.status === 401) {
+      console.log(8888);
+
+      window.location.href = `/zh/404`;
+    }
+
     err.code = String(response.status);
     switch (response && response.status) {
       case 200:
@@ -17,7 +23,7 @@ export default (err: AxiosError) => {
         break;
       case 401:
         err.message = '未授权，请重新登录(401)';
-        break;
+
       case 403:
         err.message = '拒绝访问(403)';
         break;

@@ -1,8 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import NotFound from '@/assets/common/404/404.png';
+</script>
 
 <template>
   <div class="nofound">
-    <p class="nofound-text">暂无数据</p>
+    <img :src="NotFound" class="nofound-img" alt="" />
+    <p class="nofound-text">页面不存在或无权限访问</p>
   </div>
 </template>
 
@@ -16,6 +19,7 @@
   color: var(--o-color-text1);
   padding: var(--o-spacing-h2) 0;
   min-height: calc(100vh - 339px);
+  background-color: var(--o-color-bg2);
   .nofound-text {
     margin-top: var(--o-spacing-h5);
     font-size: var(--o-font-size-h7);

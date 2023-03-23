@@ -1,11 +1,6 @@
-import {
-  createRouter,
-  createWebHistory,
-  RouteRecordRaw,
-  useRoute,
-} from 'vue-router';
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useLangStore } from '@/stores';
-import { getUserAuth, isLogined } from '@/shared/login';
+import { getUserAuth } from '@/shared/login';
 import { getUrlParam } from '@/shared/utils';
 
 export const routes: RouteRecordRaw[] = [
@@ -27,6 +22,12 @@ export const routes: RouteRecordRaw[] = [
     name: 'edit',
     alias: '/en/edit/:path/:name',
     component: () => import('@/views/sig/TheSig.vue'),
+  },
+  {
+    path: '/zh/404',
+    name: '404',
+    alias: '/en/404',
+    component: () => import('@/NotFound.vue'),
   },
 ];
 
@@ -55,6 +56,8 @@ router.beforeEach(async (to, from, next) => {
   } else {
     console.log(777);
     if (to.fullPath.includes('login')) {
+      console.log(777);
+
       next();
     } else {
       console.log(777);

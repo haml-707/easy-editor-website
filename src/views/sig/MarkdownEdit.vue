@@ -125,7 +125,11 @@ function onBlurEvent() {
       </div>
     </div>
   </div>
-  <div v-show="isEditStyle" class="del-dox" @click="delFloor"></div>
+  <div
+    v-show="isEditStyle && usePageData().pageData.get('markdown')"
+    class="del-dox"
+    @click="delFloor"
+  ></div>
 </template>
 
 <style lang="scss">
