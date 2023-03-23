@@ -35,9 +35,13 @@ const previewShown = ref(true);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (isFallback) {
-    tempData.value = JSON.parse(
-      JSON.stringify(usePageData().tempData.get('introduction'))
-    );
+    try {
+      tempData.value = JSON.parse(
+        JSON.stringify(usePageData().tempData.get('introduction'))
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
   if (!previewShown.value) {
     nextTick(() => {
@@ -46,7 +50,11 @@ function hanleChangePreview(val: boolean, isFallback?: boolean) {
   }
   previewShown.value = val;
 }
-
+function onBlurEvent() {
+  setTimeout(() => {
+    hanleChangePreview(false);
+  }, 100);
+}
 const route = useRoute();
 const sigDetailName = ref(route.params.name as string);
 </script>
@@ -71,7 +79,7 @@ const sigDetailName = ref(route.params.name as string);
           placeholder="输入markdown编辑页面"
           maxlength="1000"
           type="textarea"
-          @blur="hanleChangePreview(false)"
+          @blur="onBlurEvent"
           @focus="hanleChangePreview(true)"
         >
         </el-input>

@@ -33,6 +33,13 @@ const tempData = computed({
 });
 function hanleChangePreview(val: string, isFallback: boolean) {
   if (!isFallback) {
+    try {
+      tempData.value[val] = JSON.parse(
+        JSON.stringify(usePageData().tempData.get('markdown')[val])
+      );
+    } catch (error) {
+      console.log(error);
+    }
     tempData.value[val] = JSON.parse(
       JSON.stringify(usePageData().tempData.get('markdown')[val])
     );
@@ -46,6 +53,11 @@ function hanleChangePreview(val: string, isFallback: boolean) {
 }
 function delFloor() {
   emit('handle-del');
+}
+function onBlurEvent() {
+  setTimeout(() => {
+    hanleChangePreview('', true);
+  }, 100);
 }
 </script>
 <template>
@@ -94,7 +106,7 @@ function delFloor() {
           placeholder="输入markdown编辑页面"
           maxlength="10000"
           type="textarea"
-          @blur="hanleChangePreview('', true)"
+          @blur="onBlurEvent"
           @focus="hanleChangePreview('content', true)"
         >
         </el-input>

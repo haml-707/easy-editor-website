@@ -59,10 +59,17 @@ const tempData = computed({
 const previewShown = ref(true);
 
 async function hanleChangePreview(val: boolean, isFallback?: boolean) {
+  console.log(6);
+  console.log(isFallback);
+
   if (isFallback) {
-    tempData.value = JSON.parse(
-      JSON.stringify(usePageData().tempData.get('meeting'))
-    );
+    try {
+      tempData.value = JSON.parse(
+        JSON.stringify(usePageData().tempData.get('meeting'))
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
   if (!previewShown.value) {
     nextTick(() => {
@@ -70,6 +77,12 @@ async function hanleChangePreview(val: boolean, isFallback?: boolean) {
     });
   }
   previewShown.value = val;
+}
+
+function onBlurEvent() {
+  setTimeout(() => {
+    hanleChangePreview(false);
+  }, 100);
 }
 
 const { t } = useI18n();
@@ -255,7 +268,7 @@ const watchData = watch(
                 placeholder="输入markdown编辑页面"
                 maxlength="1000"
                 type="textarea"
-                @blur="hanleChangePreview(false)"
+                @blur="onBlurEvent"
                 @focus="hanleChangePreview(true)"
               >
               </el-input>

@@ -17,5 +17,5 @@ export default {
   CONFIRM_DEL2: '删除',
   CONFIRM_DEL3: '本楼层？',
   MARKDOWN_TEMPLATE:
-    '# 一级标题\n## 二级标题\n### 三级标题\n#### 四级标题\n\n**粗体**\n\n*斜体*\n\n~~删除线~~\n- 无序列表\n1. 有序列表\n[链接](https://www.openeuler.org/zh/)\n\n![Description](https://www.openeuler.org/assets/img-list1.6b3ad842.jpg)\n',
+    '# 一级标题\n## 二级标题\n### 三级标题\n#### 四级标题\n\n**粗体**\n\n*斜体*\n\n~~删除线~~\n- 无序列表\n1. 有序列表\n\n[链接](https://www.openeuler.org/zh/)\n\n![Description](https://www.openeuler.org/assets/logo.c7c57318.svg)\n',
 };

@@ -165,6 +165,8 @@ function saveData(name: string) {
   });
 }
 function creatFloor(name: string) {
+  console.log(name);
+
   if (pageData.value.has(name)) {
     saveData(name);
   } else {
@@ -233,9 +235,13 @@ watch(
 function handleCancel() {
   isEditDiglogVisiable.value = false;
   isEditVisiable.value;
-  dataMap[isEditVisiable.value as keyof typeof dataMap].value = JSON.parse(
-    JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
-  );
+  try {
+    dataMap[isEditVisiable.value as keyof typeof dataMap].value = JSON.parse(
+      JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
+    );
+  } catch (error) {
+    console.log(error);
+  }
 }
 watch(
   () => modeType.value,
@@ -455,7 +461,7 @@ onMounted(() => {
             </OIcon>
           </div>
         </div>
-        <div class="meeting" v-if="locale === 'zh'">
+        <div v-if="locale === 'zh'" class="meeting">
           <SigMeeting
             v-if="sigMeetingData.tableData"
             v-model="meetingData"
