@@ -97,9 +97,10 @@ const sigDetailName = ref(route.params.name as string);
       <div v-if="isEditStyle && previewShown" class="icon-box">
         <OIcon>
           <IconDone @click="hanleChangePreview(false)" />
+          <span class="save">保存修改</span>
         </OIcon>
         <OIcon @click="hanleChangePreview(false, true)">
-          <IconClose />
+          <IconClose /> <span class="close">放弃修改</span>
         </OIcon>
       </div>
     </div>
@@ -147,17 +148,36 @@ const sigDetailName = ref(route.params.name as string);
   display: flex;
   flex-direction: column;
   .o-icon {
+    position: relative;
     cursor: pointer;
     // TODO:
     box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
     font-size: 24px;
     border: 1px solid #555;
+
     &:hover {
       color: inherit;
+      span {
+        display: block;
+      }
     }
     &:first-child {
       background-color: var(--o-color-brand1);
       color: var(--o-color-text2);
+    }
+    .save,
+    .close {
+      display: none;
+      position: absolute;
+      transform: translate(100%, -50%);
+      color: #555;
+      width: max-content;
+      right: -8px;
+      top: 50%;
+      font-size: var(--o-font-size-tip);
+      padding: 4px 8px;
+      background-color: var(--o-color-bg2);
+      box-shadow: var(--o-shadow-1);
     }
   }
 }

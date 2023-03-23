@@ -269,6 +269,7 @@ const watchData = watch(
                 maxlength="1000"
                 show-word-limit
                 type="textarea"
+                @blur="onBlurEvent"
                 @focus="hanleChangePreview(true)"
               >
               </el-input>
@@ -648,13 +649,6 @@ h2 {
   cursor: pointer;
   font-size: var(--o-font-size-h7);
   transition: color 0.2s;
-  &:hover {
-    // color: var(--o-color-brand1);
-    // svg {
-    //   color: var(--o-color-brand2);
-    //   fill: var(--o-color-brand2);
-    // }
-  }
 }
 .markdown-main {
   position: relative;
