@@ -36,16 +36,16 @@ const pageTypeList = ref<string[]>([]);
 pageNameList.value = [];
 pageTypeList.value = [];
 
-function filterOption() {
-  editData.value.forEach((item) => {
-    if (!pageNameList.value.includes(item.siteName)) {
-      pageNameList.value.push(item.siteName);
-    }
-    if (!pageTypeList.value.includes(item.type)) {
-      pageTypeList.value.push(item.type);
-    }
-  });
-}
+// function filterOption() {
+//   editData.value.forEach((item) => {
+//     if (!pageNameList.value.includes(item.siteName)) {
+//       pageNameList.value.push(item.siteName);
+//     }
+//     if (!pageTypeList.value.includes(item.type)) {
+//       pageTypeList.value.push(item.type);
+//     }
+//   });
+// }
 
 const optionQuery = reactive({
   siteName: '',

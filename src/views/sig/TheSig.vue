@@ -190,8 +190,8 @@ function creatFloor(name: string) {
           content: markdownData.value.content,
           title: markdownData.value.title,
           description: markdownData.value.description,
+          name: name,
         });
-        console.log(markdownData.value.name);
       }
     });
   }
@@ -214,6 +214,8 @@ function toggleDelDlg(val: boolean) {
 watch(
   () => pageData.value,
   () => {
+    // console.log(pageData.value.get('markdown'));
+
     markdownData.value = pageData.value.get('markdown') || {
       content: t('edit.MARKDOWN_TEMPLATE'),
       title: '',

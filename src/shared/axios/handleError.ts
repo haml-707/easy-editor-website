@@ -8,8 +8,6 @@ export default (err: AxiosError) => {
       err.message = '有response但没有response.status的情况';
     }
     if (response?.status === 401) {
-      console.log(8888);
-
       window.location.href = `/zh/404`;
     }
 
