@@ -7,7 +7,8 @@ export default (err: AxiosError) => {
       err.code = '';
       err.message = '有response但没有response.status的情况';
     }
-    if (response?.status === 401) {
+
+    if (response?.status === 401 && import.meta.env.VITE_IS_DEV === 'true') {
       window.location.href = `/zh/404`;
     }
 

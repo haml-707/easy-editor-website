@@ -59,9 +59,6 @@ const tempData = computed({
 const previewShown = ref(true);
 
 async function hanleChangePreview(val: boolean, isFallback?: boolean) {
-  console.log(6);
-  console.log(isFallback);
-
   if (isFallback) {
     try {
       tempData.value = JSON.parse(
@@ -264,9 +261,9 @@ const watchData = watch(
                 v-model="tempData.content"
                 :autofocus="true"
                 :readonly="!isEditStyle"
-                :autosize="{ minRows: 2, maxRows: 3 }"
+                :autosize="{ minRows: 2, maxRows: 20 }"
                 placeholder="输入markdown编辑页面"
-                maxlength="1000"
+                maxlength="200"
                 show-word-limit
                 type="textarea"
                 @blur="onBlurEvent"
@@ -291,14 +288,19 @@ const watchData = watch(
                 <IconClose /> <span class="close">放弃修改</span>
               </OIcon>
             </div>
-            <OButton class="view-history" animation type="text"
-              >查看历史会议纪要
-              <template #suffixIcon>
-                <OIcon>
-                  <IconArrowRight></IconArrowRight>
-                </OIcon>
-              </template>
-            </OButton>
+            <a
+              :href="`https://etherpad.openeuler.org/p/${$route.params.name}`"
+              target="_blank"
+            >
+              <OButton class="view-history" animation type="text"
+                >查看历史会议纪要
+                <template #suffixIcon>
+                  <OIcon>
+                    <IconArrowRight></IconArrowRight>
+                  </OIcon>
+                </template>
+              </OButton>
+            </a>
           </div>
         </div>
       </div>
@@ -508,6 +510,18 @@ h2 {
   textarea {
     padding: 16px;
     min-height: 56px !important;
+    &::-webkit-scrollbar-track {
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background: #ccc;
+    }
     &[readonly] {
       min-height: 21px !important;
       cursor: text;

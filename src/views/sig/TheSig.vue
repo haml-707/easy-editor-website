@@ -799,6 +799,18 @@ onMounted(() => {
   </AppEditTemplate>
 </template>
 <style lang="scss" scoped>
+.en {
+  .sig-detail .content h2 {
+    .title-text {
+      display: none;
+    }
+    .title-bg {
+      display: inline-block;
+      padding-top: 16px;
+      color: var(--o-color-text1) !important;
+    }
+  }
+}
 .danger1 {
   color: #e02020;
 }

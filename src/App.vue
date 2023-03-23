@@ -34,7 +34,7 @@ watch(
 
 <template>
   <header><AppHeader /></header>
-  <main :class="isEditPage ? 'edit-page' : ''">
+  <main :class="[isEditPage ? 'edit-page' : '', locale]">
     <component
       :is="isEditPage ? EditHeader : EditTextTitle"
       :title="t('edit.TITLE')"
