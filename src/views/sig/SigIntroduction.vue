@@ -80,6 +80,7 @@ const sigDetailName = ref(route.params.name as string);
           :autosize="{ minRows: 2, maxRows: 20 }"
           placeholder="输入markdown编辑页面"
           maxlength="1000"
+          show-word-limit
           type="textarea"
           @blur="onBlurEvent"
           @focus="hanleChangePreview(true)"

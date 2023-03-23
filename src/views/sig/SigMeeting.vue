@@ -267,8 +267,8 @@ const watchData = watch(
                 :autosize="{ minRows: 2, maxRows: 3 }"
                 placeholder="输入markdown编辑页面"
                 maxlength="1000"
+                show-word-limit
                 type="textarea"
-                @blur="onBlurEvent"
                 @focus="hanleChangePreview(true)"
               >
               </el-input>
@@ -284,9 +284,10 @@ const watchData = watch(
             <div v-if="isEditStyle && previewShown" class="icon-box">
               <OIcon>
                 <IconDone @click="hanleChangePreview(false)" />
+                <span class="save">保存修改</span>
               </OIcon>
               <OIcon @click="hanleChangePreview(false, true)">
-                <IconClose />
+                <IconClose /> <span class="close">放弃修改</span>
               </OIcon>
             </div>
             <OButton class="view-history" animation type="text"
@@ -545,7 +546,13 @@ h2 {
     display: flex;
     flex-direction: column;
     .o-icon {
+      position: relative;
       cursor: pointer;
+      &:hover {
+        span {
+          display: block;
+        }
+      }
 
       // TODO:
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
@@ -558,6 +565,20 @@ h2 {
         background-color: var(--o-color-brand1);
         color: var(--o-color-text2);
       }
+    }
+    .save,
+    .close {
+      display: none;
+      position: absolute;
+      transform: translate(100%, -50%);
+      color: #555;
+      width: max-content;
+      right: -8px;
+      top: 50%;
+      font-size: var(--o-font-size-tip);
+      padding: 4px 8px;
+      background-color: var(--o-color-bg2);
+      box-shadow: var(--o-shadow-1);
     }
   }
 }
@@ -648,6 +669,7 @@ h2 {
   .communication-info {
     max-width: 456px;
     width: 100%;
+    background-color: var(--o-color-bg2);
     @media screen and (max-width: 768px) {
       max-width: 100%;
     }
