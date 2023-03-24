@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import {
   ref,
+  Ref,
   nextTick,
   onMounted,
   computed,
   reactive,
   PropType,
   watch,
+  inject,
 } from 'vue';
 
 import { isValidKey, isBrowser } from '@/shared/utils';
@@ -41,10 +43,11 @@ const props = defineProps({
       return {};
     },
   },
-  isEditStyle: {
-    type: Boolean,
-    default: false,
-  },
+});
+
+const modeType = inject('modeType') as Ref<boolean>;
+const isEditStyle = computed(() => {
+  return !modeType.value;
 });
 
 const textareaRef = ref();
@@ -56,7 +59,7 @@ const tempData = computed({
   },
 });
 
-const previewShown = ref(true);
+const previewShown = ref(false);
 
 async function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (isFallback) {
@@ -455,18 +458,9 @@ const watchData = watch(
         </div>
       </div>
     </div>
-    <div v-if="isEditStyle" class="edit-mask"></div>
   </div>
 </template>
 <style lang="scss" scoped>
-.edit-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba($color: #fff, $alpha: 0.72);
-}
 @mixin title {
   text-align: center;
   position: relative;
@@ -537,8 +531,11 @@ h2 {
   }
 }
 .border {
+  transition: all 0.3s;
+  //TODO:
   &:hover {
     border: 1px solid var(--o-color-brand1);
+    box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
   }
 }
 .meeting-tip {
@@ -549,14 +546,14 @@ h2 {
   position: relative;
   // max-height: 80px;
   .edit-box {
-    z-index: 1;
+    z-index: 11;
   }
   .icon-box {
     position: absolute;
     top: 0;
     right: -48px;
     gap: 8px 0;
-    z-index: 1;
+    z-index: 12;
 
     display: flex;
     flex-direction: column;

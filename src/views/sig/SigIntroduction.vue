@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue';
+import { computed, inject, Ref, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePageData } from '@/stores';
 
@@ -16,10 +16,10 @@ const props = defineProps({
       return {};
     },
   },
-  isEditStyle: {
-    type: Boolean,
-    default: false,
-  },
+});
+const modeType = inject('modeType') as Ref<boolean>;
+const isEditStyle = computed(() => {
+  return !modeType.value;
 });
 
 const textareaRef = ref();
@@ -31,12 +31,10 @@ const tempData = computed({
   },
 });
 
-const previewShown = ref(true);
+const previewShown = ref(false);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (isFallback) {
-    console.log(isFallback);
-
     try {
       tempData.value = JSON.parse(
         JSON.stringify(usePageData().tempData.get('introduction'))
@@ -77,7 +75,7 @@ const sigDetailName = ref(route.params.name as string);
           ref="textareaRef"
           v-model="tempData.content"
           :readonly="!isEditStyle"
-          :autosize="{ minRows: 2, maxRows: 20 }"
+          :autosize="{ minRows: 2, maxRows: 23 }"
           placeholder="输入markdown编辑页面"
           maxlength="1000"
           show-word-limit
@@ -104,22 +102,14 @@ const sigDetailName = ref(route.params.name as string);
         </OIcon>
       </div>
     </div>
-    <div v-if="isEditStyle" class="edit-mask"></div>
   </div>
 </template>
 
 <style lang="scss">
-.edit-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba($color: #fff, $alpha: 0.72);
-}
 .border {
   &:hover {
     border: 1px solid var(--o-color-brand1);
+    box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
   }
 }
 @mixin section-box {
@@ -138,6 +128,22 @@ const sigDetailName = ref(route.params.name as string);
 }
 .el-dialog {
   background-color: var(--o-color-bg1);
+}
+.edit-box {
+  textarea {
+    &::-webkit-scrollbar-track {
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background: #ccc;
+    }
+  }
 }
 .icon-box {
   position: absolute;

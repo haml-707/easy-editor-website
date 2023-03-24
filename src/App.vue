@@ -19,7 +19,7 @@ const langStore = useLangStore();
 const isEditPage = computed(() => {
   return route.name === 'edit';
 });
-const isPreviewMode = ref(false);
+const isPreviewMode = ref<boolean>(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
 }

@@ -14,7 +14,7 @@ import AppEditTemplate from '@/components/AppEditTemplate.vue';
 import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
 import AppPaginationMo from '@/components/AppPaginationMo.vue';
-import MdStatement from '@/components/MdStatement.vue';
+// import MdStatement from '@/components/MdStatement.vue';
 
 import { OButton } from '@/components/button';
 import { ElMessage } from 'element-plus';
@@ -35,7 +35,6 @@ import {
 import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
-import _ from 'lodash-es';
 
 let templateData = reactive<any>('');
 
@@ -72,18 +71,21 @@ const isDialogVisiable = ref(false);
 const isEditVisiable = ref('');
 const modeType: any = inject('modeType');
 
-const isEditDiglogVisiable = ref(isEditVisiable.value ? true : false);
-
-const EditFloor = function (type: boolean | string, name: string) {
-  if (type) {
-    templateData = _.cloneDeep(pageData.value.get(name));
-    isEditVisiable.value = name;
-  } else {
-    isEditVisiable.value = '';
-    pageData.value.set(name, templateData);
-  }
-};
+// const EditFloor = function (type: boolean | string, name: string) {
+//   if (type) {
+//     templateData = _.cloneDeep(pageData.value.get(name));
+//     isEditVisiable.value = name;
+//   } else {
+//     isEditVisiable.value = '';
+//     pageData.value.set(name, templateData);
+//   }
+// };
 const addFloor = function (name: string) {
+  pageData.value.set(name, {
+    content: t('edit.MARKDOWN_TEMPLATE'),
+    title: '',
+    name: name,
+  });
   isEditVisiable.value = name;
 };
 
@@ -91,7 +93,6 @@ const markdownData = ref(
   pageData.value.get('markdown') || {
     content: t('edit.MARKDOWN_TEMPLATE'),
     title: '',
-    description: '',
   }
 );
 
@@ -111,45 +112,40 @@ const introductData = ref(
 const markdownData1 = ref(
   pageData.value.get('markdown1') || {
     content: t('edit.MARKDOWN_TEMPLATE'),
-    description: '',
     title: '',
   }
 );
 const markdownData2 = ref(
   pageData.value.get('markdown2') || {
     content: t('edit.MARKDOWN_TEMPLATE'),
-    description: '',
     title: '',
   }
 );
 const markdownData3 = ref(
   pageData.value.get('markdown3') || {
     content: t('edit.MARKDOWN_TEMPLATE'),
-    description: '',
     title: '',
   }
 );
 const markdownData4 = ref(
   pageData.value.get('markdown4') || {
     content: t('edit.MARKDOWN_TEMPLATE'),
-    description: '',
     title: '',
   }
 );
 const markdownData5 = ref(
   pageData.value.get('markdown5') || {
     content: t('edit.MARKDOWN_TEMPLATE'),
-    description: '',
     title: '',
   }
 );
-const dataMap = {
+const dataMap: any = {
   markdown: markdownData,
-  markdown1: markdownData1,
-  markdown2: markdownData2,
-  markdown3: markdownData3,
-  markdown4: markdownData4,
-  markdown5: markdownData5,
+  ['markdown/1']: markdownData1,
+  ['markdown/2']: markdownData2,
+  ['markdown/3']: markdownData3,
+  ['markdown/4']: markdownData4,
+  ['markdown/5']: markdownData5,
   meeting: meetingData,
   introduction: introductData,
 };
@@ -177,39 +173,35 @@ function creatFloor(name: string) {
     saveData(name);
   } else {
     const param = {
-      content: markdownData.value.content,
+      content: dataMap[name].value.content,
       name: name,
       path: path.value,
-      title: markdownData.value.title,
-      description: markdownData.value.description,
+      title: dataMap[name].value.title,
       isPrivate: false,
       type: 'sig',
       locale: locale.value,
       contentType: 'text/plain',
     };
     createPage(param).then((res: any) => {
-      if (res.statusCode === 200) {
+      if (res?.statusCode === 200) {
         ElMessage({
           type: 'success',
           message: '创建成功',
         });
-        pageData.value.set(name, {
-          content: markdownData.value.content,
-          title: markdownData.value.title,
-          description: markdownData.value.description,
-          name: name,
-        });
+        pageData.value.set(name, param);
       }
     });
   }
   isEditVisiable.value = '';
 }
 function confirmDel() {
-  deleteFloor(path.value, isEditVisiable.value).then(() => {
-    ElMessage({
-      type: 'success',
-      message: '删除成功',
-    });
+  deleteFloor(path.value, isEditVisiable.value).then((res) => {
+    if (res.statusCode === 200) {
+      ElMessage({
+        type: 'success',
+        message: '删除成功',
+      });
+    }
     toggleDelDlg(false);
     pageData.value.delete(isEditVisiable.value);
     isEditVisiable.value = '';
@@ -225,12 +217,13 @@ watch(
     const tmpData = {
       content: '',
       title: '',
-      description: '',
+      name: '',
     };
     for (const key in dataMap) {
       if (pageData.value.has(key)) {
         if (key?.includes('markdown')) {
           tmpData.content = t('edit.MARKDOWN_TEMPLATE');
+          tmpData['name'] = key;
           dataMap[key as keyof typeof dataMap].value =
             pageData.value.get(key) || tmpData;
         } else {
@@ -245,14 +238,8 @@ watch(
   }
 );
 
-function handleChangeEditDialog() {
-  markdownData.value =
-    dataMap[isEditVisiable.value as keyof typeof dataMap].value;
-}
-
 function handleCancel() {
   isEditDiglogVisiable.value = false;
-  isEditVisiable.value;
   try {
     dataMap[isEditVisiable.value as keyof typeof dataMap].value = JSON.parse(
       JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
@@ -270,13 +257,7 @@ watch(
     }
   }
 );
-// isEditVisiable 字符串转布尔值
-watch(
-  () => isEditVisiable.value,
-  (val) => {
-    isEditDiglogVisiable.value = val ? true : false;
-  }
-);
+
 ////////
 
 const screenWidth = useWindowResize();
@@ -430,61 +411,12 @@ onMounted(() => {
       />
       <div class="content">
         <div class="introduction">
-          <SigIntroduction
-            v-model="introductData"
-            :is-edit-style="isEditDiglogVisiable"
-          ></SigIntroduction>
-          <div
-            v-show="!modeType"
-            class="edit-floor square first-floor"
-            @click="EditFloor(true, 'introduction')"
-          >
-            <OIcon>
-              <IconEdit />
-            </OIcon>
-          </div>
+          <SigIntroduction v-model="introductData"></SigIntroduction>
         </div>
-
-        <!-- 增加页面按钮 -->
-        <!-- <div
-          v-show="!modeType && !pageData.has('markdown')"
-          class="add-floor square"
-          @click="addFloor('markdown')"
-        >
-          <OIcon>
-            <IconAdd />
-          </OIcon>
-        </div>
-
-        <div
-          v-if="markdownData1.name"
-          style="margin-top: 40px"
-          class="markdown-floor"
-        >
-          <h2>
-            <span class="title-bg">{{ markdownData.description }}</span>
-            <span class="title-text">
-              {{ markdownData.title }}
-            </span>
-          </h2>
-          <MdStatement
-            class="markdown-main"
-            :statement="markdownData.content"
-          ></MdStatement>
-          <div
-            v-show="!modeType"
-            class="edit-floor square"
-            @click="EditFloor(true, 'markdown')"
-          >
-            <OIcon>
-              <IconEdit />
-            </OIcon>
-          </div>
-        </div> -->
         <div
           v-show="!modeType && !pageData.has('markdown')"
           class="add-floor square"
-          @click="addFloor('markdown1')"
+          @click="addFloor('markdown/1')"
         >
           <OIcon>
             <IconAdd />
@@ -493,18 +425,10 @@ onMounted(() => {
         <div v-if="markdownData.name" class="markdown-floor">
           <MarkdownEdit
             v-model="markdownData"
-            :is-edit-style="isEditDiglogVisiable"
+            markdown-id="markdown"
+            @auto-save="creatFloor('markdown')"
             @handle-del="toggleDelDlg(true)"
           />
-          <div
-            v-show="!modeType"
-            class="edit-floor square"
-            @click="EditFloor(true, 'markdown1')"
-          >
-            <OIcon>
-              <IconEdit />
-            </OIcon>
-          </div>
         </div>
         <div v-if="locale === 'zh'" class="meeting">
           <SigMeeting
@@ -516,40 +440,23 @@ onMounted(() => {
           <p v-else class="sig-introduction">
             {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
           </p>
-          <div
-            v-show="!modeType"
-            class="edit-floor square"
-            @click="EditFloor(true, 'meeting')"
-          >
-            <OIcon>
-              <IconEdit />
-            </OIcon>
-          </div>
         </div>
         <div
-          v-show="!modeType && !pageData.has('markdown1')"
+          v-show="!modeType && !pageData.has('markdown/2')"
           class="add-floor square"
-          @click="addFloor('markdown1')"
+          @click="addFloor('markdown/2')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
         </div>
-        <div v-if="markdownData1.name" class="markdown-floor">
+        <div v-if="markdownData2.name" class="markdown-floor">
           <MarkdownEdit
-            v-model="markdownData"
-            :is-edit-style="isEditDiglogVisiable"
+            v-model="markdownData2"
+            markdown-id="markdown/2"
+            @auto-save="creatFloor('markdown/2')"
             @handle-del="toggleDelDlg(true)"
           />
-          <div
-            v-show="!modeType"
-            class="edit-floor square"
-            @click="EditFloor(true, 'markdown1')"
-          >
-            <OIcon>
-              <IconEdit />
-            </OIcon>
-          </div>
         </div>
         <div v-if="memberList.length" class="member">
           <h2>
@@ -800,7 +707,7 @@ onMounted(() => {
         >
       </template>
     </el-dialog>
-    <el-dialog
+    <!-- <el-dialog
       v-model="isEditDiglogVisiable"
       class="edit-dialog"
       :show-close="false"
@@ -822,7 +729,7 @@ onMounted(() => {
       <MarkdownEdit
         v-if="isEditVisiable.includes('markdown')"
         v-model="markdownData"
-        :is-edit-style="isEditDiglogVisiable"
+        :is-edit-style="modeType"
         @handle-del="toggleDelDlg(true)"
       />
       <template #footer>
@@ -838,7 +745,7 @@ onMounted(() => {
           }}</o-button
         >
       </template>
-    </el-dialog>
+    </el-dialog> -->
   </AppEditTemplate>
 </template>
 <style lang="scss" scoped>

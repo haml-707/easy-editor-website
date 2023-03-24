@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue';
+import { computed, ref, inject, Ref, nextTick } from 'vue';
 
 import { usePageData } from '@/stores';
 
@@ -7,6 +7,7 @@ import OIcon from '@/components/OIcon.vue';
 
 import IconDone from '~icons/app/icon-done.svg';
 import IconClose from '~icons/app/icon-close.svg';
+import _ from 'lodash-es';
 
 const props = defineProps({
   modelValue: {
@@ -19,11 +20,20 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  markdownId: {
+    type: String,
+    default: '',
+  },
+});
+
+const modeType = inject('modeType') as Ref<boolean>;
+const isEditStyle = computed(() => {
+  return !modeType.value;
 });
 const textareaRef = ref();
-const previewShown = ref('content');
+const previewShown = ref('');
 
-const emit = defineEmits(['update:modelValue', 'handle-del']);
+const emit = defineEmits(['update:modelValue', 'handle-del', 'auto-save']);
 
 const tempData = computed({
   get: () => props.modelValue,
@@ -32,10 +42,16 @@ const tempData = computed({
   },
 });
 function hanleChangePreview(val: string, isFallback: boolean) {
+  if (
+    JSON.stringify(usePageData().tempData.get(props.markdownId)) !==
+    JSON.stringify(usePageData().pageData.get(props.markdownId))
+  ) {
+    emit('auto-save');
+  }
   if (!isFallback) {
     try {
       tempData.value[val] = JSON.parse(
-        JSON.stringify(usePageData().tempData.get('markdown')[val])
+        JSON.stringify(usePageData().tempData.get(props.markdownId)[val])
       );
     } catch (error) {
       console.log(error);
@@ -58,27 +74,16 @@ function onBlurEvent() {
 }
 </script>
 <template>
-  <div
-    class="markdown-edit editable-floor"
-    :class="isEditStyle ? 'edit-style' : ''"
-  >
+  <div class="markdown-edit editable-floor">
     <div class="markdown-title" @click="hanleChangePreview('title', true)">
       <h2 class="title" :class="isEditStyle ? 'is-edit' : ''">
-        <span class="title-bg">
-          <el-input
-            v-model="tempData.description"
-            :readonly="!isEditStyle || previewShown !== 'title'"
-            maxlength="100"
-            placeholder="输入英文标题"
-          >
-          </el-input
-        ></span>
         <span class="title-text">
           <el-input
             v-model="tempData.title"
             :readonly="!isEditStyle || previewShown !== 'title'"
             placeholder="输入楼层标题"
             maxlength="100"
+            @blur="previewShown = ''"
           >
           </el-input>
         </span>
@@ -132,30 +137,16 @@ function onBlurEvent() {
       </div>
     </div>
   </div>
-  <div
-    v-show="isEditStyle && usePageData().pageData.get('markdown')"
-    class="del-dox"
-    @click="delFloor"
-  ></div>
+  <div v-show="isEditStyle" class="del-dox" @click="delFloor"></div>
 </template>
 
 <style lang="scss">
-.el-dialog {
-  background-color: var(--o-color-bg1);
-}
-.edit-style {
-  .markdown-body {
-    .markdown-main {
-      max-height: 586px;
-    }
-  }
-}
 .del-dox {
   cursor: pointer;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  right: 40px;
+  right: -140px;
   width: 48px;
   height: 48px;
   background-color: var(--o-color-bg2);
@@ -220,6 +211,7 @@ function onBlurEvent() {
   }
 }
 .border {
+  transition: all 0.3s;
   &:hover {
     border: 1px solid var(--o-color-brand1);
   }
