@@ -7,7 +7,6 @@ import OIcon from '@/components/OIcon.vue';
 
 import IconDone from '~icons/app/icon-done.svg';
 import IconClose from '~icons/app/icon-close.svg';
-import _ from 'lodash-es';
 
 const props = defineProps({
   modelValue: {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, inject, reactive, watch } from 'vue';
+import { computed, ref, onMounted, inject, watch } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -23,7 +23,6 @@ import IconEmail from '~icons/app/icon-mail.svg';
 import IconGitee from '~icons/app/icon-gitee.svg';
 import IconSearch from '~icons/app/icon-search.svg';
 import IconAdd from '~icons/app/icon-add.svg';
-import IconEdit from '~icons/app/icon-edit.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
 
 import {
@@ -35,8 +34,6 @@ import {
 import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
-
-let templateData = reactive<any>('');
 
 interface SIGLIST {
   group_name: string;
@@ -238,16 +235,16 @@ watch(
   }
 );
 
-function handleCancel() {
-  isEditDiglogVisiable.value = false;
-  try {
-    dataMap[isEditVisiable.value as keyof typeof dataMap].value = JSON.parse(
-      JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
-    );
-  } catch (error) {
-    console.log(error);
-  }
-}
+// function handleCancel() {
+//   isEditDiglogVisiable.value = false;
+//   try {
+//     dataMap[isEditVisiable.value as keyof typeof dataMap].value = JSON.parse(
+//       JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
+//     );
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 // 切换预览模式 清除编辑状态
 watch(
   () => modeType.value,
