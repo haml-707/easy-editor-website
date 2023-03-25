@@ -19,6 +19,7 @@
     "markdown-it": "^12.3.2",
     "markdown-it-anchor": "^8.6.4",
     "markdown-it-for-inline": "^0.1.1",
+    "markdown-it-sanitizer": "^0.4.3",
     "markdown-it-toc": "^1.1.0",
     "pinia": "^2.0.32",
     "prismjs": "^1.29.0",

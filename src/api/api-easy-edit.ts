@@ -53,9 +53,8 @@ export function getPageData(id: number) {
 export function modifyFloorData(params: any) {
   const url = `/api-edit/page?path=${params.path}&name=${params.name}`;
   const { headers } = getHeaderConfig();
-
   return request
-    .put(url, params, { headers, $ignoreLoading: true })
+    .put(url, params, { headers })
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);
@@ -100,7 +99,7 @@ export function getAllDataByPath(path: string) {
 
   const url = `/api-edit/page/all?path=${path}`;
   return request
-    .get(url, { headers, $ignoreLoading: true })
+    .get(url, { headers })
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);

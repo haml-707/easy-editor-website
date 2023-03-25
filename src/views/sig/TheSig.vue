@@ -87,13 +87,10 @@ const addFloor = async function (name: string) {
   dataMap[name].value['name'] = name;
   dataMap[name].value['content'] = t('edit.MARKDOWN_TEMPLATE');
   await creatFloor(name);
-  // pageData.value.set(name, {
-  //   content: t('edit.MARKDOWN_TEMPLATE'),
-  //   title: '',
-  //   name: name,
-  // });
   isEditVisiable.value = name;
 };
+
+pageData.value.get('markdown');
 
 const markdownData = ref(
   pageData.value.get('markdown') || {
@@ -227,23 +224,14 @@ function toggleDelDlg(val: boolean, name?: string) {
 watch(
   () => pageData.value,
   () => {
-    // TODO:删除 tmpData
     const tmpData = {
       content: '',
       title: '',
-      name: '',
     };
     for (const key in dataMap) {
       if (pageData.value.has(key)) {
-        if (key?.includes('markdown')) {
-          tmpData.content = t('edit.MARKDOWN_TEMPLATE');
-          tmpData['name'] = key;
-          dataMap[key as keyof typeof dataMap].value =
-            pageData.value.get(key) || tmpData;
-        } else {
-          dataMap[key as keyof typeof dataMap].value =
-            pageData.value.get(key) || tmpData;
-        }
+        dataMap[key as keyof typeof dataMap].value =
+          pageData.value.get(key) || tmpData;
       }
     }
   },
@@ -429,7 +417,7 @@ onMounted(() => {
             <IconAdd />
           </OIcon>
         </div>
-        <div v-if="markdownData.name" class="markdown-floor">
+        <div v-if="pageData.has('markdown')" class="markdown-floor">
           <MarkdownEdit
             v-model="markdownData"
             markdown-id="markdown"
@@ -458,7 +446,7 @@ onMounted(() => {
             <IconAdd />
           </OIcon>
         </div>
-        <div v-if="markdownData2.name" class="markdown-floor">
+        <div v-if="pageData.has('markdown2')" class="markdown-floor">
           <MarkdownEdit
             v-model="markdownData2"
             markdown-id="markdown2"

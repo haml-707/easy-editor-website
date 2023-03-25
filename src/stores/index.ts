@@ -24,17 +24,20 @@ export const usePageData = defineStore('edit-data', {
   },
   actions: {
     setPageData(data: any) {
-      if (data) {
+      console.log(data);
+
+      if (data?.length) {
         const mapData = new Map();
         for (let i = 0; i < data.length; i++) {
           mapData.set(data[i].name, data[i]);
         }
         this.pageData = mapData;
         this.tempData = _.cloneDeep(mapData);
+      } else {
+        this.pageData = new Map();
+        this.tempData = new Map();
+        console.log(this.pageData);
       }
-    },
-    setTempData(data: any) {
-      this.tempData = data;
     },
   },
 });

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Markdown from 'markdown-it';
 import { ref, watch } from 'vue';
-
+import MarkdownItSanitizer from 'markdown-it-sanitizer';
 const props = defineProps({
   statement: {
     type: String,
@@ -10,6 +10,8 @@ const props = defineProps({
 });
 
 const mkit = new Markdown({ html: true });
+
+mkit.use(MarkdownItSanitizer);
 
 const statementHtml = ref(mkit.render(props.statement));
 watch(

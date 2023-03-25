@@ -21,6 +21,11 @@ const path = ref(
 );
 
 const modeType = inject('modeType');
+
+//数据初始化
+usePageData().setPageData([]);
+console.log();
+
 getAllDataByPath(path.value).then((res) => {
   usePageData().setPageData(res.data);
 });
