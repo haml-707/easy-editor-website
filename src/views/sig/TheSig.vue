@@ -213,10 +213,10 @@ function confirmDel() {
         message: '删除成功',
       });
     }
-    toggleDelDlg(false);
     pageData.value.delete(isEditVisiable.value);
     dataMap[isEditVisiable.value].value.name = '';
     isEditVisiable.value = '';
+    toggleDelDlg(false);
   });
 }
 function toggleDelDlg(val: boolean, name?: string) {
@@ -252,16 +252,6 @@ watch(
   }
 );
 
-// function handleCancel() {
-//   isEditDiglogVisiable.value = false;
-//   try {
-//     dataMap[isEditVisiable.value as keyof typeof dataMap].value = JSON.parse(
-//       JSON.stringify(usePageData().tempData.get(isEditVisiable.value))
-//     );
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
 // 切换预览模式 清除编辑状态
 watch(
   () => modeType.value,
@@ -433,7 +423,7 @@ onMounted(() => {
         <div
           v-show="!modeType && !pageData.has('markdown')"
           class="add-floor square"
-          @click="addFloor('markdown1')"
+          @click="addFloor('markdown')"
         >
           <OIcon>
             <IconAdd />
