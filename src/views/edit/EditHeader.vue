@@ -1,5 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+
+// import { useRoute } from 'vue-router';
+
 import { OButton } from '@/components/button';
 import OIcon from '@/components/OIcon.vue';
 
@@ -10,6 +13,7 @@ const isPreviewMode = ref(false);
 function handleChange() {
   emit('switch-change', isPreviewMode.value);
 }
+handleChange();
 </script>
 <template>
   <div class="edit-dispaly-zone">

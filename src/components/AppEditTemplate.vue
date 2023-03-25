@@ -2,18 +2,22 @@
 import { inject, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { useI18n } from 'vue-i18n';
+
 import AppFooter from '@/components/AppFooter.vue';
 
 import { getAllDataByPath } from '@/api/api-easy-edit';
 import { usePageData } from '@/stores';
 import imgLogo from '@/assets/common/header/logo.png';
 
+const { locale } = useI18n();
+
 const route = useRoute();
 
 const sigDetailName = ref(route.params.name as string);
 
 const path = ref(
-  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
+  `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
 );
 
 const modeType = inject('modeType');

@@ -47,8 +47,9 @@ const { t, locale } = useI18n();
 const sigDetailName = ref(route.params.name as string);
 
 const path = ref(
-  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
+  `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
 );
+
 let params = {
   title: '介绍',
   description: '介绍',
@@ -138,11 +139,11 @@ const markdownData5 = ref(
 );
 const dataMap: any = {
   markdown: markdownData,
-  ['markdown/1']: markdownData1,
-  ['markdown/2']: markdownData2,
-  ['markdown/3']: markdownData3,
-  ['markdown/4']: markdownData4,
-  ['markdown/5']: markdownData5,
+  ['markdown1']: markdownData1,
+  ['markdown2']: markdownData2,
+  ['markdown3']: markdownData3,
+  ['markdown4']: markdownData4,
+  ['markdown5']: markdownData5,
   meeting: meetingData,
   introduction: introductData,
 };
@@ -413,7 +414,7 @@ onMounted(() => {
         <div
           v-show="!modeType && !pageData.has('markdown')"
           class="add-floor square"
-          @click="addFloor('markdown/1')"
+          @click="addFloor('markdown1')"
         >
           <OIcon>
             <IconAdd />
@@ -439,9 +440,9 @@ onMounted(() => {
           </p>
         </div>
         <div
-          v-show="!modeType && !pageData.has('markdown/2')"
+          v-show="!modeType && !pageData.has('markdown2') && locale === 'zh'"
           class="add-floor square"
-          @click="addFloor('markdown/2')"
+          @click="addFloor('markdown2')"
         >
           <OIcon>
             <IconAdd />
@@ -450,8 +451,8 @@ onMounted(() => {
         <div v-if="markdownData2.name" class="markdown-floor">
           <MarkdownEdit
             v-model="markdownData2"
-            markdown-id="markdown/2"
-            @auto-save="creatFloor('markdown/2')"
+            markdown-id="markdown2"
+            @auto-save="creatFloor('markdown2')"
             @handle-del="toggleDelDlg(true)"
           />
         </div>

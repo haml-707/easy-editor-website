@@ -43,7 +43,8 @@ const tempData = computed({
 function hanleChangePreview(val: string, isFallback: boolean) {
   if (
     JSON.stringify(usePageData().tempData.get(props.markdownId)) !==
-    JSON.stringify(usePageData().pageData.get(props.markdownId))
+      JSON.stringify(usePageData().pageData.get(props.markdownId)) &&
+    !val
   ) {
     emit('auto-save');
   }

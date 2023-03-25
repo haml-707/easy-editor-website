@@ -9,7 +9,7 @@ export default (err: AxiosError) => {
     }
 
     if (response?.status === 401 && import.meta.env.VITE_IS_DEV === 'false') {
-      // window.location.href = `/zh/404`;
+      window.location.href = `/zh/404`;
     }
 
     err.code = String(response.status);
