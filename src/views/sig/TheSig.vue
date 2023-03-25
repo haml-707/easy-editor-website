@@ -215,6 +215,7 @@ function confirmDel() {
     }
     toggleDelDlg(false);
     pageData.value.delete(isEditVisiable.value);
+    dataMap[isEditVisiable.value].value.name = '';
     isEditVisiable.value = '';
   });
 }
@@ -424,7 +425,10 @@ onMounted(() => {
       />
       <div class="content">
         <div class="introduction">
-          <SigIntroduction v-model="introductData"></SigIntroduction>
+          <SigIntroduction
+            v-model="introductData"
+            @auto-save="creatFloor('introduction')"
+          ></SigIntroduction>
         </div>
         <div
           v-show="!modeType && !pageData.has('markdown')"
@@ -449,6 +453,7 @@ onMounted(() => {
             v-model="meetingData"
             class="calender-box"
             :table-data="sigMeetingData.tableData"
+            @auto-save="creatFloor('meeting')"
           />
           <p v-else class="sig-introduction">
             {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}

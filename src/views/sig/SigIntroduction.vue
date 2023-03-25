@@ -23,7 +23,7 @@ const isEditStyle = computed(() => {
 });
 
 const textareaRef = ref();
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'auto-save']);
 const tempData = computed({
   get: () => props.modelValue,
   set: (val) => {
@@ -34,6 +34,13 @@ const tempData = computed({
 const previewShown = ref(false);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
+  if (
+    JSON.stringify(usePageData().tempData.get('introduction')) !==
+      JSON.stringify(usePageData().pageData.get('introduction')) &&
+    !val
+  ) {
+    emit('auto-save');
+  }
   if (isFallback) {
     try {
       tempData.value = JSON.parse(

@@ -83,7 +83,7 @@ function onBlurEvent() {
             :readonly="!isEditStyle || previewShown !== 'title'"
             placeholder="输入楼层标题"
             maxlength="100"
-            @blur="previewShown = ''"
+            @blur="hanleChangePreview('', true)"
           >
           </el-input>
         </span>
@@ -165,6 +165,7 @@ function onBlurEvent() {
 }
 :deep(.el-input) {
   .el-input__wrapper {
+    box-shadow: none !important;
     input {
       min-height: 56px !important;
       &[readonly] {
@@ -216,23 +217,13 @@ function onBlurEvent() {
     border: 1px solid var(--o-color-brand1);
   }
 }
-.is-edit {
-  .el-input__wrapper {
-    &:hover {
-      box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
-    }
-  }
-}
+
 .markdown-edit {
   .markdown-title {
     position: relative;
     .el-input {
-      .el-input__wrapper:not(.is-focus) {
+      .el-input__wrapper {
         box-shadow: none;
-      }
-      .is-focus {
-        background-color: var(--o-color-bg1);
-        box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
       }
     }
   }
@@ -250,7 +241,6 @@ function onBlurEvent() {
     .el-textarea {
       textarea {
         overflow: auto;
-        // box-sizing: content-box;
         padding: 16px;
         padding-right: 100px;
         &::-webkit-scrollbar-track {
@@ -306,6 +296,22 @@ function onBlurEvent() {
         padding: 4px 8px;
         background-color: var(--o-color-bg2);
         box-shadow: var(--o-shadow-1);
+      }
+    }
+  }
+}
+.markdown-title {
+  .is-edit {
+    .el-input {
+      .el-input__wrapper {
+        &:hover {
+          border: 1px solid var(--o-color-brand1);
+          box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+        }
+      }
+      .is-focus {
+        border: none !important;
+        box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
       }
     }
   }
