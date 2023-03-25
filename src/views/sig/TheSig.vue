@@ -83,10 +83,10 @@ const modeType: any = inject('modeType');
 //     pageData.value.set(name, templateData);
 //   }
 // };
-const addFloor = function (name: string) {
+const addFloor = async function (name: string) {
   dataMap[name].value['name'] = name;
   dataMap[name].value['content'] = t('edit.MARKDOWN_TEMPLATE');
-  creatFloor(name);
+  await creatFloor(name);
   // pageData.value.set(name, {
   //   content: t('edit.MARKDOWN_TEMPLATE'),
   //   title: '',
@@ -218,8 +218,10 @@ function confirmDel() {
     isEditVisiable.value = '';
   });
 }
-function toggleDelDlg(val: boolean) {
+function toggleDelDlg(val: boolean, name?: string) {
   isDialogVisiable.value = val;
+
+  isEditVisiable.value = name || '';
 }
 watch(
   () => pageData.value,
@@ -438,7 +440,7 @@ onMounted(() => {
             v-model="markdownData"
             markdown-id="markdown"
             @auto-save="creatFloor('markdown')"
-            @handle-del="toggleDelDlg(true)"
+            @handle-del="toggleDelDlg(true, 'markdown')"
           />
         </div>
         <div v-if="locale === 'zh'" class="meeting">
@@ -466,7 +468,7 @@ onMounted(() => {
             v-model="markdownData2"
             markdown-id="markdown2"
             @auto-save="creatFloor('markdown2')"
-            @handle-del="toggleDelDlg(true)"
+            @handle-del="toggleDelDlg(true, 'markdown2')"
           />
         </div>
         <div v-if="memberList.length" class="member">

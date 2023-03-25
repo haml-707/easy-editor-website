@@ -20,10 +20,9 @@ function getHeaderConfig() {
  * @return {Array}
  */
 export function createPage(params: any) {
-  const { headers } = getHeaderConfig();
   const url = '/api-edit/page';
   return request
-    .post(url, params, { headers, $ignoreLoading: true })
+    .post(url, params, getHeaderConfig())
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);
@@ -97,9 +96,11 @@ export function profileData(params: { siteName: string; type: string }) {
  * @return {Array}
  */
 export function getAllDataByPath(path: string) {
+  const { headers } = getHeaderConfig();
+
   const url = `/api-edit/page/all?path=${path}`;
   return request
-    .get(url, getHeaderConfig())
+    .get(url, { headers, $ignoreLoading: true })
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);
