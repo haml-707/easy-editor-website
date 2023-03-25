@@ -469,6 +469,7 @@ const watchData = watch(
     height: 30px;
   }
   .title-bg {
+    display: none;
     color: var(--o-color-neutral10);
     font-size: 40px;
     font-weight: 300;

@@ -20,9 +20,10 @@ function getHeaderConfig() {
  * @return {Array}
  */
 export function createPage(params: any) {
+  const { headers } = getHeaderConfig();
   const url = '/api-edit/page';
   return request
-    .post(url, params, getHeaderConfig())
+    .post(url, params, { headers, $ignoreLoading: true })
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);

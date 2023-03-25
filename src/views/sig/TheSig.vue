@@ -31,7 +31,12 @@ import {
   getSigRepositoryList,
   getSigList,
 } from '@/api/api-sig';
-import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
+import {
+  modifyFloorData,
+  deleteFloor,
+  createPage,
+  getAllDataByPath,
+} from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
 
@@ -79,11 +84,14 @@ const modeType: any = inject('modeType');
 //   }
 // };
 const addFloor = function (name: string) {
-  pageData.value.set(name, {
-    content: t('edit.MARKDOWN_TEMPLATE'),
-    title: '',
-    name: name,
-  });
+  dataMap[name].value['name'] = name;
+  dataMap[name].value['content'] = t('edit.MARKDOWN_TEMPLATE');
+  creatFloor(name);
+  // pageData.value.set(name, {
+  //   content: t('edit.MARKDOWN_TEMPLATE'),
+  //   title: '',
+  //   name: name,
+  // });
   isEditVisiable.value = name;
 };
 
@@ -155,13 +163,18 @@ function saveData(name: string) {
   params.name = name;
   params.path = path.value;
   modifyFloorData(params).then((res: any) => {
+    // if (res.statusCode === 200) {
+    //   ElMessage({
+    //     type: 'success',
+    //     message: '修改成功',
+    //   });
+    // }
+    // usePageData().tempData.set(name, usePageData().pageData.get(name));
     if (res.statusCode === 200) {
-      ElMessage({
-        type: 'success',
-        message: '修改成功',
+      getAllDataByPath(path.value).then((res) => {
+        usePageData().setPageData(res.data);
       });
     }
-    usePageData().tempData.set(name, usePageData().pageData.get(name));
     isEditVisiable.value = '';
   });
 }
@@ -786,6 +799,7 @@ onMounted(() => {
     height: 30px;
   }
   .title-bg {
+    display: none;
     color: var(--o-color-neutral10);
     font-size: 40px;
     font-weight: 300;

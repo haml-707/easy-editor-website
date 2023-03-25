@@ -127,7 +127,7 @@ function onBlurEvent() {
       ></MdStatement>
       <div v-if="previewShown === 'content' && isEditStyle" class="icon-box">
         <OIcon>
-          <IconDone @click="hanleChangePreview('', true)" />
+          <IconDone />
           <span class="save">保存修改</span>
         </OIcon>
         <OIcon @click="hanleChangePreview('content', false)">
@@ -328,6 +328,7 @@ function onBlurEvent() {
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
+    display: none;
     &:hover {
       z-index: 10;
     }
