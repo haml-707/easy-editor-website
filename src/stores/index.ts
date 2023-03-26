@@ -3,8 +3,8 @@ import _ from 'lodash-es';
 
 interface FloorData {
   name: string;
-  content_type: string;
-  description: string;
+  content_type?: string;
+  description?: string;
   title: string;
 }
 
