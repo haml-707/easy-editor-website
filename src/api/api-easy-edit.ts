@@ -54,7 +54,7 @@ export function modifyFloorData(params: any) {
   const url = `/api-edit/page?path=${params.path}&name=${params.name}`;
   const { headers } = getHeaderConfig();
   return request
-    .put(url, params, { headers })
+    .put(url, params, { headers, $ignoreLoading: true })
     .then((res: AxiosResponse) => res.data)
     .catch((e: any) => {
       console.error(e);

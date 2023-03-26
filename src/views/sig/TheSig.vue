@@ -14,7 +14,6 @@ import AppEditTemplate from '@/components/AppEditTemplate.vue';
 import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
 import AppPaginationMo from '@/components/AppPaginationMo.vue';
-// import MdStatement from '@/components/MdStatement.vue';
 
 import { OButton } from '@/components/button';
 import { ElMessage } from 'element-plus';
@@ -143,7 +142,7 @@ const markdownData5 = ref(
   }
 );
 const dataMap: any = {
-  markdown: markdownData,
+  ['markdown']: markdownData,
   ['markdown1']: markdownData1,
   ['markdown2']: markdownData2,
   ['markdown3']: markdownData3,
@@ -159,7 +158,9 @@ function saveData(name: string) {
   }
   params.name = name;
   params.path = path.value;
-  modifyFloorData(params).then((res: any) => {
+  // usePageData().tempData.set(name, usePageData().pageData.get(name));
+
+  modifyFloorData(params).then((res: { statusCode: number }) => {
     // if (res.statusCode === 200) {
     //   ElMessage({
     //     type: 'success',

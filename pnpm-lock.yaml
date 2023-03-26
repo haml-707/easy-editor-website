@@ -2,7 +2,6 @@ lockfileVersion: 5.4
 
 specifiers:
   '@kangc/v-md-editor': ^2.3.15
-  '@types/dompurify': ^3.0.0
   '@types/lodash-es': ^4.17.6
   '@types/node': ^18.14.2
   '@types/prismjs': ^1.26.0
@@ -12,7 +11,6 @@ specifiers:
   '@vue/eslint-config-typescript': ^11.0.2
   authing-js-sdk: ^4.23.39
   axios: ^1.3.4
-  dompurify: ^3.0.1
   element-plus: ^2.2.26
   eslint: ^8.35.0
   eslint-plugin-vue: ^9.9.0
@@ -41,10 +39,8 @@ specifiers:
 
 dependencies:
   '@kangc/v-md-editor': 2.3.15_vue@3.2.47
-  '@types/dompurify': 3.0.0
   authing-js-sdk: 4.23.39
   axios: 1.3.4
-  dompurify: 3.0.1
   element-plus: 2.2.32_vue@3.2.47
   lodash-es: 4.17.21
   markdown-it: 12.3.2
@@ -666,12 +662,6 @@ packages:
     resolution: {integrity: sha512-Ccy0NlLkzr0Ex2FKvh2X+OyERHXJ88XJ1MXtsI9y9fGexlaXaVTPzBCRBwIxFkORuOb+uBqeu+RqnpgYTEZRUQ==}
     dev: false
 
-  /@types/dompurify/3.0.0:
-    resolution: {integrity: sha512-EcSqmgm/xJwH8CcJPy9AHNypp/j58CYga3nWdl93/wLxX6OH+rSD3aAj75NQazcZd1YKHJ/pjNZ9qmgVajggwQ==}
-    dependencies:
-      '@types/trusted-types': 2.0.3
-    dev: false
-
   /@types/estree/1.0.0:
     resolution: {integrity: sha512-WulqXMDUTYAXCjZnk6JtIHPigp55cVtDgDrO2gHRwhyJto21+1zbVCtOYB2L1F9w4qCQ0rOGWBnBe0FNTiEJIQ==}
     dev: true
@@ -709,10 +699,6 @@ packages:
   /@types/semver/7.3.13:
     resolution: {integrity: sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==}
     dev: true
-
-  /@types/trusted-types/2.0.3:
-    resolution: {integrity: sha512-NfQ4gyz38SL8sDNrSixxU2Os1a5xcdFxipAFxYEuLUlvU2uDwS4NUpsImcf1//SlWItCVMMLiylsxbmNMToV/g==}
-    dev: false
 
   /@types/web-bluetooth/0.0.16:
     resolution: {integrity: sha512-oh8q2Zc32S6gd/j50GowEjKLoOVOwHP/bWVjKJInBwQqdOYMdPrf1oVlelTlyfFK3CKxL1uahMDAr+vy8T7yMQ==}
@@ -2162,10 +2148,6 @@ packages:
 
   /dompurify/2.3.5:
     resolution: {integrity: sha512-kD+f8qEaa42+mjdOpKeztu9Mfx5bv9gVLO6K9jRx4uGvh6Wv06Srn4jr1wPNY2OOUGGSKHNFN+A8MA3v0E0QAQ==}
-    dev: false
-
-  /dompurify/3.0.1:
-    resolution: {integrity: sha512-60tsgvPKwItxZZdfLmamp0MTcecCta3avOhsLgPZ0qcWt96OasFfhkeIRbJ6br5i0fQawT1/RBGB5L58/Jpwuw==}
     dev: false
 
   /eastasianwidth/0.2.0:

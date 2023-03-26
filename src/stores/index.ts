@@ -1,6 +1,13 @@
 import { defineStore } from 'pinia';
 import _ from 'lodash-es';
 
+interface FloorData {
+  name: string;
+  content_type: string;
+  description: string;
+  title: string;
+}
+
 // 语言
 export const useLangStore = defineStore('lang', {
   state: () => {
@@ -23,9 +30,7 @@ export const usePageData = defineStore('edit-data', {
     };
   },
   actions: {
-    setPageData(data: any) {
-      console.log(data);
-
+    setPageData(data: [FloorData]) {
       if (data?.length) {
         const mapData = new Map();
         for (let i = 0; i < data.length; i++) {
@@ -36,7 +41,6 @@ export const usePageData = defineStore('edit-data', {
       } else {
         this.pageData = new Map();
         this.tempData = new Map();
-        console.log(this.pageData);
       }
     },
   },
