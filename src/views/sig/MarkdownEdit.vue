@@ -34,18 +34,21 @@ const previewShown = ref('');
 
 const emit = defineEmits(['update:modelValue', 'handle-del', 'auto-save']);
 
+// computed
 const tempData = computed({
   get: () => props.modelValue,
   set: (val) => {
     emit('update:modelValue', val);
   },
 });
+
 function hanleChangePreview(val: string, isFallback: boolean) {
   if (
     JSON.stringify(usePageData().tempData.get(props.markdownId)) !==
       JSON.stringify(usePageData().pageData.get(props.markdownId)) &&
     !val
   ) {
+    // 内容有修改且和原数据不同自动保存
     emit('auto-save');
   }
   if (!isFallback) {

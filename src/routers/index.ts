@@ -46,23 +46,20 @@ router.beforeEach(async (to, from, next) => {
 
   if (getUserAuth().token) {
     if (to.fullPath.includes('login')) {
-      console.log(666);
       next({
-        path: getUrlParam('redirect') || '/',
+        path: getUrlParam('redirect').includes('404')
+          ? '/'
+          : getUrlParam('redirect') || '/',
       });
     } else {
       next();
     }
   } else {
-    console.log(777);
     if (to.fullPath.includes('login')) {
-      console.log(777);
-
       next();
     } else {
-      console.log(777);
       next({
-        path: `/zh/login`,
+        path: `/${langStore.lang}/login`,
         query: { redirect: to.fullPath },
       });
     }

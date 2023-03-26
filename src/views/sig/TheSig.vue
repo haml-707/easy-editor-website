@@ -89,40 +89,88 @@ const addFloor = async function (name: string) {
   isEditVisiable.value = name;
 };
 
-pageData.value.get('markdown');
+// const markdownData = computed(() => {
+//   return (
+//     pageData.value.get('markdown') || {
+//       content: t('edit.MARKDOWN_TEMPLATE'),
+//       title: '',
+//     }
+//   );
+// });
 
-const markdownData = ref(
-  pageData.value.get('markdown') || {
-    content: t('edit.MARKDOWN_TEMPLATE'),
-    title: '',
-  }
-);
+const markdownData = computed({
+  get: () =>
+    pageData.value.get('markdown1') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
 
-const meetingData = ref(
-  pageData.value.get('meeting') || {
-    content: '',
-    title: '',
-  }
-);
+// const meetingData = ref(
+//   pageData.value.get('meeting') || {
+//     content: '',
+//     title: '',
+//   }
+// );
 
-const introductData = ref(
-  pageData.value.get('introduction') || {
-    content: '',
-    title: '',
-  }
-);
-const markdownData1 = ref(
-  pageData.value.get('markdown1') || {
-    content: t('edit.MARKDOWN_TEMPLATE'),
-    title: '',
-  }
-);
-const markdownData2 = ref(
-  pageData.value.get('markdown2') || {
-    content: t('edit.MARKDOWN_TEMPLATE'),
-    title: '',
-  }
-);
+const meetingData = computed({
+  get: () =>
+    pageData.value.get('meeting') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+
+// const introductData = ref(
+//   pageData.value.get('introduction') || {
+//     content: '',
+//     title: '',
+//   }
+// );
+const introductData = computed({
+  get: () =>
+    pageData.value.get('introduction') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+
+const markdownData1 = computed({
+  get: () =>
+    pageData.value.get('markdown1') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+
+// const markdownData2 = ref(
+//   pageData.value.get('markdown2') || {
+//     content: t('edit.MARKDOWN_TEMPLATE'),
+//     title: '',
+//   }
+// );
+const markdownData2 = computed({
+  get: () =>
+    pageData.value.get('markdown2') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
 const markdownData3 = ref(
   pageData.value.get('markdown3') || {
     content: t('edit.MARKDOWN_TEMPLATE'),
@@ -158,8 +206,6 @@ function saveData(name: string) {
   }
   params.name = name;
   params.path = path.value;
-  // usePageData().tempData.set(name, usePageData().pageData.get(name));
-
   modifyFloorData(params).then((res: { statusCode: number }) => {
     // if (res.statusCode === 200) {
     //   ElMessage({
@@ -176,7 +222,8 @@ function saveData(name: string) {
     }
   });
 }
-// 新键楼层 如果存在 调用保存
+
+// 新键楼层 如果已存在 调用保存
 function creatFloor(name: string) {
   if (pageData.value.has(name)) {
     saveData(name);
@@ -219,27 +266,27 @@ function confirmDel() {
 }
 function toggleDelDlg(val: boolean, name?: string) {
   isDialogVisiable.value = val;
-
   isEditVisiable.value = name || '';
 }
-watch(
-  () => pageData.value,
-  () => {
-    const tmpData = {
-      content: '',
-      title: '',
-    };
-    for (const key in dataMap) {
-      if (pageData.value.has(key)) {
-        dataMap[key as keyof typeof dataMap].value =
-          pageData.value.get(key) || tmpData;
-      }
-    }
-  },
-  {
-    deep: true,
-  }
-);
+// 监听 pageData 变化，实时更新
+// watch(
+//   () => pageData.value,
+//   () => {
+//     const tmpData = {
+//       content: '',
+//       title: '',
+//     };
+//     for (const key in dataMap) {
+//       if (pageData.value.has(key)) {
+//         dataMap[key as keyof typeof dataMap].value =
+//           pageData.value.get(key) || tmpData;
+//       }
+//     }
+//   },
+//   {
+//     deep: true,
+//   }
+// );
 
 // 切换预览模式 清除编辑状态
 watch(
@@ -410,20 +457,20 @@ onMounted(() => {
           ></SigIntroduction>
         </div>
         <div
-          v-show="!modeType && !pageData.has('markdown')"
+          v-show="!modeType && !pageData.has('markdown1')"
           class="add-floor square"
-          @click="addFloor('markdown')"
+          @click="addFloor('markdown1')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
         </div>
-        <div v-if="pageData.has('markdown')" class="markdown-floor">
+        <div v-if="pageData.has('markdown1')" class="markdown-floor">
           <MarkdownEdit
             v-model="markdownData"
-            markdown-id="markdown"
-            @auto-save="creatFloor('markdown')"
-            @handle-del="toggleDelDlg(true, 'markdown')"
+            markdown-id="markdown1"
+            @auto-save="creatFloor('markdown1')"
+            @handle-del="toggleDelDlg(true, 'markdown1')"
           />
         </div>
         <div v-if="locale === 'zh'" class="meeting">
