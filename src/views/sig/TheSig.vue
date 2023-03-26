@@ -168,11 +168,11 @@ function saveData(name: string) {
     //   });
     // }
     // usePageData().tempData.set(name, usePageData().pageData.get(name));
-    if (res.statusCode === 200) {
-      getAllDataByPath(path.value).then((res) => {
-        usePageData().setPageData(res.data);
-      });
-    }
+    // if (res.statusCode === 200) {
+    //   getAllDataByPath(path.value).then((res) => {
+    //     usePageData().setPageData(res.data);
+    //   });
+    // }
     isEditVisiable.value = '';
   });
 }
