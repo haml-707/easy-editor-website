@@ -30,12 +30,7 @@ import {
   getSigRepositoryList,
   getSigList,
 } from '@/api/api-sig';
-import {
-  modifyFloorData,
-  deleteFloor,
-  createPage,
-  getAllDataByPath,
-} from '@/api/api-easy-edit';
+import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
 
@@ -79,17 +74,6 @@ const addFloor = async function (name: string) {
   await creatFloor(name);
   isEditVisiable.value = name;
 };
-
-const markdownData = computed({
-  get: () =>
-    pageData.value.get('markdown1') || {
-      content: '',
-      title: '',
-    },
-  set: (val) => {
-    val;
-  },
-});
 
 const meetingData = computed({
   get: () =>
@@ -164,26 +148,8 @@ const markdownData5 = computed({
     val;
   },
 });
-// const markdownData3 = ref(
-//   pageData.value.get('markdown3') || {
-//     content: t('edit.MARKDOWN_TEMPLATE'),
-//     title: '',
-//   }
-// );
-// const markdownData4 = ref(
-//   pageData.value.get('markdown4') || {
-//     content: t('edit.MARKDOWN_TEMPLATE'),
-//     title: '',
-//   }
-// );
-// const markdownData5 = ref(
-//   pageData.value.get('markdown5') || {
-//     content: t('edit.MARKDOWN_TEMPLATE'),
-//     title: '',
-//   }
-// );
+
 const dataMap: any = {
-  ['markdown']: markdownData,
   ['markdown1']: markdownData1,
   ['markdown2']: markdownData2,
   ['markdown3']: markdownData3,
@@ -231,6 +197,7 @@ function creatFloor(name: string) {
       locale: locale.value,
       contentType: 'text/plain',
     };
+
     createPage(param).then((res: any) => {
       if (res?.statusCode === 200) {
         ElMessage({
@@ -243,6 +210,7 @@ function creatFloor(name: string) {
   }
   isEditVisiable.value = '';
 }
+
 function confirmDel() {
   deleteFloor(path.value, isEditVisiable.value).then((res) => {
     if (res.statusCode === 200) {
@@ -261,25 +229,6 @@ function toggleDelDlg(val: boolean, name?: string) {
   isDialogVisiable.value = val;
   isEditVisiable.value = name || '';
 }
-// 监听 pageData 变化，实时更新
-// watch(
-//   () => pageData.value,
-//   () => {
-//     const tmpData = {
-//       content: '',
-//       title: '',
-//     };
-//     for (const key in dataMap) {
-//       if (pageData.value.has(key)) {
-//         dataMap[key as keyof typeof dataMap].value =
-//           pageData.value.get(key) || tmpData;
-//       }
-//     }
-//   },
-//   {
-//     deep: true,
-//   }
-// );
 
 // 切换预览模式 清除编辑状态
 watch(
@@ -291,7 +240,7 @@ watch(
   }
 );
 
-////////
+////////////////////////////////////////////////////////////////////////
 
 const screenWidth = useWindowResize();
 const isIphone = computed(() => {
@@ -460,7 +409,7 @@ onMounted(() => {
         </div>
         <div v-if="pageData.has('markdown1')" class="markdown-floor">
           <MarkdownEdit
-            v-model="markdownData"
+            v-model="markdownData1"
             markdown-id="markdown1"
             @auto-save="creatFloor('markdown1')"
             @handle-del="toggleDelDlg(true, 'markdown1')"
@@ -545,7 +494,7 @@ onMounted(() => {
         </div>
         <div v-if="pageData.has('markdown3')" class="markdown-floor">
           <MarkdownEdit
-            v-model="markdownData2"
+            v-model="markdownData3"
             markdown-id="markdown3"
             @auto-save="creatFloor('markdown3')"
             @handle-del="toggleDelDlg(true, 'markdown3')"
@@ -727,7 +676,7 @@ onMounted(() => {
         </div>
         <div v-if="pageData.has('markdown4')" class="markdown-floor">
           <MarkdownEdit
-            v-model="markdownData2"
+            v-model="markdownData4"
             markdown-id="markdown4"
             @auto-save="creatFloor('markdown4')"
             @handle-del="toggleDelDlg(true, 'markdown4')"

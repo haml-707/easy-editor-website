@@ -149,7 +149,7 @@ function onBlurEvent() {
   cursor: pointer;
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% - 106px));
   right: -140px;
   width: 48px;
   height: 48px;
