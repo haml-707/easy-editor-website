@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, inject, watch } from 'vue';
+import { computed, ref, onMounted, Ref, inject, watch } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -34,10 +34,11 @@ import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
 
 import { usePageData } from '@/stores';
 
-interface SIGLIST {
+interface SigList {
   group_name: string;
   maillist: string;
 }
+
 const lang = useLangStore().lang;
 
 const route = useRoute();
@@ -58,7 +59,7 @@ let params = {
   path: path.value,
   type: 'sig',
   locale: locale.value,
-  is_private: false,
+  isPrivate: false,
 };
 
 const pageData = computed(() => {
@@ -66,8 +67,9 @@ const pageData = computed(() => {
 });
 const isDialogVisiable = ref(false);
 const isEditVisiable = ref('');
-const modeType: any = inject('modeType');
+const modeType = inject('modeType') as Ref<boolean>;
 
+// 新建楼层，赋值默认markdown
 const addFloor = async function (name: string) {
   dataMap[name].value['name'] = name;
   dataMap[name].value['content'] = t('edit.MARKDOWN_TEMPLATE');
@@ -96,6 +98,19 @@ const introductData = computed({
     val;
   },
 });
+
+// for (let i = 1; i <= 5; i++) {
+//   const `markdownData${i}` = computed({
+//     get: () =>
+//       pageData.value.get('markdown1') || {
+//         content: '',
+//         title: '',
+//       },
+//     set: (val) => {
+//       val;
+//     },
+//   });
+// }
 
 const markdownData1 = computed({
   get: () =>
@@ -149,6 +164,7 @@ const markdownData5 = computed({
   },
 });
 
+// name和数据映射
 const dataMap: any = {
   ['markdown1']: markdownData1,
   ['markdown2']: markdownData2,
@@ -166,17 +182,7 @@ function saveData(name: string) {
   params.name = name;
   params.path = path.value;
   modifyFloorData(params).then((res: { statusCode: number }) => {
-    // if (res.statusCode === 200) {
-    //   ElMessage({
-    //     type: 'success',
-    //     message: '修改成功',
-    //   });
-    // }
-    // usePageData().tempData.set(name, usePageData().pageData.get(name));
-    if (res.statusCode === 200) {
-      // getAllDataByPath(path.value).then((res) => {
-      //   usePageData().setPageData(res.data);
-      // });
+    if (res?.statusCode === 200) {
       isEditVisiable.value = '';
     }
   });
@@ -190,6 +196,7 @@ function creatFloor(name: string) {
     const param = {
       content: dataMap[name].value.content,
       name: name,
+      description: '',
       path: path.value,
       title: dataMap[name].value.title,
       isPrivate: false,
@@ -197,8 +204,7 @@ function creatFloor(name: string) {
       locale: locale.value,
       contentType: 'text/plain',
     };
-
-    createPage(param).then((res: any) => {
+    createPage(param).then((res: { statusCode: number }) => {
       if (res?.statusCode === 200) {
         ElMessage({
           type: 'success',
@@ -269,7 +275,7 @@ const oldEmail = ref('');
 const giteeHomeLink = ref('');
 function getOldEmail() {
   getSigList().then((res) => {
-    const targetData = res.filter((item: SIGLIST) => {
+    const targetData = res.filter((item: SigList) => {
       return item.group_name === sigDetailName.value;
     });
     if (targetData.length) {
