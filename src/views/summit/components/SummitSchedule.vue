@@ -2,9 +2,9 @@
 import { ref, onMounted } from 'vue';
 import IconTime from '~icons/app/icon-time.svg';
 
-import { modifyFloorData, getPageData } from '@/api/api-easy-edit';
+import { getPageData } from '@/api/api-easy-edit';
 
-import { ElMessage } from 'element-plus';
+// import { ElMessage } from 'element-plus';
 
 // const value1 = ref<[Date, Date]>([
 //   new Date(2016, 9, 10, 8, 40),
@@ -243,12 +243,12 @@ function addSubtitle2() {
   });
 }
 function savePageData() {
-  modifyFloorData(6).then(() => {
-    ElMessage({
-      type: 'success',
-      message: '保存成功',
-    });
-  });
+  // modifyFloorData(6).then(() => {
+  //   ElMessage({
+  //     type: 'success',
+  //     message: '保存成功',
+  //   });
+  // });
 }
 // function createNewPage() {
 //   createPage(JSON.stringify(scheduleData.value)).then(() => {
