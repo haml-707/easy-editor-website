@@ -30,9 +30,15 @@ getAllDataByPath(path.value).then((res) => {
 watch(
   () => useVersionData().versionData,
   (val: number) => {
-    getDataByVersion(path.value, val).then((res) => {
-      usePageData().setPageData(res?.data);
-    });
+    if (val !== -1) {
+      getDataByVersion(path.value, val).then((res) => {
+        usePageData().setPageData(res?.data);
+      });
+    } else {
+      getAllDataByPath(path.value).then((res) => {
+        usePageData().setPageData(res.data);
+      });
+    }
   }
 );
 </script>

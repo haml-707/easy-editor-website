@@ -45,16 +45,20 @@ export const usePageData = defineStore('edit-data', {
     },
   },
 });
-// 页面数据
+// 当前版本
 export const useVersionData = defineStore('version-data', {
   state: () => {
     return {
       versionData: 0,
+      isCoverLatest: true,
     };
   },
   actions: {
     setVersionData(data: number) {
       this.versionData = data;
+    },
+    setCoverData(data: boolean) {
+      this.isCoverLatest = data;
     },
   },
 });

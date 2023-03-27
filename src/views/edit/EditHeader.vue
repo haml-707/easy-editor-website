@@ -14,7 +14,7 @@ import { getReleaseVersion } from '@/api/api-easy-edit';
 
 interface VersionData {
   statusCode: number;
-  data: [number];
+  data: number[];
 }
 
 const route = useRoute();
@@ -31,6 +31,7 @@ function getVersionData() {
   getReleaseVersion(path.value).then((res: VersionData) => {
     if (res.statusCode === 200) {
       versionData.value = res.data.reverse();
+      versionData.value.unshift(-1);
     }
   });
 }
@@ -41,9 +42,18 @@ const emit = defineEmits(['change-switch', 'change-select']);
 const isPreviewMode = ref(false);
 function handleChangeSwitch() {
   emit('change-switch', isPreviewMode.value);
+  if (useVersionData().isCoverLatest && isPreviewMode.value) {
+  } else {
+    console.log('show diglog');
+  }
 }
 function handleChangeSelect() {
   useVersionData().setVersionData(activeVersion.value);
+  if (activeVersion.value !== -1) {
+    isPreviewMode.value = true;
+    handleChangeSwitch();
+    useVersionData().setCoverData(false);
+  }
 }
 handleChangeSwitch();
 </script>

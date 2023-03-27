@@ -32,7 +32,7 @@ import {
 } from '@/api/api-sig';
 import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
 
-import { usePageData } from '@/stores';
+import { usePageData, useVersionData } from '@/stores';
 
 interface SigList {
   group_name: string;
@@ -190,6 +190,9 @@ function saveData(name: string) {
 
 // 新键楼层 如果已存在 调用保存
 function creatFloor(name: string) {
+  if (!useVersionData().isCoverLatest) {
+    return false;
+  }
   if (pageData.value.has(name)) {
     saveData(name);
   } else {
