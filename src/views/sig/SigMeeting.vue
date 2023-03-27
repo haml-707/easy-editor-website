@@ -491,7 +491,6 @@ const watchData = watch(
     font-weight: 400;
     position: absolute;
     // z-index: 1;
-    top: 16px;
     left: 50%;
     transform: translateX(-50%);
     @media screen and (max-width: 768px) {

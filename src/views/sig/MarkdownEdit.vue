@@ -139,9 +139,9 @@ function onBlurEvent() {
           <span class="close">放弃修改</span>
         </OIcon>
       </div>
+      <div v-show="isEditStyle" class="del-dox" @click="delFloor"></div>
     </div>
   </div>
-  <div v-show="isEditStyle" class="del-dox" @click="delFloor"></div>
 </template>
 
 <style lang="scss">
@@ -149,7 +149,7 @@ function onBlurEvent() {
   cursor: pointer;
   position: absolute;
   top: 50%;
-  transform: translateY(calc(-50% - 106px));
+  transform: translateY(calc(-50%));
   right: -140px;
   width: 48px;
   height: 48px;
@@ -355,8 +355,6 @@ function onBlurEvent() {
     color: var(--o-color-text1);
     font-weight: 300;
     position: absolute;
-    z-index: 1;
-    top: 16px;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;

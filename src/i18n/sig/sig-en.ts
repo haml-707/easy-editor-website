@@ -425,7 +425,7 @@ export default {
     REPOSITORY_LIST_BG: 'REPOSITORIES',
     LATEST_MEETING: '',
     MEMBERS: 'SIG Members',
-    MAINTAINER: 'The project maintainer',
+    MAINTAINER: 'MAINTAINER',
     REPOSITORY_LIST: 'REPOSITORIES',
     REPOSITORY_NAME: 'Repos name',
     CONTACT: 'Contact',

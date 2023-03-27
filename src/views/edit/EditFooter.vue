@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, inject, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStoreData } from '@/shared/login';
 import { useRoute } from 'vue-router';
@@ -19,6 +19,7 @@ import type { FormInstance } from 'element-plus';
 const { t } = useI18n();
 const { guardAuthClient } = useStoreData();
 const route = useRoute();
+const modeType = inject('modeType') as Ref<boolean>;
 
 const sigDetailName = ref(route.params.name as string);
 
@@ -87,7 +88,11 @@ function confirmPublish(verify: FormInstance | undefined) {
 <template>
   <div class="edit-footer">
     <p>{{ t('edit.CONFIRE_PUBLISH') }}</p>
-    <OButton class="post-edit" animation @click="toggleDelDlg(true)"
+    <OButton
+      class="post-edit"
+      :class="modeType ? '' : 'disabled'"
+      :animation="modeType"
+      @click="modeType ? toggleDelDlg(true) : ''"
       >{{ t('edit.PUBLISH_PAGE') }}
       <template #suffixIcon>
         <OIcon>
@@ -155,6 +160,11 @@ function confirmPublish(verify: FormInstance | undefined) {
     border: transparent;
     background-color: var(--o-color-major1);
     color: var(--o-color-text1);
+  }
+  .disabled {
+    cursor: not-allowed;
+    color: var(--o-color-white);
+    background-color: var(--o-color-info3);
   }
 }
 </style>

@@ -769,18 +769,6 @@ onMounted(() => {
   </AppEditTemplate>
 </template>
 <style lang="scss" scoped>
-.en {
-  .sig-detail .content h2 {
-    .title-text {
-      display: none;
-    }
-    .title-bg {
-      display: inline-block;
-      padding-top: 16px;
-      color: var(--o-color-text1) !important;
-    }
-  }
-}
 .danger1 {
   color: #e02020;
 }
@@ -823,7 +811,6 @@ onMounted(() => {
     font-weight: 400;
     position: absolute;
     z-index: 1;
-    top: 16px;
     left: 50%;
     transform: translateX(-50%);
     @media screen and (max-width: 768px) {
@@ -1252,7 +1239,6 @@ onMounted(() => {
     font-weight: 400;
     position: absolute;
     z-index: 1;
-    top: 16px;
     left: 50%;
     transform: translateX(-50%);
     @media screen and (max-width: 768px) {
