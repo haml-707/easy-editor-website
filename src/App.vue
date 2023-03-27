@@ -23,6 +23,9 @@ const isPreviewMode = ref<boolean>(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
 }
+function getVersionData() {
+  console.log(55);
+}
 provide('modeType', isPreviewMode);
 watch(
   () => langStore.lang,
@@ -38,7 +41,8 @@ watch(
     <component
       :is="isEditPage ? EditHeader : EditTextTitle"
       :title="t('edit.TITLE')"
-      @switch-change="getModeType"
+      @change-switch="getModeType"
+      @change-select="getVersionData"
     ></component>
     <div class="content">
       <RouterView class="router-view" :mode-type="isPreviewMode"></RouterView>

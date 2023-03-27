@@ -102,7 +102,7 @@ export function profileData(params: { siteName: string; type: string }) {
     });
 }
 /**
- * 查询path 下的所有 组件
+ * 查询path 下的所有 组件 (编辑版本)
  * @name profileData
  * @return {Array}
  */
@@ -147,12 +147,12 @@ export function getReleaseVersion(path: string) {
  * 查询某个网页的某个发布版本内容
  * @name getReleaseVersion
  */
-// export function getReleaseVersion(path: string) {
-//   const url = `/api-edit/publish/versions?path=${path}`;
-//   return request
-//     .get(url, getHeaderConfig())
-//     .then((res: AxiosResponse) => res?.data)
-//     .catch((e: any) => {
-//       console.error(e);
-//     });
-// }
+export function getDataByVersion(path: string, version: number) {
+  const url = `/api-edit/publish?path=${path}&version=${version}`;
+  return request
+    .get(url, getHeaderConfig())
+    .then((res: AxiosResponse) => res?.data)
+    .catch((e: any) => {
+      console.error(e);
+    });
+}

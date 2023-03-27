@@ -21,7 +21,7 @@ export const useLangStore = defineStore('lang', {
     },
   },
 });
-
+// 页面数据
 export const usePageData = defineStore('edit-data', {
   state: () => {
     return {
@@ -42,6 +42,19 @@ export const usePageData = defineStore('edit-data', {
         this.pageData = new Map();
         this.tempData = new Map();
       }
+    },
+  },
+});
+// 页面数据
+export const useVersionData = defineStore('version-data', {
+  state: () => {
+    return {
+      versionData: 0,
+    };
+  },
+  actions: {
+    setVersionData(data: number) {
+      this.versionData = data;
     },
   },
 });

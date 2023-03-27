@@ -1,13 +1,14 @@
 <script lang="ts" setup>
-import { inject, ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 
 import AppFooter from '@/components/AppFooter.vue';
 
-import { getAllDataByPath } from '@/api/api-easy-edit';
-import { usePageData } from '@/stores';
+import { getAllDataByPath, getDataByVersion } from '@/api/api-easy-edit';
+import { usePageData, useVersionData } from '@/stores';
+
 import imgLogo from '@/assets/common/header/logo.png';
 
 const { locale } = useI18n();
@@ -22,11 +23,18 @@ const path = ref(
 
 const modeType = inject('modeType');
 
-//数据初始化
-
+//获取编辑版本内容数据初始化
 getAllDataByPath(path.value).then((res) => {
   usePageData().setPageData(res.data);
 });
+watch(
+  () => useVersionData().versionData,
+  (val: number) => {
+    getDataByVersion(path.value, val).then((res) => {
+      usePageData().setPageData(res?.data);
+    });
+  }
+);
 </script>
 <template>
   <div class="edit-template">
