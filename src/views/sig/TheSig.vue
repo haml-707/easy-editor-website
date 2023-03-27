@@ -73,30 +73,12 @@ const isDialogVisiable = ref(false);
 const isEditVisiable = ref('');
 const modeType: any = inject('modeType');
 
-// const EditFloor = function (type: boolean | string, name: string) {
-//   if (type) {
-//     templateData = _.cloneDeep(pageData.value.get(name));
-//     isEditVisiable.value = name;
-//   } else {
-//     isEditVisiable.value = '';
-//     pageData.value.set(name, templateData);
-//   }
-// };
 const addFloor = async function (name: string) {
   dataMap[name].value['name'] = name;
   dataMap[name].value['content'] = t('edit.MARKDOWN_TEMPLATE');
   await creatFloor(name);
   isEditVisiable.value = name;
 };
-
-// const markdownData = computed(() => {
-//   return (
-//     pageData.value.get('markdown') || {
-//       content: t('edit.MARKDOWN_TEMPLATE'),
-//       title: '',
-//     }
-//   );
-// });
 
 const markdownData = computed({
   get: () =>
@@ -109,13 +91,6 @@ const markdownData = computed({
   },
 });
 
-// const meetingData = ref(
-//   pageData.value.get('meeting') || {
-//     content: '',
-//     title: '',
-//   }
-// );
-
 const meetingData = computed({
   get: () =>
     pageData.value.get('meeting') || {
@@ -127,12 +102,6 @@ const meetingData = computed({
   },
 });
 
-// const introductData = ref(
-//   pageData.value.get('introduction') || {
-//     content: '',
-//     title: '',
-//   }
-// );
 const introductData = computed({
   get: () =>
     pageData.value.get('introduction') || {
@@ -155,12 +124,6 @@ const markdownData1 = computed({
   },
 });
 
-// const markdownData2 = ref(
-//   pageData.value.get('markdown2') || {
-//     content: t('edit.MARKDOWN_TEMPLATE'),
-//     title: '',
-//   }
-// );
 const markdownData2 = computed({
   get: () =>
     pageData.value.get('markdown2') || {
@@ -171,24 +134,54 @@ const markdownData2 = computed({
     val;
   },
 });
-const markdownData3 = ref(
-  pageData.value.get('markdown3') || {
-    content: t('edit.MARKDOWN_TEMPLATE'),
-    title: '',
-  }
-);
-const markdownData4 = ref(
-  pageData.value.get('markdown4') || {
-    content: t('edit.MARKDOWN_TEMPLATE'),
-    title: '',
-  }
-);
-const markdownData5 = ref(
-  pageData.value.get('markdown5') || {
-    content: t('edit.MARKDOWN_TEMPLATE'),
-    title: '',
-  }
-);
+const markdownData3 = computed({
+  get: () =>
+    pageData.value.get('markdown3') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+const markdownData4 = computed({
+  get: () =>
+    pageData.value.get('markdown4') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+const markdownData5 = computed({
+  get: () =>
+    pageData.value.get('markdown5') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+// const markdownData3 = ref(
+//   pageData.value.get('markdown3') || {
+//     content: t('edit.MARKDOWN_TEMPLATE'),
+//     title: '',
+//   }
+// );
+// const markdownData4 = ref(
+//   pageData.value.get('markdown4') || {
+//     content: t('edit.MARKDOWN_TEMPLATE'),
+//     title: '',
+//   }
+// );
+// const markdownData5 = ref(
+//   pageData.value.get('markdown5') || {
+//     content: t('edit.MARKDOWN_TEMPLATE'),
+//     title: '',
+//   }
+// );
 const dataMap: any = {
   ['markdown']: markdownData,
   ['markdown1']: markdownData1,
@@ -541,6 +534,23 @@ onMounted(() => {
             </ul>
           </div>
         </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown3')"
+          class="add-floor square"
+          @click="addFloor('markdown3')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="pageData.has('markdown3')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData2"
+            markdown-id="markdown3"
+            @auto-save="creatFloor('markdown3')"
+            @handle-del="toggleDelDlg(true, 'markdown3')"
+          />
+        </div>
         <div class="repository">
           <h2>
             <span class="title-bg">{{
@@ -705,6 +715,23 @@ onMounted(() => {
               </AppPaginationMo>
             </div>
           </div>
+        </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown4')"
+          class="add-floor square"
+          @click="addFloor('markdown4')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="pageData.has('markdown4')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData2"
+            markdown-id="markdown4"
+            @auto-save="creatFloor('markdown4')"
+            @handle-del="toggleDelDlg(true, 'markdown4')"
+          />
         </div>
         <div class="contribution">
           <h2>

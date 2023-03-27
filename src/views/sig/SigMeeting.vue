@@ -71,9 +71,9 @@ async function hanleChangePreview(val: boolean, isFallback?: boolean) {
   }
   if (isFallback) {
     try {
-      tempData.value = JSON.parse(
+      tempData.value.content = JSON.parse(
         JSON.stringify(usePageData().tempData.get('meeting'))
-      );
+      ).content;
     } catch (error) {
       console.log(error);
     }
