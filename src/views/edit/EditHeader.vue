@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -7,6 +7,7 @@ import { OButton } from '@/components/button';
 import OIcon from '@/components/OIcon.vue';
 
 import IconCancel from '~icons/app/icon-close.svg';
+import IconWarn from '~icons/edit/icon-warn.svg';
 
 import { useVersionData } from '@/stores';
 
@@ -18,7 +19,7 @@ interface VersionData {
 }
 
 const route = useRoute();
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
 const sigDetailName = ref(route.params.name as string);
 const versionData = ref<number[]>();
@@ -26,6 +27,8 @@ const versionData = ref<number[]>();
 const path = ref(
   `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
 );
+
+const isDialogVisiable = ref(false);
 
 function getVersionData() {
   getReleaseVersion(path.value).then((res: VersionData) => {
@@ -40,22 +43,50 @@ const activeVersion = ref();
 
 const emit = defineEmits(['change-switch', 'change-select']);
 const isPreviewMode = ref(false);
+
 function handleChangeSwitch() {
   emit('change-switch', isPreviewMode.value);
-  if (useVersionData().isCoverLatest && isPreviewMode.value) {
-  } else {
-    console.log('show diglog');
-  }
 }
+
 function handleChangeSelect() {
   useVersionData().setVersionData(activeVersion.value);
   if (activeVersion.value !== -1) {
     isPreviewMode.value = true;
     handleChangeSwitch();
     useVersionData().setCoverData(false);
+  } else {
+    useVersionData().setCoverData(true);
   }
 }
+
+function beforeChange() {
+  if (!useVersionData().isCoverLatest) {
+    useVersionData().setDialogData(true);
+    return false;
+  } else {
+    return true;
+  }
+}
+function toggleCoverDlg(val: boolean) {
+  useVersionData().setDialogData(val);
+  isDialogVisiable.value = val;
+}
+
+function confirmCover() {
+  useVersionData().setCoverData(true);
+  toggleCoverDlg(false);
+  isPreviewMode.value = false;
+  handleChangeSwitch();
+}
+
 handleChangeSwitch();
+
+watch(
+  () => useVersionData().isCoverDialogShon,
+  (val) => {
+    isDialogVisiable.value = val;
+  }
+);
 </script>
 <template>
   <div class="edit-dispaly-zone">
@@ -65,6 +96,7 @@ handleChangeSwitch();
         <span :class="!isPreviewMode ? 'active-switch' : ''">编辑模式</span
         ><el-switch
           v-model="isPreviewMode"
+          :before-change="beforeChange"
           @change="handleChangeSwitch"
         ></el-switch
         ><span :class="isPreviewMode ? 'active-switch' : ''">预览模式</span>
@@ -101,6 +133,28 @@ handleChangeSwitch();
       </router-link>
       <p>退出编辑将不保存任何修改</p>
     </div>
+    <el-dialog
+      v-model="isDialogVisiable"
+      class="cover-dialog"
+      :show-close="false"
+      width="640"
+      @close="toggleCoverDlg(false)"
+    >
+      <template #header>
+        <OIcon>
+          <IconWarn />
+        </OIcon>
+      </template>
+      <h3>该操作将使所选版本覆盖当前Latest版本所有内容</h3>
+      <template #footer>
+        <o-button size="small" @click="toggleCoverDlg(false)">{{
+          t('edit.CANCEL')
+        }}</o-button>
+        <o-button size="small" type="primary" @click="confirmCover()">{{
+          t('edit.CONFIRM')
+        }}</o-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -162,6 +216,46 @@ handleChangeSwitch();
     p {
       margin-top: 8px;
     }
+  }
+}
+</style>
+<style lang="scss">
+.cover-dialog {
+  .el-dialog__header {
+    margin-right: 0;
+    text-align: center;
+    font-size: 48px;
+    color: var(--o-color-major1);
+    .o-icon {
+      display: inline-block;
+    }
+  }
+  .el-dialog__body {
+    text-align: center;
+    h3 {
+      font-weight: 400;
+      color: var(--o-color-text1);
+      font-size: var(--o-font_size-h1);
+      line-height: var(--o-line_height-h1);
+    }
+    p {
+      margin-top: 24px;
+      color: var(--o-color-neutral5);
+      span {
+        color: var(--o-color-text1);
+      }
+    }
+    .el-input {
+      margin-top: 8px;
+      .el-input__inner {
+        text-align: center;
+      }
+    }
+  }
+  .el-dialog__footer {
+    display: flex;
+    gap: 0 16px;
+    justify-content: center;
   }
 }
 </style>

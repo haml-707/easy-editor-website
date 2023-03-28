@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, inject, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { useStoreData } from '@/shared/login';
+import { useVersionData } from '@/stores';
+
 import { useRoute } from 'vue-router';
 
 import { publishPage } from '@/api/api-easy-edit';
@@ -63,8 +66,12 @@ function checkName(rule: any, value: string, callback: any) {
 }
 
 function toggleDelDlg(val: boolean) {
-  ruleForm.name === userName.value;
-  isDialogVisiable.value = val;
+  if (val && !useVersionData().isCoverLatest) {
+    useVersionData().setDialogData(true);
+  } else {
+    ruleForm.name === userName.value;
+    isDialogVisiable.value = val;
+  }
 }
 function confirmPublish(verify: FormInstance | undefined) {
   if (!verify) {

@@ -63,8 +63,8 @@ const previewShown = ref(false);
 
 async function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (
-    JSON.stringify(usePageData().tempData.get('introduction')) !==
-      JSON.stringify(usePageData().pageData.get('introduction')) &&
+    JSON.stringify(usePageData().tempData.get('meeting')) !==
+      JSON.stringify(usePageData().pageData.get('meeting')) &&
     !val
   ) {
     emit('auto-save');
