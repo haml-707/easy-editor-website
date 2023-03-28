@@ -94,7 +94,6 @@ function onBlurEvent() {
       <div v-if="previewShown === 'title' && isEditStyle" class="icon-box">
         <OIcon>
           <IconDone />
-          <!-- <IconDone @click.stop="hanleChangePreview('', true)" /> -->
           <span class="save">保存修改</span>
         </OIcon>
         <OIcon @click.stop="hanleChangePreview('title', false)">

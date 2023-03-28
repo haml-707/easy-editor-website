@@ -51,7 +51,7 @@ export const useVersionData = defineStore('version-data', {
     return {
       versionData: 0,
       isCoverLatest: true,
-      isCoverDialogShon: false,
+      isCoverDialogShon: '',
     };
   },
   actions: {
@@ -61,7 +61,7 @@ export const useVersionData = defineStore('version-data', {
     setCoverData(data: boolean) {
       this.isCoverLatest = data;
     },
-    setDialogData(data: boolean) {
+    setDialogData(data: string) {
       this.isCoverDialogShon = data;
     },
   },

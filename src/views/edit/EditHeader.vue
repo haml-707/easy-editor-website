@@ -34,12 +34,12 @@ function getVersionData() {
   getReleaseVersion(path.value).then((res: VersionData) => {
     if (res.statusCode === 200) {
       versionData.value = res.data.reverse();
-      versionData.value.unshift(-1);
+      // versionData.value.unshift(-1);
     }
   });
 }
 getVersionData();
-const activeVersion = ref();
+const activeVersion = ref(-1);
 
 const emit = defineEmits(['change-switch', 'change-select']);
 const isPreviewMode = ref(false);
@@ -61,22 +61,26 @@ function handleChangeSelect() {
 
 function beforeChange() {
   if (!useVersionData().isCoverLatest) {
-    useVersionData().setDialogData(true);
+    useVersionData().setDialogData('header');
     return false;
   } else {
     return true;
   }
 }
 function toggleCoverDlg(val: boolean) {
-  useVersionData().setDialogData(val);
+  useVersionData().setDialogData(val ? 'header' : '');
   isDialogVisiable.value = val;
 }
 
 function confirmCover() {
   useVersionData().setCoverData(true);
+  if (useVersionData().isCoverDialogShon === 'header') {
+    isPreviewMode.value = false;
+    handleChangeSwitch();
+  } else if (useVersionData().isCoverDialogShon === 'footer') {
+    console.log('close');
+  }
   toggleCoverDlg(false);
-  isPreviewMode.value = false;
-  handleChangeSwitch();
 }
 
 handleChangeSwitch();
@@ -84,7 +88,7 @@ handleChangeSwitch();
 watch(
   () => useVersionData().isCoverDialogShon,
   (val) => {
-    isDialogVisiable.value = val;
+    isDialogVisiable.value = val ? true : false;
   }
 );
 </script>
@@ -103,17 +107,24 @@ watch(
       </div>
       <div class="revision-history">
         <span class="label">历史版本回退</span>
-        <el-select v-model="activeVersion" @change="handleChangeSelect">
+        <el-select
+          v-model="activeVersion"
+          placeholder="Latest"
+          @change="handleChangeSelect"
+        >
+          <el-option label="Latest" :value="-1">
+            <div class="customer-option">
+              <span class="version">Latest</span>
+            </div>
+          </el-option>
           <el-option
-            v-for="(item, index) in versionData"
+            v-for="item in versionData"
             :key="item"
-            :label="index === 0 ? 'Latest' : `Version ${item}`"
+            :label="`Version ${item}`"
             :value="item"
           >
             <div class="customer-option">
-              <span class="version">{{
-                index === 0 ? 'Latest' : `Version ${item}`
-              }}</span>
+              <span class="version">{{ `Version ${item}` }}</span>
               <span class="time"></span>
             </div>
           </el-option>
@@ -145,7 +156,7 @@ watch(
           <IconWarn />
         </OIcon>
       </template>
-      <h3>该操作将使所选版本覆盖当前Latest版本所有内容</h3>
+      <h3>该操作将使所选版本内容覆盖当前Latest版本内容</h3>
       <template #footer>
         <o-button size="small" @click="toggleCoverDlg(false)">{{
           t('edit.CANCEL')
