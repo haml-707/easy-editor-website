@@ -3,6 +3,7 @@ import { computed, ref, onMounted, Ref, inject, watch } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import _ from 'lodash-es';
 
 import useWindowResize from '@/components/hooks/useWindowResize';
 import BreadCrumbs from '@/components/BreadCrumbs.vue';
@@ -98,19 +99,6 @@ const introductData = computed({
     val;
   },
 });
-
-// for (let i = 1; i <= 5; i++) {
-//   const `markdownData${i}` = computed({
-//     get: () =>
-//       pageData.value.get('markdown1') || {
-//         content: '',
-//         title: '',
-//       },
-//     set: (val) => {
-//       val;
-//     },
-//   });
-// }
 
 const markdownData1 = computed({
   get: () =>
@@ -213,7 +201,8 @@ function creatFloor(name: string) {
           type: 'success',
           message: '创建成功',
         });
-        pageData.value.set(name, param);
+        pageData.value.set(name, _.cloneDeep(param));
+        usePageData().tempData.set(name, _.cloneDeep(param));
       }
     });
   }
