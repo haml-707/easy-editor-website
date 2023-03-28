@@ -15,14 +15,17 @@ import { getReleaseVersion } from '@/api/api-easy-edit';
 
 interface VersionData {
   statusCode: number;
-  data: number[];
+  data: VersionData1[];
 }
-
+interface VersionData1 {
+  version: number;
+  publishAt: string;
+}
 const route = useRoute();
 const { locale, t } = useI18n();
 
 const sigDetailName = ref(route.params.name as string);
-const versionData = ref<number[]>();
+const versionData = ref<VersionData1[]>();
 
 const path = ref(
   `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
@@ -119,13 +122,13 @@ watch(
           </el-option>
           <el-option
             v-for="item in versionData"
-            :key="item"
-            :label="`Version ${item}`"
-            :value="item"
+            :key="item.version"
+            :label="`Version ${item.version}`"
+            :value="item.version"
           >
             <div class="customer-option">
-              <span class="version">{{ `Version ${item}` }}</span>
-              <span class="time"></span>
+              <span class="version">{{ `Version ${item.version}` }}</span>
+              <span class="time">{{ item.publishAt }}</span>
             </div>
           </el-option>
         </el-select>
@@ -231,6 +234,18 @@ watch(
 }
 </style>
 <style lang="scss">
+.customer-option {
+  padding: 0 8px;
+  display: flex;
+  .version {
+    min-width: 96px;
+  }
+  .time {
+    padding-left: 16px;
+    color: #999;
+    font-size: var(--o-font-size-tip);
+  }
+}
 .cover-dialog {
   .el-dialog__header {
     margin-right: 0;
@@ -244,6 +259,7 @@ watch(
   .el-dialog__body {
     text-align: center;
     h3 {
+      padding: 16px 0;
       font-weight: 400;
       color: var(--o-color-text1);
       font-size: var(--o-font_size-h1);

@@ -263,7 +263,6 @@ function onBlurEvent() {
   }
   .icon-box {
     position: absolute;
-    top: 24px;
     right: -48px;
     gap: 8px 0;
 

@@ -710,6 +710,23 @@ onMounted(() => {
             ></ContributList>
           </div>
         </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown5')"
+          class="add-floor square"
+          @click="addFloor('markdown5')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="pageData.has('markdown5')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData5"
+            markdown-id="markdown5"
+            @auto-save="creatFloor('markdown5')"
+            @handle-del="toggleDelDlg(true, 'markdown5')"
+          />
+        </div>
       </div>
     </div>
     <el-dialog
