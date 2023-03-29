@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, reactive, computed, inject, Ref, watch } from 'vue';
+import { ref, reactive, computed, inject, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useStoreData } from '@/shared/login';
@@ -66,12 +66,12 @@ function checkName(rule: any, value: string, callback: any) {
 }
 
 function toggleDelDlg(val: boolean) {
-  if (val && !useVersionData().isCoverLatest) {
-    useVersionData().setDialogData('footer');
-  } else {
-    ruleForm.name === userName.value;
-    isDialogVisiable.value = val;
-  }
+  // if (val && !useVersionData().isCoverLatest) {
+  //   useVersionData().setDialogData('footer');
+  // } else {
+  ruleForm.name === userName.value;
+  isDialogVisiable.value = val;
+  // }
 }
 function confirmPublish(verify: FormInstance | undefined) {
   if (!verify) {
@@ -92,14 +92,14 @@ function confirmPublish(verify: FormInstance | undefined) {
     }
   });
 }
-watch(
-  () => useVersionData().isCoverDialogShown,
-  (val, oldVal) => {
-    if (!val && oldVal === 'footer' && useVersionData().isCoverLatest) {
-      toggleDelDlg(true);
-    }
-  }
-);
+// watch(
+//   () => useVersionData().isCoverDialogShown,
+//   (val, oldVal) => {
+//     if (!val && oldVal === 'footer' && useVersionData().isCoverLatest) {
+//       toggleDelDlg(true);
+//     }
+//   }
+// );
 </script>
 <template>
   <div class="edit-footer">

@@ -62,14 +62,14 @@ function toggleCoverDlg(val: boolean) {
   isDialogVisiable.value = val;
 }
 
-function confirmCover() {
-  useVersionData().setCoverData(true);
-  if (useVersionData().isCoverDialogShown === 'header') {
-    isPreviewMode.value = false;
-    handleChangeSwitch();
-  }
-  toggleCoverDlg(false);
-}
+// function confirmCover() {
+//   useVersionData().setCoverData(true);
+//   if (useVersionData().isCoverDialogShown === 'header') {
+//     isPreviewMode.value = false;
+//     handleChangeSwitch();
+//   }
+//   toggleCoverDlg(false);
+// }
 
 handleChangeSwitch();
 
@@ -144,14 +144,18 @@ watch(
           <IconWarn />
         </OIcon>
       </template>
-      <h3>该操作将使所选版本内容覆盖当前Latest版本内容</h3>
+      <!-- <h3>该操作将使所选版本内容覆盖当前Latest版本内容</h3> -->
+      <h3>当前历史版本不支持编辑，如需回退至此版本请点击底部"发布页面"</h3>
       <template #footer>
-        <o-button size="small" @click="toggleCoverDlg(false)">{{
+        <!-- <o-button size="small" @click="toggleCoverDlg(false)">{{
           t('edit.CANCEL')
-        }}</o-button>
-        <o-button size="small" type="primary" @click="confirmCover()">{{
+        }}</o-button> -->
+        <o-button size="small" type="primary" @click="toggleCoverDlg(false)">{{
           t('edit.CONFIRM')
         }}</o-button>
+        <!-- <o-button size="small" type="primary" @click="confirmCover()">{{
+          t('edit.CONFIRM')
+        }}</o-button> -->
       </template>
     </el-dialog>
   </div>

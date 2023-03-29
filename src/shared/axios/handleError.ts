@@ -7,22 +7,22 @@ export default (err: AxiosError) => {
       err.code = '';
       err.message = '有response但没有response.status的情况';
     }
-
-    if (response?.status === 401 && import.meta.env.VITE_IS_DEV === 'false') {
-      window.location.href = `/zh/404`;
-    }
-
     err.code = String(response.status);
-    switch (response && response.status) {
+    switch (response?.status) {
       case 200:
         err.message = '错误响应也会有状态码为200的情况';
         break;
       case 400:
-        err.message = '请求错误(400)';
+        const res = err.response?.data as any;
+        err.message =
+          res.statusCode === 411 ? '请检查文本敏感词' : '请求错误(400)';
         break;
       case 401:
+        if (import.meta.env.VITE_IS_DEV === 'false') {
+          window.location.href = `/zh/404`;
+        }
         err.message = '未授权，请重新登录(401)';
-
+        break;
       case 403:
         err.message = '拒绝访问(403)';
         break;
