@@ -145,7 +145,7 @@ watch(
         </OIcon>
       </template>
       <!-- <h3>该操作将使所选版本内容覆盖当前Latest版本内容</h3> -->
-      <h3>当前历史版本不支持编辑，如需回退至此版本请点击底部"发布页面"</h3>
+      <h3>当前历史版本不支持编辑，如需回退至此版本请点击底部“发布页面”</h3>
       <template #footer>
         <!-- <o-button size="small" @click="toggleCoverDlg(false)">{{
           t('edit.CANCEL')

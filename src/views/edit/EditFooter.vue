@@ -79,7 +79,13 @@ function confirmPublish(verify: FormInstance | undefined) {
   }
   verify.validate(async (res: boolean) => {
     if (res) {
-      publishPage(path.value, ruleForm.name).then((res) => {
+      publishPage(
+        path.value,
+        ruleForm.name,
+        useVersionData().activeVersion === -1
+          ? 'latest'
+          : useVersionData().activeVersion.toString()
+      ).then((res) => {
         if (res.statusCode === 200) {
           ElMessage({
             type: 'success',

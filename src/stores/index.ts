@@ -53,13 +53,16 @@ export const usePageData = defineStore('edit-data', {
     },
   },
 });
-// 当前版本
 export const useVersionData = defineStore('version-data', {
   state: () => {
     return {
-      activeVersion: 0,
+      // 当前版本
+      activeVersion: -1,
+      // 是否允许切换编辑状态
       isCoverLatest: true,
+      // 覆盖警示弹窗
       isCoverDialogShown: '',
+      // 版本信息
       versionData: [] as VersionData[],
     };
   },

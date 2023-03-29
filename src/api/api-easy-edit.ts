@@ -73,11 +73,12 @@ export function modifyFloorData(params: Params) {
     });
 }
 
-export function publishPage(path: string, publisher: string) {
+export function publishPage(path: string, publisher: string, version: string) {
   const url = '/api-edit/publish';
   const params = {
     path,
     publisher,
+    version,
   };
   return request
     .post(url, params, getHeaderConfig())
