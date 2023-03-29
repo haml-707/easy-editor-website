@@ -48,19 +48,7 @@ const tempData = computed({
 });
 
 function hanleChangePreview(val: string, isFallback: boolean) {
-  if (
-    (!_.isEqual(
-      usePageData().tempData.get(props.markdownId),
-      usePageData().pageData.get(props.markdownId)
-    ) ||
-      !isFallback) &&
-    !val &&
-    guardFunc(isFallback, guard.value)
-  ) {
-    // 内容有修改且和原数据不同自动保存
-    emit('auto-save');
-  }
-  if (!isFallback) {
+  if (isFallback) {
     try {
       tempData.value[val] = JSON.parse(
         JSON.stringify(usePageData().tempData.get(props.markdownId)[val])
@@ -69,6 +57,19 @@ function hanleChangePreview(val: string, isFallback: boolean) {
       console.log(error);
     }
   }
+  if (
+    (!_.isEqual(
+      usePageData().tempData.get(props.markdownId),
+      usePageData().pageData.get(props.markdownId)
+    ) ||
+      isFallback) &&
+    !val &&
+    guardFunc(!isFallback, guard)
+  ) {
+    // 内容有修改且和原数据不同自动保存
+    emit('auto-save');
+  }
+
   if (!previewShown.value) {
     nextTick(() => {
       textareaRef.value.focus();
@@ -81,13 +82,13 @@ function delFloor() {
 }
 function onBlurEvent() {
   setTimeout(() => {
-    hanleChangePreview('', true);
+    hanleChangePreview('', false);
   }, 200);
 }
 </script>
 <template>
   <div class="markdown-edit editable-floor">
-    <div class="markdown-title" @click="hanleChangePreview('title', true)">
+    <div class="markdown-title" @click="hanleChangePreview('title', false)">
       <h2 class="title" :class="isEditStyle ? 'is-edit' : ''">
         <span class="title-text">
           <el-input
@@ -95,7 +96,7 @@ function onBlurEvent() {
             :readonly="!isEditStyle || previewShown !== 'title'"
             placeholder="输入楼层标题"
             maxlength="100"
-            @blur="hanleChangePreview('', true)"
+            @blur="hanleChangePreview('', false)"
           >
           </el-input>
         </span>
@@ -105,7 +106,7 @@ function onBlurEvent() {
           <IconDone />
           <span class="save">保存修改</span>
         </OIcon>
-        <OIcon @click.stop="hanleChangePreview('title', false)">
+        <OIcon @click.stop="hanleChangePreview('title', true)">
           <IconClose /> <span class="close">放弃修改</span>
         </OIcon>
       </div>
@@ -114,7 +115,7 @@ function onBlurEvent() {
       <div
         v-show="isEditStyle && previewShown === 'content'"
         class="edit-textarea"
-        @click="hanleChangePreview('content', true)"
+        @click="hanleChangePreview('content', false)"
       >
         <el-input
           ref="textareaRef"
@@ -126,7 +127,7 @@ function onBlurEvent() {
           show-word-limit
           type="textarea"
           @blur="onBlurEvent"
-          @focus="hanleChangePreview('content', true)"
+          @focus="hanleChangePreview('content', false)"
         >
         </el-input>
       </div>
@@ -135,14 +136,14 @@ function onBlurEvent() {
         class="markdown-main"
         :class="isEditStyle ? 'border' : ''"
         :statement="modelValue.content"
-        @click="isEditStyle ? hanleChangePreview('content', true) : ''"
+        @click="isEditStyle ? hanleChangePreview('content', false) : ''"
       ></MdStatement>
       <div v-if="previewShown === 'content' && isEditStyle" class="icon-box">
         <OIcon>
           <IconDone />
           <span class="save">保存修改</span>
         </OIcon>
-        <OIcon @click="hanleChangePreview('content', false)">
+        <OIcon @click="hanleChangePreview('content', true)">
           <IconClose />
           <span class="close">放弃修改</span>
         </OIcon>

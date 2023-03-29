@@ -67,25 +67,6 @@ const tempData = computed({
 const previewShown = ref(false);
 
 async function hanleChangePreview(val: boolean, isFallback: boolean) {
-  // console.log(!isFallback);
-  console.log(guardFunc(!isFallback, guard.value));
-
-  // if (
-  //   // !_.isEqual(
-  //   //   usePageData().tempData.get('meeting'),
-  //   //   usePageData().pageData.get('meeting')
-  //   // ) &&
-  //   // !val
-  //   (!_.isEqual(
-  //     usePageData().tempData.get('meeting'),
-  //     usePageData().pageData.get('meeting')
-  //   ) ||
-  //     isFallback) &&
-  //   !val &&
-  //   guardFunc(!isFallback, guard.value)
-  // ) {
-  //   emit('auto-save');
-  // }
   if (isFallback) {
     try {
       tempData.value.content = JSON.parse(
@@ -95,6 +76,18 @@ async function hanleChangePreview(val: boolean, isFallback: boolean) {
       console.log(error);
     }
   }
+  if (
+    (!_.isEqual(
+      usePageData().tempData.get('meeting'),
+      usePageData().pageData.get('meeting')
+    ) ||
+      isFallback) &&
+    !val &&
+    guardFunc(!isFallback, guard)
+  ) {
+    emit('auto-save');
+  }
+
   if (!previewShown.value) {
     nextTick(() => {
       textareaRef.value.focus();

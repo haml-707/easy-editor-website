@@ -27,6 +27,9 @@ const modeType = inject('modeType');
 getAllDataByPath(path.value).then((res) => {
   usePageData().setPageData(res?.data);
 });
+// getDataByVersion(path.value, 16).then((res) => {
+//   usePageData().setPageData(res?.data);
+// });
 watch(
   () => useVersionData().activeVersion,
   (val: number) => {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import _ from 'lodash-es';
-import { getReleaseVersion } from '@/api/api-easy-edit';
+import { getReleaseVersion, getDataByVersion } from '@/api/api-easy-edit';
 interface FloorData {
   name: string;
   content_type?: string;
@@ -34,6 +34,8 @@ export const usePageData = defineStore('edit-data', {
   state: () => {
     return {
       pageData: new Map(),
+      // 线上版本内容（用于判断是否有修改）
+      laststData: new Map(),
       tempData: new Map(),
     };
   },
@@ -50,6 +52,15 @@ export const usePageData = defineStore('edit-data', {
         this.pageData = new Map();
         this.tempData = new Map();
       }
+    },
+    setLatestData(path: string, val: number) {
+      getDataByVersion(path, val).then((res) => {
+        const mapData = new Map();
+        for (let i = 0; i < res?.data.length; i++) {
+          mapData.set(res?.data[i].name, res?.data[i]);
+        }
+        this.laststData = mapData;
+      });
     },
   },
 });
@@ -81,6 +92,9 @@ export const useVersionData = defineStore('version-data', {
       getReleaseVersion(path).then((res: VersionDataRes) => {
         if (res.statusCode === 200) {
           this.versionData = res.data;
+          if (this.versionData.length) {
+            usePageData().setLatestData(path, this.versionData[0].version);
+          }
         }
       });
     },

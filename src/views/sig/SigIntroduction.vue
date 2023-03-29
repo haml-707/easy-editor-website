@@ -11,6 +11,10 @@ import IconDone from '~icons/app/icon-done.svg';
 import IconClose from '~icons/app/icon-close.svg';
 import IconGitee from '~icons/app/icon-gitee.svg';
 
+import { guardFunc } from '@/shared/utils';
+
+const guard = ref(true);
+
 const props = defineProps({
   modelValue: {
     type: Object as any,
@@ -36,16 +40,6 @@ const tempData = computed({
 const previewShown = ref(false);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
-  // 与原始数据比较是否修改
-  if (
-    !_.isEqual(
-      usePageData().tempData.get('introduction'),
-      usePageData().pageData.get('introduction')
-    ) &&
-    !val
-  ) {
-    emit('auto-save');
-  }
   // 回显
   if (isFallback) {
     try {
@@ -56,6 +50,18 @@ function hanleChangePreview(val: boolean, isFallback?: boolean) {
       console.log(error);
     }
   }
+  // 与原始数据比较是否修改
+  if (
+    !_.isEqual(
+      usePageData().tempData.get('introduction'),
+      usePageData().pageData.get('introduction') || isFallback
+    ) &&
+    !val &&
+    guardFunc(!isFallback, guard)
+  ) {
+    emit('auto-save');
+  }
+
   // 切换至编辑框textarea获得焦点
   if (!previewShown.value) {
     nextTick(() => {
@@ -66,7 +72,7 @@ function hanleChangePreview(val: boolean, isFallback?: boolean) {
 }
 function onBlurEvent() {
   setTimeout(() => {
-    hanleChangePreview(false);
+    hanleChangePreview(false, false);
   }, 200);
 }
 const route = useRoute();
@@ -95,7 +101,7 @@ const sigDetailName = ref(route.params.name as string);
           show-word-limit
           type="textarea"
           @blur="onBlurEvent"
-          @focus="hanleChangePreview(true)"
+          @focus="hanleChangePreview(true, false)"
         >
         </el-input>
       </div>
@@ -104,7 +110,7 @@ const sigDetailName = ref(route.params.name as string);
         :class="isEditStyle ? 'border' : ''"
         :statement="tempData.content"
         class="markdown-main"
-        @click.stop="isEditStyle ? hanleChangePreview(true) : ''"
+        @click.stop="isEditStyle ? hanleChangePreview(true, false) : ''"
       ></MdStatement>
       <div v-if="isEditStyle && previewShown" class="icon-box">
         <OIcon>
