@@ -19,7 +19,7 @@ import { ElMessage } from 'element-plus';
 
 import type { FormInstance } from 'element-plus';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { guardAuthClient } = useStoreData();
 const route = useRoute();
 const modeType = inject('modeType') as Ref<boolean>;
@@ -27,7 +27,7 @@ const modeType = inject('modeType') as Ref<boolean>;
 const sigDetailName = ref(route.params.name as string);
 
 const path = ref(
-  `https://www.openeuler.org/zh/sig/sig-detail/?name=${sigDetailName.value}`
+  `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
 );
 
 const userName = computed(() => {
