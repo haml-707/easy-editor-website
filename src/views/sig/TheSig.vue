@@ -171,7 +171,9 @@ function saveData(name: string) {
   params.path = path.value;
   modifyFloorData(params)
     .then((res: { statusCode: number }) => {
-      if (res?.statusCode === 200) {
+      if (res?.statusCode !== 200) {
+        // 错误回显
+        usePageData().tempData.get(params?.name);
         // isEditVisiable.value = '';
       }
     })

@@ -153,3 +153,18 @@ export function getUrlParam(paraName: string) {
     return '';
   }
 }
+// guardFunc
+export function guardFunc(bool: boolean, guard: boolean) {
+  if (bool && guard) {
+    guard = true;
+    return true;
+  } else {
+    if (guard) {
+      guard = false;
+      return true;
+    } else {
+      guard = true;
+      return false;
+    }
+  }
+}

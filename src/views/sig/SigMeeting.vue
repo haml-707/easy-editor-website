@@ -31,6 +31,10 @@ import notFoundImg from '@/assets/common/404/404.png';
 import useWindowResize from '@/components/hooks/useWindowResize';
 import { getSigMember } from '@/api/api-sig';
 
+import { guardFunc } from '@/shared/utils';
+
+const guard = ref(true);
+
 const props = defineProps({
   tableData: {
     type: Array as PropType<TableData[]>,
@@ -62,16 +66,26 @@ const tempData = computed({
 
 const previewShown = ref(false);
 
-async function hanleChangePreview(val: boolean, isFallback?: boolean) {
-  if (
-    !_.isEqual(
-      usePageData().tempData.get('meeting'),
-      usePageData().pageData.get('meeting')
-    ) &&
-    !val
-  ) {
-    emit('auto-save');
-  }
+async function hanleChangePreview(val: boolean, isFallback: boolean) {
+  // console.log(!isFallback);
+  console.log(guardFunc(!isFallback, guard.value));
+
+  // if (
+  //   // !_.isEqual(
+  //   //   usePageData().tempData.get('meeting'),
+  //   //   usePageData().pageData.get('meeting')
+  //   // ) &&
+  //   // !val
+  //   (!_.isEqual(
+  //     usePageData().tempData.get('meeting'),
+  //     usePageData().pageData.get('meeting')
+  //   ) ||
+  //     isFallback) &&
+  //   !val &&
+  //   guardFunc(!isFallback, guard.value)
+  // ) {
+  //   emit('auto-save');
+  // }
   if (isFallback) {
     try {
       tempData.value.content = JSON.parse(
@@ -91,7 +105,7 @@ async function hanleChangePreview(val: boolean, isFallback?: boolean) {
 
 function onBlurEvent() {
   setTimeout(() => {
-    hanleChangePreview(false);
+    hanleChangePreview(false, false);
   }, 200);
 }
 
@@ -280,7 +294,7 @@ const watchData = watch(
                 show-word-limit
                 type="textarea"
                 @blur="onBlurEvent"
-                @focus="hanleChangePreview(true)"
+                @focus="hanleChangePreview(true, false)"
               >
               </el-input>
             </div>
@@ -289,7 +303,7 @@ const watchData = watch(
               :statement="tempData.content"
               :class="isEditStyle ? 'border' : ''"
               class="markdown-main"
-              @click.stop="isEditStyle ? hanleChangePreview(true) : ''"
+              @click.stop="isEditStyle ? hanleChangePreview(true, false) : ''"
             ></MdStatement>
 
             <div v-if="isEditStyle && previewShown" class="icon-box">

@@ -9,6 +9,9 @@ import _ from 'lodash-es';
 
 import IconDone from '~icons/app/icon-done.svg';
 import IconClose from '~icons/app/icon-close.svg';
+import { guardFunc } from '@/shared/utils';
+
+const guard = ref(true);
 
 const props = defineProps({
   modelValue: {
@@ -46,11 +49,13 @@ const tempData = computed({
 
 function hanleChangePreview(val: string, isFallback: boolean) {
   if (
-    !_.isEqual(
+    (!_.isEqual(
       usePageData().tempData.get(props.markdownId),
       usePageData().pageData.get(props.markdownId)
-    ) &&
-    !val
+    ) ||
+      !isFallback) &&
+    !val &&
+    guardFunc(isFallback, guard.value)
   ) {
     // 内容有修改且和原数据不同自动保存
     emit('auto-save');
