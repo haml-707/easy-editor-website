@@ -118,7 +118,11 @@ function confirmPublish(verify: FormInstance | undefined) {
 <template>
   <div class="edit-footer">
     <p>
-      {{ isCententEqual ? '您未修改任何内容' : t('edit.CONFIRE_PUBLISH') }}
+      {{
+        isCententEqual
+          ? '当前版本内容与线上版本内容一致，无内容更新'
+          : t('edit.CONFIRE_PUBLISH')
+      }}
     </p>
     <OButton
       class="post-edit"
