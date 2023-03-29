@@ -3,6 +3,8 @@ import { computed, inject, Ref, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePageData } from '@/stores';
 
+import _ from 'lodash-es';
+
 import OIcon from '@/components/OIcon.vue';
 
 import IconDone from '~icons/app/icon-done.svg';
@@ -34,13 +36,17 @@ const tempData = computed({
 const previewShown = ref(false);
 
 function hanleChangePreview(val: boolean, isFallback?: boolean) {
+  // 与原始数据比较是否修改
   if (
-    JSON.stringify(usePageData().tempData.get('introduction')) !==
-      JSON.stringify(usePageData().pageData.get('introduction')) &&
+    !_.isEqual(
+      usePageData().tempData.get('introduction'),
+      usePageData().pageData.get('introduction')
+    ) &&
     !val
   ) {
     emit('auto-save');
   }
+  // 回显
   if (isFallback) {
     try {
       tempData.value.content = JSON.parse(
@@ -50,6 +56,7 @@ function hanleChangePreview(val: boolean, isFallback?: boolean) {
       console.log(error);
     }
   }
+  // 切换至编辑框textarea获得焦点
   if (!previewShown.value) {
     nextTick(() => {
       textareaRef.value.focus();

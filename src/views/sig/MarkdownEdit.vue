@@ -5,6 +5,8 @@ import { usePageData } from '@/stores';
 
 import OIcon from '@/components/OIcon.vue';
 
+import _ from 'lodash-es';
+
 import IconDone from '~icons/app/icon-done.svg';
 import IconClose from '~icons/app/icon-close.svg';
 
@@ -44,8 +46,10 @@ const tempData = computed({
 
 function hanleChangePreview(val: string, isFallback: boolean) {
   if (
-    JSON.stringify(usePageData().tempData.get(props.markdownId)) !==
-      JSON.stringify(usePageData().pageData.get(props.markdownId)) &&
+    !_.isEqual(
+      usePageData().tempData.get(props.markdownId),
+      usePageData().pageData.get(props.markdownId)
+    ) &&
     !val
   ) {
     // 内容有修改且和原数据不同自动保存

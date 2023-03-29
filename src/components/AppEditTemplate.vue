@@ -25,7 +25,7 @@ const modeType = inject('modeType');
 
 //获取编辑版本内容数据初始化
 getAllDataByPath(path.value).then((res) => {
-  usePageData().setPageData(res.data);
+  usePageData().setPageData(res?.data);
 });
 watch(
   () => useVersionData().activeVersion,
@@ -36,7 +36,7 @@ watch(
       });
     } else {
       getAllDataByPath(path.value).then((res) => {
-        usePageData().setPageData(res.data);
+        usePageData().setPageData(res?.data);
       });
     }
   }

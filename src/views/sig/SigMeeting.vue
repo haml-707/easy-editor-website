@@ -10,6 +10,7 @@ import {
   watch,
   inject,
 } from 'vue';
+import _ from 'lodash-es';
 
 import { isValidKey, isBrowser } from '@/shared/utils';
 import { TableData, DayData } from '@/shared/@types/type-calendar';
@@ -63,8 +64,10 @@ const previewShown = ref(false);
 
 async function hanleChangePreview(val: boolean, isFallback?: boolean) {
   if (
-    JSON.stringify(usePageData().tempData.get('meeting')) !==
-      JSON.stringify(usePageData().pageData.get('meeting')) &&
+    !_.isEqual(
+      usePageData().tempData.get('meeting'),
+      usePageData().pageData.get('meeting')
+    ) &&
     !val
   ) {
     emit('auto-save');

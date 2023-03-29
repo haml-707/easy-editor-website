@@ -43,7 +43,7 @@ router.beforeEach(async (to, from, next) => {
   // 设置语言
   const langStore = useLangStore();
   langStore.lang = to.fullPath.includes('/en/') ? 'en' : 'zh';
-
+  // 权限校验
   if (getUserAuth().token) {
     if (to.fullPath.includes('login')) {
       next({
@@ -64,10 +64,4 @@ router.beforeEach(async (to, from, next) => {
       });
     }
   }
-
-  // await isLogined()
-  //   .then(() => {})
-  //   .catch(() => {
-
-  //   });
 });

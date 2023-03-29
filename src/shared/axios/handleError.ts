@@ -1,4 +1,5 @@
 import type { AxiosError } from 'axios';
+import { router } from '@/routers';
 
 export default (err: AxiosError) => {
   const { response } = err;
@@ -19,7 +20,9 @@ export default (err: AxiosError) => {
         break;
       case 401:
         if (import.meta.env.VITE_IS_DEV === 'false') {
-          window.location.href = `/zh/404`;
+          router.push({
+            path: '/zh/404',
+          });
         }
         err.message = '未授权，请重新登录(401)';
         break;

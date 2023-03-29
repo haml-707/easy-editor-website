@@ -63,6 +63,7 @@ export default defineConfig({
     }),
   ],
   server: {
+    port: 80,
     proxy: {
       '/api-edit/': {
         target: 'https://easyeditor.test.osinfra.cn/api/',
