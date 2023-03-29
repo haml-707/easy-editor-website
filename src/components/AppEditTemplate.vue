@@ -28,7 +28,7 @@ getAllDataByPath(path.value).then((res) => {
   usePageData().setPageData(res.data);
 });
 watch(
-  () => useVersionData().versionData,
+  () => useVersionData().activeVersion,
   (val: number) => {
     if (val !== -1) {
       getDataByVersion(path.value, val).then((res) => {

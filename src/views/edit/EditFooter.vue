@@ -85,6 +85,7 @@ function confirmPublish(verify: FormInstance | undefined) {
             type: 'success',
             message: '发布成功',
           });
+          useVersionData().setVersionData(path.value);
           toggleDelDlg(false);
         }
       });
@@ -92,7 +93,7 @@ function confirmPublish(verify: FormInstance | undefined) {
   });
 }
 watch(
-  () => useVersionData().isCoverDialogShon,
+  () => useVersionData().isCoverDialogShown,
   (val, oldVal) => {
     if (!val && oldVal === 'footer' && useVersionData().isCoverLatest) {
       toggleDelDlg(true);

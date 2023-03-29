@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -11,21 +11,13 @@ import IconWarn from '~icons/edit/icon-warn.svg';
 
 import { useVersionData } from '@/stores';
 
-import { getReleaseVersion } from '@/api/api-easy-edit';
-
-interface VersionData {
-  statusCode: number;
-  data: VersionData1[];
-}
-interface VersionData1 {
-  version: number;
-  publishAt: string;
-}
 const route = useRoute();
 const { locale, t } = useI18n();
 
 const sigDetailName = ref(route.params.name as string);
-const versionData = ref<VersionData1[]>();
+const versionData = computed(() => {
+  return useVersionData().versionData;
+});
 
 const path = ref(
   `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
@@ -34,12 +26,7 @@ const path = ref(
 const isDialogVisiable = ref(false);
 
 function getVersionData() {
-  getReleaseVersion(path.value).then((res: VersionData) => {
-    if (res.statusCode === 200) {
-      versionData.value = res.data.reverse();
-      // versionData.value.unshift(-1);
-    }
-  });
+  useVersionData().setVersionData(path.value);
 }
 getVersionData();
 const activeVersion = ref(-1);
@@ -52,7 +39,7 @@ function handleChangeSwitch() {
 }
 
 function handleChangeSelect() {
-  useVersionData().setVersionData(activeVersion.value);
+  useVersionData().setActiveVersion(activeVersion.value);
   if (activeVersion.value !== -1) {
     isPreviewMode.value = true;
     handleChangeSwitch();
@@ -77,11 +64,9 @@ function toggleCoverDlg(val: boolean) {
 
 function confirmCover() {
   useVersionData().setCoverData(true);
-  if (useVersionData().isCoverDialogShon === 'header') {
+  if (useVersionData().isCoverDialogShown === 'header') {
     isPreviewMode.value = false;
     handleChangeSwitch();
-  } else if (useVersionData().isCoverDialogShon === 'footer') {
-    console.log('close');
   }
   toggleCoverDlg(false);
 }
@@ -89,7 +74,7 @@ function confirmCover() {
 handleChangeSwitch();
 
 watch(
-  () => useVersionData().isCoverDialogShon,
+  () => useVersionData().isCoverDialogShown,
   (val) => {
     isDialogVisiable.value = val ? true : false;
   }

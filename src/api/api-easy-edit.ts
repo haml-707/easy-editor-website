@@ -145,7 +145,7 @@ export function getReleaseVersion(path: string) {
 }
 /**
  * 查询某个网页的某个发布版本内容
- * @name getReleaseVersion
+ * @name getDataByVersion
  */
 export function getDataByVersion(path: string, version: number) {
   const url = `/api-edit/publish?path=${path}&version=${version}`;

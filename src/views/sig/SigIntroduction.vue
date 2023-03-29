@@ -101,7 +101,7 @@ const sigDetailName = ref(route.params.name as string);
       ></MdStatement>
       <div v-if="isEditStyle && previewShown" class="icon-box">
         <OIcon>
-          <IconDone @click="hanleChangePreview(false)" />
+          <IconDone />
           <span class="save">保存修改</span>
         </OIcon>
         <OIcon @click="hanleChangePreview(false, true)">

@@ -169,11 +169,15 @@ function saveData(name: string) {
   }
   params.name = name;
   params.path = path.value;
-  modifyFloorData(params).then((res: { statusCode: number }) => {
-    if (res?.statusCode === 200) {
-      isEditVisiable.value = '';
-    }
-  });
+  modifyFloorData(params)
+    .then((res: { statusCode: number }) => {
+      if (res?.statusCode === 200) {
+        // isEditVisiable.value = '';
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
 // 新键楼层 如果已存在 调用保存

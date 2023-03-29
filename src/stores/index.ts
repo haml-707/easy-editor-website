@@ -1,13 +1,21 @@
 import { defineStore } from 'pinia';
 import _ from 'lodash-es';
-
+import { getReleaseVersion } from '@/api/api-easy-edit';
 interface FloorData {
   name: string;
   content_type?: string;
   description?: string;
   title: string;
 }
+interface VersionData {
+  version: number;
+  publishAt: string;
+}
 
+interface VersionDataRes {
+  statusCode: number;
+  data: VersionData[];
+}
 // 语言
 export const useLangStore = defineStore('lang', {
   state: () => {
@@ -49,20 +57,29 @@ export const usePageData = defineStore('edit-data', {
 export const useVersionData = defineStore('version-data', {
   state: () => {
     return {
-      versionData: 0,
+      activeVersion: 0,
       isCoverLatest: true,
-      isCoverDialogShon: '',
+      isCoverDialogShown: '',
+      versionData: [] as VersionData[],
     };
   },
   actions: {
-    setVersionData(data: number) {
-      this.versionData = data;
+    setActiveVersion(data: number) {
+      this.activeVersion = data;
     },
     setCoverData(data: boolean) {
       this.isCoverLatest = data;
     },
     setDialogData(data: string) {
-      this.isCoverDialogShon = data;
+      this.isCoverDialogShown = data;
+    },
+    // 获取版本信息
+    setVersionData(path: string) {
+      getReleaseVersion(path).then((res: VersionDataRes) => {
+        if (res.statusCode === 200) {
+          this.versionData = res.data;
+        }
+      });
     },
   },
 });
