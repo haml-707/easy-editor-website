@@ -33,7 +33,10 @@ import { getSigMember } from '@/api/api-sig';
 
 import { guardFunc } from '@/shared/utils';
 
-const guard = ref(true);
+interface PageData {
+  content: string;
+  title: string;
+}
 
 const props = defineProps({
   tableData: {
@@ -43,12 +46,15 @@ const props = defineProps({
     },
   },
   modelValue: {
-    type: Object as any,
+    type: Object as PropType<PageData>,
     default: () => {
       return {};
     },
   },
 });
+const { t } = useI18n();
+
+const guard = ref(true);
 
 const modeType = inject('modeType') as Ref<boolean>;
 const isEditStyle = computed(() => {
@@ -101,8 +107,6 @@ function onBlurEvent() {
     hanleChangePreview(false, false);
   }, 200);
 }
-
-const { t } = useI18n();
 
 let currentMeet = reactive<TableData>({
   date: '',

@@ -72,6 +72,22 @@ export function modifyFloorData(params: Params) {
       console.error(e);
     });
 }
+/**
+ * 获取单个楼层数据
+ * @name getSingleFloorData
+ * @return {Array}
+ */
+
+export function getSingleFloorData(path: string, name: string) {
+  const url = `/api-edit/page?path=${path}&name=${name}`;
+  const { headers } = getHeaderConfig();
+  return request
+    .get(url, { headers, $ignoreLoading: true })
+    .then((res: AxiosResponse) => res?.data)
+    .catch((e: any) => {
+      console.error(e);
+    });
+}
 
 export function publishPage(path: string, publisher: string, version: string) {
   const url = '/api-edit/publish';

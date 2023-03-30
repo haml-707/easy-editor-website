@@ -31,7 +31,13 @@ import {
   getSigRepositoryList,
   getSigList,
 } from '@/api/api-sig';
-import { modifyFloorData, deleteFloor, createPage } from '@/api/api-easy-edit';
+
+import {
+  modifyFloorData,
+  deleteFloor,
+  createPage,
+  getSingleFloorData,
+} from '@/api/api-easy-edit';
 
 import { usePageData, useVersionData } from '@/stores';
 
@@ -172,9 +178,12 @@ function saveData(name: string) {
   modifyFloorData(params)
     .then((res: { statusCode: number }) => {
       if (res?.statusCode !== 200) {
-        // 错误回显
-        usePageData().tempData.get(params?.name);
-        // isEditVisiable.value = '';
+        // 修改出错内容回显
+        getSingleFloorData(path.value, name).then((res: any) => {
+          params.content = res?.data?.content;
+          params.title = res?.data?.title;
+          usePageData().pageData.set(name, params);
+        });
       }
     })
     .catch((err) => {
@@ -214,7 +223,7 @@ function creatFloor(name: string) {
   }
   isEditVisiable.value = '';
 }
-
+// 确认删除
 function confirmDel() {
   deleteFloor(path.value, isEditVisiable.value).then((res) => {
     if (res.statusCode === 200) {
@@ -748,45 +757,6 @@ onMounted(() => {
         >
       </template>
     </el-dialog>
-    <!-- <el-dialog
-      v-model="isEditDiglogVisiable"
-      class="edit-dialog"
-      :show-close="false"
-      width="100%"
-      @open="handleChangeEditDialog()"
-      @close="isEditVisiable = ''"
-    >
-      <SigMeeting
-        v-if="sigMeetingData.tableData && isEditVisiable === 'meeting'"
-        v-model="meetingData"
-        :table-data="sigMeetingData.tableData"
-        :is-edit-style="isEditDiglogVisiable"
-      ></SigMeeting>
-      <SigIntroduction
-        v-if="isEditVisiable === 'introduction'"
-        v-model="introductData"
-        :is-edit-style="isEditDiglogVisiable"
-      ></SigIntroduction>
-      <MarkdownEdit
-        v-if="isEditVisiable.includes('markdown')"
-        v-model="markdownData"
-        :is-edit-style="modeType"
-        @handle-del="toggleDelDlg(true)"
-      />
-      <template #footer>
-        <o-button size="small" @click="handleCancel">
-          {{ pageData.has(isEditVisiable) ? '放弃修改' : '放弃创建' }}</o-button
-        >
-        <o-button
-          size="small"
-          type="primary"
-          @click="creatFloor(isEditVisiable)"
-          >{{
-            pageData.has(isEditVisiable) ? '确认修改' : '确认创建'
-          }}</o-button
-        >
-      </template>
-    </el-dialog> -->
   </AppEditTemplate>
 </template>
 <style lang="scss" scoped>

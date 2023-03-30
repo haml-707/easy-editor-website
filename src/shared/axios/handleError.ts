@@ -9,12 +9,12 @@ export default (err: AxiosError) => {
       err.message = '有response但没有response.status的情况';
     }
     err.code = String(response.status);
+    const res = err.response?.data as any;
     switch (response?.status) {
       case 200:
         err.message = '错误响应也会有状态码为200的情况';
         break;
       case 400:
-        const res = err.response?.data as any;
         err.message =
           res.statusCode === 411 ? '请检查文本敏感词' : '请求错误(400)';
         break;

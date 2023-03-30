@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, Ref, ref, nextTick } from 'vue';
+import { computed, inject, Ref, ref, nextTick, PropType } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePageData } from '@/stores';
 
@@ -13,11 +13,13 @@ import IconGitee from '~icons/app/icon-gitee.svg';
 
 import { guardFunc } from '@/shared/utils';
 
-const guard = ref(true);
-
+interface PageData {
+  content: string;
+  title: string;
+}
 const props = defineProps({
   modelValue: {
-    type: Object as any,
+    type: Object as PropType<PageData>,
     default: () => {
       return {};
     },
@@ -27,6 +29,8 @@ const modeType = inject('modeType') as Ref<boolean>;
 const isEditStyle = computed(() => {
   return !modeType.value;
 });
+
+const guard = ref(true);
 
 const textareaRef = ref();
 const emit = defineEmits(['update:modelValue', 'auto-save']);
