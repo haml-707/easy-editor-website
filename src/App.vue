@@ -17,14 +17,11 @@ const route = useRoute();
 const { locale } = useI18n();
 const langStore = useLangStore();
 const isEditPage = computed(() => {
-  return route.name === 'edit';
+  return route.path.includes('edit');
 });
 const isPreviewMode = ref<boolean>(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
-}
-function getVersionData() {
-  console.log(55);
 }
 provide('modeType', isPreviewMode);
 watch(
@@ -42,7 +39,6 @@ watch(
       :is="isEditPage ? EditHeader : EditTextTitle"
       :title="t('edit.TITLE')"
       @change-switch="getModeType"
-      @change-select="getVersionData"
     ></component>
     <div class="content">
       <RouterView class="router-view" :mode-type="isPreviewMode"></RouterView>
