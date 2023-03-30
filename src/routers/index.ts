@@ -29,6 +29,10 @@ export const routes: RouteRecordRaw[] = [
     alias: '/en/404',
     component: () => import('@/NotFound.vue'),
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/404',
+  },
 ];
 
 export const router = createRouter({
