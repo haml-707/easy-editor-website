@@ -92,9 +92,9 @@ export const useVersionData = defineStore('version-data', {
       getReleaseVersion(path).then((res: VersionDataRes) => {
         if (res.statusCode === 200) {
           this.versionData = res.data;
-          if (this.versionData.length) {
-            usePageData().setLatestData(path, this.versionData[0].version);
-          }
+          // if (this.versionData.length) {
+          //   usePageData().setLatestData(path, this.versionData[0].version);
+          // }
         }
       });
     },

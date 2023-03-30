@@ -3,7 +3,7 @@ import { ref, reactive, computed, inject, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useStoreData } from '@/shared/login';
-import { useVersionData, usePageData } from '@/stores';
+import { useVersionData } from '@/stores';
 
 import { useRoute } from 'vue-router';
 
@@ -18,7 +18,7 @@ import IconWarn from '~icons/edit/icon-warn.svg';
 import { ElMessage } from 'element-plus';
 
 import type { FormInstance } from 'element-plus';
-import _ from 'lodash-es';
+// import _ from 'lodash-es';
 
 const { t, locale } = useI18n();
 const { guardAuthClient } = useStoreData();
@@ -27,9 +27,9 @@ const modeType = inject('modeType') as Ref<boolean>;
 
 const sigDetailName = ref(route.params.name as string);
 
-const isCententEqual = computed(() => {
-  return _.isEqual(usePageData().pageData, usePageData().laststData);
-});
+// const isCententEqual = computed(() => {
+//   return _.isEqual(usePageData().pageData, usePageData().laststData);
+// });
 
 const path = ref(
   `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
@@ -71,9 +71,9 @@ function checkName(rule: any, value: string, callback: any) {
 }
 
 function toggleDelDlg(val: boolean) {
-  if (isCententEqual.value) {
-    return false;
-  }
+  // if (isCententEqual.value) {
+  //   return false;
+  // }
   // if (val && !useVersionData().isCoverLatest) {
   //   useVersionData().setDialogData('footer');
   // } else {
@@ -118,15 +118,11 @@ function confirmPublish(verify: FormInstance | undefined) {
 <template>
   <div class="edit-footer">
     <p>
-      {{
-        isCententEqual
-          ? '当前版本内容与线上版本内容一致，无内容更新'
-          : t('edit.CONFIRE_PUBLISH')
-      }}
+      {{ t('edit.CONFIRE_PUBLISH') }}
     </p>
     <OButton
       class="post-edit"
-      :class="[modeType ? '' : 'disabled', isCententEqual ? 'disabled' : '']"
+      :class="[modeType ? '' : 'disabled']"
       :animation="modeType"
       @click="modeType ? toggleDelDlg(true) : ''"
       >{{ t('edit.PUBLISH_PAGE') }}
