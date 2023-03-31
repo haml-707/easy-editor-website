@@ -1,23 +1,20 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import IconTime from '~icons/app/icon-time.svg';
+import { ref, onMounted, Ref, inject, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 // import { getPageData } from '@/api/api-easy-edit';
+import { createPage } from '@/api/api-easy-edit';
 
-import { Ref, inject, computed } from 'vue';
 import OIcon from '@/components/OIcon.vue';
 
 import IconAdd from '~icons/app/icon-add.svg';
+import IconTime from '~icons/app/icon-time.svg';
+
+const { locale } = useI18n();
 
 const modeType = inject('modeType') as Ref<boolean>;
 
 // import { ElMessage } from 'element-plus';
-
-// const value1 = ref<[Date, Date]>([
-//   new Date(2016, 9, 10, 8, 40),
-//   new Date(2016, 9, 10, 9, 40),
-// ]);
-// const value1 = ref<any>(['15:55', '15:59']);
 
 const isEditStyle = computed(() => {
   return !modeType.value;
@@ -155,58 +152,48 @@ function changeIndexShow(id: number, index: number) {
 }
 // 控制主论坛及各个分论坛的显示
 const tabType = ref(0);
-console.log(tabType.value);
 
 const otherTabType = ref(0);
 function tabClick() {
   otherTabType.value = 0;
 }
 
-function handleGetPageData() {
-  // getPageData(6).then((res) => {
-  //   try {
-  //     scheduleData.value = JSON.parse(res.data.content);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // });
-}
-
 function handleInputBlur() {
   console.log('失焦事件');
 }
 
-function addSubtitle() {
-  scheduleData.value.content.push({
-    lable: '请输入论坛名称',
-    id: window.crypto.randomUUID(),
-    content: [
-      {
-        id: window.crypto.randomUUID(),
-        name: '填写标题',
-        content: [
-          {
-            id: window.crypto.randomUUID(),
-            time: ['14:00', '14:05'],
-            desc: 'XXX领导致辞',
-            person: [
-              {
-                id: window.crypto.randomUUID(),
-                name: '姓名',
-                post: ['XXX成员'],
-              },
-            ],
-            detail: [''],
-          },
-        ],
-      },
-    ],
-  });
-}
-function delSubtitle(index: number) {
-  scheduleData.value.content.splice(index, 1);
-  tabType.value = 0;
-}
+// function addSubtitle() {
+//   scheduleData.value.content.push({
+//     lable: '请输入论坛名称',
+//     id: window.crypto.randomUUID(),
+//     content: [
+//       {
+//         id: window.crypto.randomUUID(),
+//         name: '填写标题',
+//         content: [
+//           {
+//             id: window.crypto.randomUUID(),
+//             time: ['14:00', '14:05'],
+//             desc: 'XXX领导致辞',
+//             person: [
+//               {
+//                 id: window.crypto.randomUUID(),
+//                 name: '姓名',
+//                 post: ['XXX成员'],
+//               },
+//             ],
+//             detail: [''],
+//           },
+//         ],
+//       },
+//     ],
+//   });
+// }
+// function delSubtitle(index: number) {
+//   scheduleData.value.content.splice(index, 1);
+//   tabType.value = 0;
+// }
+// 增加一行表格
 function addContent() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value
@@ -222,14 +209,18 @@ function addContent() {
     detail: [''],
   });
 }
+// 删除一行表格
 function delContent(index: number) {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value
   ].content.splice(index, 1);
 }
+// 删除分论坛标题
 function delSubtitle2(index: number) {
   scheduleData.value.content[tabType.value].content.splice(index, 1);
+  otherTabType.value = 0;
 }
+// 增加分论坛标题
 function addSubtitle2() {
   scheduleData.value.content[tabType.value].content.push({
     id: window.crypto.randomUUID(),
@@ -250,7 +241,9 @@ function addSubtitle2() {
       },
     ],
   });
+  otherTabType.value = 0;
 }
+// 保持页面数据
 function savePageData() {
   // modifyFloorData(6).then(() => {
   //   ElMessage({
@@ -259,14 +252,25 @@ function savePageData() {
   //   });
   // });
 }
-// function createNewPage() {
-//   createPage(JSON.stringify(scheduleData.value)).then(() => {
-//     ElMessage({
-//       type: 'success',
-//       message: '保存成功',
-//     });
-//   });
-// }
+function createNewPage() {
+  const param = {
+    content: JSON.stringify(scheduleData.value),
+    name: 'schedule',
+    description: '',
+    path: 'https://www.openeuler.org/zh/interaction/summit-list/devday2023/',
+    title: '',
+    isPrivate: false,
+    type: 'event',
+    locale: locale.value,
+    contentType: 'text/plain',
+  };
+  createPage(param).then(() => {
+    // ElMessage({
+    //   type: 'success',
+    //   message: '成功',
+    // });
+  });
+}
 onMounted(() => {
   handleGetPageData();
 });
@@ -321,7 +325,11 @@ onMounted(() => {
           v-show="tabType == index && scheduleItem.content[0].content"
           class="schedule-item other"
         >
-          <el-tabs v-model.number="otherTabType" class="other-tabs">
+          <el-tabs
+            v-if="isEditStyle || scheduleItem.content[1]"
+            v-model.number="otherTabType"
+            class="other-tabs"
+          >
             <template v-if="scheduleItem.content[1]">
               <el-tab-pane
                 v-for="(itemList, scheduleIndex) in scheduleItem.content"
@@ -338,9 +346,9 @@ onMounted(() => {
                     />
                     <span
                       v-show="isEditStyle"
-                      @click="delSubtitle2(scheduleIndex)"
-                      >X</span
-                    >
+                      class="del-icon del-title"
+                      @click.stop="delSubtitle2(scheduleIndex)"
+                    ></span>
                   </div>
                 </template>
               </el-tab-pane>
@@ -348,7 +356,7 @@ onMounted(() => {
 
             <el-tab-pane v-if="isEditStyle">
               <template #label>
-                <OIcon class="icon-add" @click="addSubtitle2">
+                <OIcon class="icon-add" @click.stop="addSubtitle2">
                   <IconAdd />
                 </OIcon>
               </template>
@@ -492,19 +500,18 @@ onMounted(() => {
                 ></div>
                 <span
                   v-if="isEditStyle"
-                  class="del-content"
+                  class="del-icon del-content"
                   @click="delContent(subIndex)"
-                  >X</span
-                >
+                ></span>
               </div>
             </div>
-            <el-button
+            <OIcon
               v-if="isEditStyle"
-              class="add-content"
+              class="icon-add add-content"
               @click="addContent"
             >
-              增加日程
-            </el-button>
+              <IconAdd />
+            </OIcon>
           </div>
         </div>
       </template>
@@ -512,7 +519,7 @@ onMounted(() => {
   </div>
   <div class="contoral-box">
     <el-button @click="savePageData">保存</el-button>
-    <!-- <el-button @click="createNewPage">新建</el-button> -->
+    <el-button @click="createNewPage">新建</el-button>
   </div>
 </template>
 
@@ -544,7 +551,6 @@ onMounted(() => {
   background-color: transparent;
 }
 .schedule {
-  // margin-top: 20px;
   h3 {
     position: relative;
     text-align: center;
@@ -641,20 +647,6 @@ onMounted(() => {
       }
     }
   }
-  .icon-add {
-    margin: 0 auto;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: var(--o-font-size-text);
-    border-radius: 50%;
-    border: 1px solid var(--o-color-brand1);
-    // padding: 3px;
-    color: var(--o-color-brand1);
-  }
   .schedule-item {
     width: 100%;
     padding: 24px;
@@ -663,10 +655,21 @@ onMounted(() => {
       padding: 16px;
     }
     &.other {
+      .del-title {
+        left: inherit;
+        right: -8px;
+        width: 16px;
+        height: 16px;
+        top: -18px;
+        &::after {
+          height: 2px;
+          width: calc(100% - 6px);
+        }
+      }
       :deep(.el-tabs) {
         margin-bottom: 24px;
         .el-tabs__header.is-top .el-tabs__item.is-top {
-          padding: 10px 20px 10px 0;
+          // padding: 10px 20px 10px 0;
           @media (max-width: 1100px) {
             height: auto;
             padding: 6px 18px 6px 0;
@@ -683,6 +686,12 @@ onMounted(() => {
         .el-tabs__header {
           text-align: center;
           margin: 0;
+          .el-tabs__nav-wrap {
+            overflow: visible;
+            .el-tabs__nav-scroll {
+              overflow: visible;
+            }
+          }
           .el-tabs__item {
             @media (max-width: 1100px) {
               font-size: 12px;
@@ -759,11 +768,15 @@ onMounted(() => {
       display: none;
     }
   }
+  .add-content {
+    margin-top: 16px;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
 }
 .is-edit {
   :deep(.el-input) {
-    &:hover {
-    }
     .el-input__wrapper {
       &:hover {
         border: 1px solid var(--o-color-brand1);
@@ -775,29 +788,41 @@ onMounted(() => {
       box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
     }
   }
-  // .is-active {
-  //   .one-level-tabs {
-  //     :deep(.el-input) {
-  //       .el-input__wrapper {
-  //         .el-input__inner {
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  // .one-level-tabs {
-  //   background: var(--o-color-bg2);
-  //   border-color: var(--o-color-primary2);
-  //   :deep(.el-input) {
-  //     cursor: pointer;
-  //     .el-input__inner {
-  //       cursor: pointer;
-  //       width: min-content;
-  //       color: var(--o-color-text1);
-  //       text-align: center;
-  //     }
-  //   }
-  // }
+}
+.del-icon {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: -36px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #e02020;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    border-radius: 1px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 3px;
+    width: calc(100% - 10px);
+    background-color: #e02020;
+  }
+}
+.icon-add {
+  margin: 0 auto;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: var(--o-font-size-text);
+  border-radius: 50%;
+  border: 1px solid var(--o-color-brand1);
+  color: var(--o-color-brand1);
 }
 .content-list {
   @media screen and (max-width: 1100px) {
@@ -805,15 +830,14 @@ onMounted(() => {
   }
   .content-item {
     display: grid;
-    grid-template-columns: 192px 580px 445px;
+    grid-template-columns: 192px 580px 400px;
     padding: 20px 0;
     transition: all 0.25s ease;
     align-items: center;
     min-height: 64px;
     position: relative;
-    & + .content-item {
-      border-top: 1px solid var(--o-color-border2);
-    }
+    border-bottom: 1px solid var(--o-color-border2);
+
     @media screen and (max-width: 1328px) {
       grid-template-columns: 192px 450px 400px;
     }
@@ -822,9 +846,6 @@ onMounted(() => {
       padding: 6px 0;
       min-height: 36px;
       position: static;
-    }
-    &:hover {
-      // background-color: var(--o-color-bg4);
     }
     .name-box {
       @media screen and (max-width: 1100px) {
@@ -845,7 +866,22 @@ onMounted(() => {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      right: 12px;
+      left: -36px;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      border: 1px solid #e02020;
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        border-radius: 1px;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        height: 3px;
+        width: calc(100% - 10px);
+        background-color: #e02020;
+      }
     }
     .desc {
       font-size: 18px;
@@ -878,7 +914,6 @@ onMounted(() => {
       color: var(--o-color-text3);
       font-size: 16px;
       line-height: 24px;
-      // word-break: keep-all;
       flex: 1;
       @media (max-width: 1100px) {
         font-size: 12px;
@@ -906,15 +941,21 @@ onMounted(() => {
       svg {
         width: 18px;
         height: 18px;
-        color: var(--o-color-text3);
+        color: var(--o-color-text4);
         margin-right: 6px;
         @media screen and (max-width: 1100px) {
           display: none;
         }
       }
       .el-input-time {
-        width: 60px;
+        width: 40px;
         text-align: center;
+        :deep(.el-input__wrapper) {
+          padding: 0;
+          .el-input__inner {
+            color: var(--o-color-text4);
+          }
+        }
       }
     }
     .info .desc {

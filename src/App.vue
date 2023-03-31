@@ -12,9 +12,8 @@ import EditTextTitle from '@/views/edit/EditTextTitle.vue';
 import { refreshInfo } from '@/shared/login';
 
 refreshInfo();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
-const { locale } = useI18n();
 const langStore = useLangStore();
 const isEditPage = computed(() => {
   return route.path.includes('edit');
