@@ -775,12 +775,29 @@ onMounted(() => {
       box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
     }
   }
-  .is-active .one-level-tabs {
-    background-color: inherit !important;
-    .el-input__inner {
-      text-align: center;
-    }
-  }
+  // .is-active {
+  //   .one-level-tabs {
+  //     :deep(.el-input) {
+  //       .el-input__wrapper {
+  //         .el-input__inner {
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+  // .one-level-tabs {
+  //   background: var(--o-color-bg2);
+  //   border-color: var(--o-color-primary2);
+  //   :deep(.el-input) {
+  //     cursor: pointer;
+  //     .el-input__inner {
+  //       cursor: pointer;
+  //       width: min-content;
+  //       color: var(--o-color-text1);
+  //       text-align: center;
+  //     }
+  //   }
+  // }
 }
 .content-list {
   @media screen and (max-width: 1100px) {
