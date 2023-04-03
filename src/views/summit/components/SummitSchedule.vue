@@ -262,7 +262,7 @@ function createNewPage() {
     isPrivate: false,
     type: 'event',
     locale: locale.value,
-    contentType: 'text/plain',
+    contentType: 'json',
   };
   createPage(param).then(() => {
     // ElMessage({
@@ -272,7 +272,7 @@ function createNewPage() {
   });
 }
 onMounted(() => {
-  handleGetPageData();
+  // handleGetPageData();
 });
 </script>
 
