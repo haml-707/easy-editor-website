@@ -31,8 +31,15 @@ const sigDetailName = ref(route.params.name as string);
 //   return _.isEqual(usePageData().pageData, usePageData().laststData);
 // });
 
+const pathMap: any = {
+  sig: `sig/sig-detail/?name=${sigDetailName.value}`,
+  event: `interaction/summit-list/${route.params.name}/`,
+};
+
 const path = ref(
-  `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
+  `https://www.openeuler.org/${locale.value}/${
+    pathMap[route.path.split('/')[3]]
+  }`
 );
 
 const userName = computed(() => {

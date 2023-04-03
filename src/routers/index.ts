@@ -18,10 +18,16 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/login/TheLogin.vue'),
   },
   {
-    path: '/zh/edit/:path/:name',
-    name: 'edit',
-    alias: '/en/edit/:path/:name',
+    path: '/zh/edit/sig/:name',
+    name: 'sig-edit',
+    alias: '/en/edit/sig/:name',
     component: () => import('@/views/sig/TheSig.vue'),
+  },
+  {
+    path: '/zh/edit/event/:name',
+    name: 'sig-event',
+    alias: '/en/edit/event/:name',
+    component: () => import('@/views/summit/TheSummit.vue'),
   },
   {
     path: '/zh/404',
@@ -31,7 +37,7 @@ export const routes: RouteRecordRaw[] = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/404',
+    redirect: '/zh/404',
   },
 ];
 

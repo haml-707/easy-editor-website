@@ -19,8 +19,15 @@ const versionData = computed(() => {
   return useVersionData().versionData;
 });
 
+const pathMap: any = {
+  sig: `sig/sig-detail/?name=${sigDetailName.value}`,
+  event: `interaction/summit-list/${route.params.name}/`,
+};
+
 const path = ref(
-  `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
+  `https://www.openeuler.org/${locale.value}/${
+    pathMap[route.path.split('/')[3]]
+  }`
 );
 
 const isDialogVisiable = ref(false);
