@@ -15,8 +15,7 @@ export default (err: AxiosError) => {
         err.message = '错误响应也会有状态码为200的情况';
         break;
       case 400:
-        err.message =
-          res.statusCode === 411 ? '请检查文本敏感词' : '请求错误(400)';
+        err.message = res?.message || '请求错误(400)';
         break;
       case 401:
         if (import.meta.env.VITE_IS_DEV === 'false') {
@@ -27,7 +26,7 @@ export default (err: AxiosError) => {
         err.message = '未授权，请重新登录(401)';
         break;
       case 403:
-        err.message = '拒绝访问(403)';
+        err.message = res?.message || '拒绝访问(403)';
         break;
       case 404:
         err.message = '请求出错(404)';
