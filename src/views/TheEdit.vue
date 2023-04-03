@@ -36,16 +36,16 @@ const pageTypeList = ref<string[]>([]);
 pageNameList.value = [];
 pageTypeList.value = [];
 
-// function filterOption() {
-//   editData.value.forEach((item) => {
-//     if (!pageNameList.value.includes(item.siteName)) {
-//       pageNameList.value.push(item.siteName);
-//     }
-//     if (!pageTypeList.value.includes(item.type)) {
-//       pageTypeList.value.push(item.type);
-//     }
-//   });
-// }
+function filterOption() {
+  editData.value.forEach((item) => {
+    if (!pageNameList.value.includes(item.siteName)) {
+      pageNameList.value.push(item.siteName);
+    }
+    if (!pageTypeList.value.includes(item.type)) {
+      pageTypeList.value.push(item.type);
+    }
+  });
+}
 
 const optionQuery = reactive({
   siteName: '',
@@ -60,7 +60,14 @@ const randerData = computed(() => {
 });
 
 const goEdit = (item: EditData) => {
-  router.push(`/${item.locale}/edit/sig/${getUrlParams(item.path)?.name}`);
+  let path = '';
+  if (item.type === 'sig') {
+    path = `/${item.locale}/edit/${item.type}/${getUrlParams(item.path)?.name}`;
+  } else {
+    path = `/${item.locale}/edit/${item.type}/${item.path.split('/').at(-2)}/`;
+  }
+
+  router.push(path);
 };
 
 const handleSizeChange = (val: number) => {
@@ -80,14 +87,7 @@ function getPageData(isFirstGet: boolean) {
       if (isFirstGet) {
         pageNameList.value = [];
         pageTypeList.value = [];
-        editData.value.forEach((item) => {
-          if (!pageNameList.value.includes(item.siteName)) {
-            pageNameList.value.push(item.siteName);
-          }
-          if (!pageTypeList.value.includes(item.type)) {
-            pageTypeList.value.push(item.type);
-          }
-        });
+        filterOption();
       }
     } else {
       editData.value = [];

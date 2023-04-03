@@ -154,6 +154,8 @@ const responseInterceptorId = request.interceptors.response.use(
       ElMessage({
         type: 'error',
         message: err.message,
+        showClose: true,
+        duration:0
       });
     }
     // 没有response(没有状态码)的情况

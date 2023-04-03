@@ -3,15 +3,38 @@ import { ref, onMounted, Ref, inject, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // import { getPageData } from '@/api/api-easy-edit';
-import { createPage } from '@/api/api-easy-edit';
+import { modifyFloorData, getSingleFloorData } from '@/api/api-easy-edit';
 
 import OIcon from '@/components/OIcon.vue';
+import { OButton } from '@/components/button';
 
 import IconAdd from '~icons/app/icon-add.svg';
 import IconTime from '~icons/app/icon-time.svg';
+import IconWarn from '~icons/edit/icon-warn.svg';
+
+import { usePageData } from '@/stores';
 
 const { locale } = useI18n();
 
+// const scheduleData = computed({
+//   get: () =>
+//     usePageData().pageData.get('schedule')
+//       ? JSON.parse(usePageData().pageData.get('schedule').content)
+//       : scheduleDataTemp.value;
+//   ,
+//   set:(val) =>
+//   val
+//   ,
+// });
+const scheduleData = computed({
+  get: () =>
+    usePageData().pageData.get('schedule')
+      ? JSON.parse(usePageData().pageData.get('schedule').content)
+      : scheduleDataTemp.value,
+  set: (val) => {
+    val;
+  },
+});
 const modeType = inject('modeType') as Ref<boolean>;
 
 // import { ElMessage } from 'element-plus';
@@ -20,7 +43,7 @@ const isEditStyle = computed(() => {
   return !modeType.value;
 });
 
-const scheduleData: any = ref({
+const scheduleDataTemp: any = ref({
   title: '12月28日 操作系统产业峰会 2022',
   content: [
     {
@@ -86,63 +109,24 @@ const scheduleData: any = ref({
             },
           ],
         },
-        {
-          id: 2,
-          name: '统信软件',
-          content: [
-            {
-              time: ['14:00', '14:05'],
-              desc: '欢迎致辞',
-              person: [
-                {
-                  name: '张木梁',
-                  post: ['统信软件生态中心副总经理'],
-                },
-              ],
-              detail: [''],
-            },
-          ],
-        },
-        {
-          id: 3,
-          name: '软通动力',
-          title: '',
-          content: [
-            {
-              time: ['14:00', '14:10'],
-              desc: '欧拉社区领导致辞',
-              person: [
-                {
-                  name: '冯冠霖',
-                  post: ['开放原子开源基金会秘书长'],
-                },
-              ],
-              detail: ['3333333'],
-            },
-          ],
-        },
-        {
-          id: 4,
-          name: '中科创达',
-          title: '开放融合创新 崛起数智行业',
-          content: [
-            {
-              time: ['14:00', '14:05'],
-              desc: '欧拉社区领导致辞',
-              person: [
-                {
-                  name: '熊伟',
-                  post: ['开放原子开源基金会TOC委员'],
-                },
-              ],
-              detail: [''],
-            },
-          ],
-        },
       ],
     },
   ],
 });
+const param = {
+  content: '',
+  name: 'schedule',
+  description: '',
+  path: 'https://www.openeuler.org/zh/interaction/summit-list/devday2023/',
+  title: '',
+  isPrivate: false,
+  type: 'event',
+  locale: locale.value,
+  contentType: 'application/json;charset=UTF-8',
+};
+
+const delRowDialogVisiable = ref(false);
+
 // 控制分论坛的详情弹窗显示
 const indexShow: any = ref(-1);
 const idShow: any = ref(-1);
@@ -214,11 +198,20 @@ function delContent(index: number) {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value
   ].content.splice(index, 1);
+  otherTabType.value = index === 0 ? 0 : index - 1;
+  // toggleDelDlg(true);
 }
+// function confirmDelContent(index: number) {
+//   scheduleData.value.content[tabType.value].content[
+//     otherTabType.value
+//   ].content.splice(index, 1);
+// }
 // 删除分论坛标题
 function delSubtitle2(index: number) {
   scheduleData.value.content[tabType.value].content.splice(index, 1);
-  otherTabType.value = 0;
+  console.log(scheduleData.value.content[tabType.value].content);
+
+  otherTabType.value = index === 0 ? 0 : index - 1;
 }
 // 增加分论坛标题
 function addSubtitle2() {
@@ -241,36 +234,38 @@ function addSubtitle2() {
       },
     ],
   });
-  otherTabType.value = 0;
+  const index = scheduleData.value.content[tabType.value].content.length;
+  otherTabType.value = index === 0 ? 0 : index - 1;
 }
 // 保持页面数据
 function savePageData() {
-  // modifyFloorData(6).then(() => {
-  //   ElMessage({
-  //     type: 'success',
-  //     message: '保存成功',
-  //   });
-  // });
+  param.content = JSON.stringify(scheduleDataTemp.value);
+  modifyFloorData(param)
+    .then((res: { statusCode: number }) => {
+      if (res?.statusCode !== 200) {
+        // 修改出错内容回显
+        getSingleFloorData(param.path, param.name).then((res: any) => {
+          param.content = res?.data?.content;
+          param.title = res?.data?.title;
+          usePageData().pageData.set(param.name, param);
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
-function createNewPage() {
-  const param = {
-    content: JSON.stringify(scheduleData.value),
-    name: 'schedule',
-    description: '',
-    path: 'https://www.openeuler.org/zh/interaction/summit-list/devday2023/',
-    title: '',
-    isPrivate: false,
-    type: 'event',
-    locale: locale.value,
-    contentType: 'json',
-  };
-  createPage(param).then(() => {
-    // ElMessage({
-    //   type: 'success',
-    //   message: '成功',
-    // });
-  });
+function toggleDelDlg(val: boolean) {
+  delRowDialogVisiable.value = val;
 }
+// function createNewPage() {
+//   createPage(param).then(() => {
+//     ElMessage({
+//       type: 'success',
+//       message: '成功',
+//     });
+//   });
+// }
 onMounted(() => {
   // handleGetPageData();
 });
@@ -322,7 +317,7 @@ onMounted(() => {
         :key="scheduleItem.id"
       >
         <div
-          v-show="tabType == index && scheduleItem.content[0].content"
+          v-show="tabType == index && scheduleItem?.content[0].content"
           class="schedule-item other"
         >
           <el-tabs
@@ -517,16 +512,41 @@ onMounted(() => {
       </template>
     </el-container>
   </div>
+  <el-dialog
+    v-model="delRowDialogVisiable"
+    class="publish-dialog"
+    :show-close="false"
+    width="640"
+  >
+    <template #header>
+      <OIcon class="danger1">
+        <IconWarn />
+      </OIcon>
+    </template>
+    <h3>
+      是否确认
+      <span class="danger1">删除</span>
+      本行
+    </h3>
+    <!-- TODO: 用户名 -->
+    <template #footer>
+      <o-button size="small" @click="toggleDelDlg(false)">取消</o-button>
+      <!-- <o-button size="small" type="primary" @click="confirmDel()">
+        确定</o-button
+      > -->
+    </template>
+  </el-dialog>
   <div class="contoral-box">
     <el-button @click="savePageData">保存</el-button>
-    <el-button @click="createNewPage">新建</el-button>
+    <!-- <el-button @click="createNewPage">新建</el-button> -->
   </div>
 </template>
 
 <style lang="scss" scoped>
-.el-button {
-  border-radius: 0;
+.danger1 {
+  color: #e02020;
 }
+
 :deep(.el-input) {
   .el-input__wrapper {
     border: 1px solid transparent;

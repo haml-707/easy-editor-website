@@ -5,7 +5,9 @@ import NotFound from '@/assets/common/404/404.png';
 <template>
   <div class="nofound">
     <img :src="NotFound" class="nofound-img" alt="" />
-    <p class="nofound-text">页面不存在或无权限访问</p>
+    <p class="nofound-text">
+      页面不存在或无权限访问，<a href="/zh/">返回首页</a>
+    </p>
   </div>
 </template>
 

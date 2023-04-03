@@ -23,7 +23,10 @@ export default (err: AxiosError) => {
             path: '/zh/404',
           });
         }
-        err.message = '未授权，请重新登录(401)';
+        err.message =
+          res?.message === 'token expires'
+            ? '您的账号信息已过期，请重新登陆'
+            : '未授权，请重新登录(401)';
         break;
       case 403:
         err.message = res?.message || '拒绝访问(403)';
