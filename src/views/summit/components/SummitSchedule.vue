@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, Ref, inject, computed } from 'vue';
+import { ref, onMounted, Ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // import { getPageData } from '@/api/api-easy-edit';
@@ -11,6 +11,8 @@ import { OButton } from '@/components/button';
 import IconAdd from '~icons/app/icon-add.svg';
 import IconTime from '~icons/app/icon-time.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
+
+import { ElMessage } from 'element-plus';
 
 import { usePageData } from '@/stores';
 
@@ -26,18 +28,17 @@ const { locale } = useI18n();
 //   val
 //   ,
 // });
-const scheduleData = computed({
-  get: () =>
-    usePageData().pageData.get('schedule')
-      ? JSON.parse(usePageData().pageData.get('schedule').content)
-      : scheduleDataTemp.value,
-  set: (val) => {
-    val;
-  },
-});
-const modeType = inject('modeType') as Ref<boolean>;
+// const scheduleData = computed({
+//   get: () =>
+//     usePageData().pageData.get('schedule')
+//       ? JSON.parse(usePageData().pageData.get('schedule').content)
+//       : scheduleDataTemp.value,
+//   set: (val) => {
+//     val;
+//   },
+// });
 
-// import { ElMessage } from 'element-plus';
+const modeType = inject('modeType') as Ref<boolean>;
 
 const isEditStyle = computed(() => {
   return !modeType.value;
@@ -65,7 +66,7 @@ const scheduleDataTemp: any = ref({
                   post: ['XXX成员'],
                 },
               ],
-              detail: [''],
+              detail: '描述',
             },
           ],
         },
@@ -80,6 +81,7 @@ const scheduleDataTemp: any = ref({
           name: '麒麟软件',
           content: [
             {
+              id: window.crypto.randomUUID(),
               time: ['14:00', '14:10'],
               desc: '欧拉社区领导致辞',
               person: [
@@ -88,7 +90,7 @@ const scheduleDataTemp: any = ref({
                   post: ['开放原子开源基金会秘书长'],
                 },
               ],
-              detail: ['EEEEEE'],
+              detail: '描述',
             },
           ],
         },
@@ -97,6 +99,7 @@ const scheduleDataTemp: any = ref({
           name: '麒麟信安',
           content: [
             {
+              id: window.crypto.randomUUID(),
               time: ['14:00', '14:10'],
               desc: '致辞',
               person: [
@@ -105,7 +108,7 @@ const scheduleDataTemp: any = ref({
                   post: ['麒麟信安高级副总裁'],
                 },
               ],
-              detail: [''],
+              detail: '描述',
             },
           ],
         },
@@ -113,6 +116,22 @@ const scheduleDataTemp: any = ref({
     },
   ],
 });
+const scheduleData = ref(
+  usePageData().pageData.get('schedule')
+    ? JSON.parse(usePageData().pageData.get('schedule').content)
+    : scheduleDataTemp.value
+);
+watch(
+  () => usePageData().pageData.get('schedule'),
+  () => {
+    scheduleData.value = JSON.parse(
+      usePageData().pageData.get('schedule').content
+    );
+  },
+  {
+    deep: true,
+  }
+);
 const param = {
   content: '',
   name: 'schedule',
@@ -166,7 +185,7 @@ function handleInputBlur() {
 //                 post: ['XXX成员'],
 //               },
 //             ],
-//             detail: [''],
+//             detail: '描述',
 //           },
 //         ],
 //       },
@@ -190,7 +209,7 @@ function addContent() {
         post: ['XXX成员'],
       },
     ],
-    detail: [''],
+    detail: '描述',
   });
 }
 // 删除一行表格
@@ -230,7 +249,7 @@ function addSubtitle2() {
             post: ['开放原子开源基金会秘书长'],
           },
         ],
-        detail: ['EEEEEE'],
+        detail: '描述',
       },
     ],
   });
@@ -239,15 +258,20 @@ function addSubtitle2() {
 }
 // 保持页面数据
 function savePageData() {
-  param.content = JSON.stringify(scheduleDataTemp.value);
+  param.content = JSON.stringify(scheduleData.value);
   modifyFloorData(param)
     .then((res: { statusCode: number }) => {
       if (res?.statusCode !== 200) {
         // 修改出错内容回显
-        getSingleFloorData(param.path, param.name).then((res: any) => {
-          param.content = res?.data?.content;
-          param.title = res?.data?.title;
-          usePageData().pageData.set(param.name, param);
+        // getSingleFloorData(param.path, param.name).then((res: any) => {
+        //   param.content = res?.data?.content;
+        //   param.title = res?.data?.title;
+        //   usePageData().pageData.set(param.name, param);
+        // });
+      } else {
+        ElMessage({
+          type: 'success',
+          message: '保持成功',
         });
       }
     })
@@ -448,20 +472,16 @@ onMounted(() => {
                     </span>
                   </div>
                 </div>
-                <div v-if="subItem.detail[0]" class="detail">
+                <div v-if="subItem.detail" class="detail">
                   <p>
                     <span>议题名称：</span><span> {{ subItem.desc }}</span>
                   </p>
-                  <p v-if="subItem.detail[0]">
+                  <p v-if="subItem.detail">
                     <span>议题简介：</span
                     ><span
-                      ><span
-                        v-for="(itemDetail, detailIndex) in subItem.detail"
-                        :key="detailIndex"
-                        class="detail-text"
-                      >
+                      ><span class="detail-text">
                         <el-input
-                          v-model="subItem.detail[detailIndex]"
+                          v-model="subItem.detail"
                           :readonly="!isEditStyle"
                           type="text"
                           @blur="handleInputBlur"
