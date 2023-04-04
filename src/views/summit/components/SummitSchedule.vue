@@ -3,7 +3,7 @@ import { ref, onMounted, Ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // import { getPageData } from '@/api/api-easy-edit';
-import { modifyFloorData, getSingleFloorData } from '@/api/api-easy-edit';
+import { modifyFloorData } from '@/api/api-easy-edit';
 
 import OIcon from '@/components/OIcon.vue';
 import { OButton } from '@/components/button';
@@ -145,7 +145,8 @@ const param = {
 };
 
 const delRowDialogVisiable = ref(false);
-
+const delTabDialogVisiable = ref(false);
+const delIndex = ref(0);
 // 控制分论坛的详情弹窗显示
 const indexShow: any = ref(-1);
 const idShow: any = ref(-1);
@@ -214,23 +215,24 @@ function addContent() {
 }
 // 删除一行表格
 function delContent(index: number) {
+  delIndex.value = index;
+  toggleDelDlg(true);
+}
+function confirmDelContent() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value
-  ].content.splice(index, 1);
-  otherTabType.value = index === 0 ? 0 : index - 1;
-  // toggleDelDlg(true);
+  ].content.splice(delIndex.value, 1);
+  toggleDelDlg(false);
 }
-// function confirmDelContent(index: number) {
-//   scheduleData.value.content[tabType.value].content[
-//     otherTabType.value
-//   ].content.splice(index, 1);
-// }
+function confirmDelTab() {
+  scheduleData.value.content[tabType.value].content.splice(delIndex.value, 1);
+  otherTabType.value = delIndex.value === 0 ? 0 : delIndex.value - 1;
+  toggleDelTabDlg(false);
+}
 // 删除分论坛标题
 function delSubtitle2(index: number) {
-  scheduleData.value.content[tabType.value].content.splice(index, 1);
-  console.log(scheduleData.value.content[tabType.value].content);
-
-  otherTabType.value = index === 0 ? 0 : index - 1;
+  delIndex.value = index;
+  toggleDelTabDlg(true);
 }
 // 增加分论坛标题
 function addSubtitle2() {
@@ -281,6 +283,9 @@ function savePageData() {
 }
 function toggleDelDlg(val: boolean) {
   delRowDialogVisiable.value = val;
+}
+function toggleDelTabDlg(val: boolean) {
+  delTabDialogVisiable.value = val;
 }
 // function createNewPage() {
 //   createPage(param).then(() => {
@@ -375,7 +380,11 @@ onMounted(() => {
 
             <el-tab-pane v-if="isEditStyle">
               <template #label>
-                <OIcon class="icon-add" @click.stop="addSubtitle2">
+                <OIcon
+                  class="icon-add"
+                  :class="scheduleItem.content.length ? 'margin-left' : ''"
+                  @click.stop="addSubtitle2"
+                >
                   <IconAdd />
                 </OIcon>
               </template>
@@ -551,9 +560,33 @@ onMounted(() => {
     <!-- TODO: 用户名 -->
     <template #footer>
       <o-button size="small" @click="toggleDelDlg(false)">取消</o-button>
-      <!-- <o-button size="small" type="primary" @click="confirmDel()">
+      <o-button size="small" type="primary" @click="confirmDelContent()">
         确定</o-button
-      > -->
+      >
+    </template>
+  </el-dialog>
+  <el-dialog
+    v-model="delTabDialogVisiable"
+    class="publish-dialog"
+    :show-close="false"
+    width="640"
+  >
+    <template #header>
+      <OIcon class="danger1">
+        <IconWarn />
+      </OIcon>
+    </template>
+    <h3>
+      是否确认
+      <span class="danger1">删除</span>
+      本分论坛所有日程
+    </h3>
+    <!-- TODO: 用户名 -->
+    <template #footer>
+      <o-button size="small" @click="toggleDelTabDlg(false)">取消</o-button>
+      <o-button size="small" type="primary" @click="confirmDelTab()">
+        确定</o-button
+      >
     </template>
   </el-dialog>
   <div class="contoral-box">
@@ -863,6 +896,9 @@ onMounted(() => {
   border-radius: 50%;
   border: 1px solid var(--o-color-brand1);
   color: var(--o-color-brand1);
+}
+.margin-left {
+  margin-left: 40px;
 }
 .content-list {
   @media screen and (max-width: 1100px) {
