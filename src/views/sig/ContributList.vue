@@ -114,7 +114,7 @@ const componentName = 'member';
 const loading = ref(true);
 const getContributeInfo = (e: IObject) => {
   param.value[e.id] = e.active;
-  getMemberData();
+  // getMemberData();
   switchType();
 };
 const typeLable = ref('');
@@ -135,7 +135,7 @@ switchType();
 watch(
   () => props.sig,
   () => {
-    getMemberData();
+    // getMemberData();
   },
   { immediate: true }
 );
@@ -164,7 +164,7 @@ const querySearch = () => {
   }
 };
 const clearSearchInput = () => {
-  getMemberData();
+  // getMemberData();
   searchInput.value = '';
 };
 
