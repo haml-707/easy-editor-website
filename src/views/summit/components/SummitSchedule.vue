@@ -145,7 +145,9 @@ const param = {
 };
 
 const delRowDialogVisiable = ref(false);
+
 const delTabDialogVisiable = ref(false);
+
 const delIndex = ref(0);
 // 控制分论坛的详情弹窗显示
 const indexShow: any = ref(-1);
@@ -370,7 +372,7 @@ onMounted(() => {
                     />
                     <span
                       v-show="isEditStyle"
-                      class="del-icon del-title"
+                      class="icon-del del-title"
                       @click.stop="delSubtitle2(scheduleIndex)"
                     ></span>
                   </div>
@@ -480,6 +482,13 @@ onMounted(() => {
                       />
                     </span>
                   </div>
+                  <span v-show="isEditStyle" class="icon-del"
+                    ><span class="tip">删除附属信息</span></span
+                  >
+                  <OIcon v-show="isEditStyle" class="icon-add">
+                    <span class="tip">新增附属信息</span>
+                    <IconAdd />
+                  </OIcon>
                 </div>
                 <div v-if="subItem.detail" class="detail">
                   <p>
@@ -524,7 +533,7 @@ onMounted(() => {
                 ></div>
                 <span
                   v-if="isEditStyle"
-                  class="del-icon del-content"
+                  class="icon-del del-content"
                   @click="delContent(subIndex)"
                 ></span>
               </div>
@@ -862,7 +871,7 @@ onMounted(() => {
     }
   }
 }
-.del-icon {
+.icon-del {
   cursor: pointer;
   position: absolute;
   top: 50%;
@@ -924,6 +933,30 @@ onMounted(() => {
       position: static;
     }
     .name-box {
+      position: relative;
+      .icon-add,
+      .icon-del {
+        width: 16px;
+        height: 16px;
+        right: -8px;
+        background-color: var(--o-color-bg2);
+        .tip {
+          display: none;
+        }
+      }
+      .icon-add {
+        position: absolute;
+        bottom: -8px;
+      }
+      .icon-del {
+        top: 0;
+        left: inherit;
+        &::after {
+          height: 2px;
+          border-radius: 1px;
+          width: calc(100% - 6px);
+        }
+      }
       @media screen and (max-width: 1100px) {
         grid-column-end: 3;
       }
