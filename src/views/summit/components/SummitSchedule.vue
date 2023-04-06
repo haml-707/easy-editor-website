@@ -133,6 +133,8 @@ const delRowDialogVisiable = ref(false);
 
 const delTabDialogVisiable = ref(false);
 
+const agendaDialogVisiable = ref(false);
+
 const delIndex = ref(0);
 // 控制分论坛的详情弹窗显示
 const indexShow: any = ref(-1);
@@ -297,6 +299,9 @@ function savePageData() {
 function toggleDelDlg(val: boolean) {
   delRowDialogVisiable.value = val;
 }
+function toggleAgendaDlg(val: boolean) {
+  agendaDialogVisiable.value = val;
+}
 function toggleDelTabDlg(val: boolean) {
   delTabDialogVisiable.value = val;
 }
@@ -459,21 +464,33 @@ onMounted(() => {
                 <span
                   class="desc"
                   :class="{ 'exit-detail': subItem.detail[0] }"
-                  @click="changeIndexShow(listIndex, subIndex as any)"
+                  @click="
+                    !isEditStyle
+                      ? changeIndexShow(listIndex, subIndex as any)
+                      : ''
+                  "
                 >
                   <el-input
                     v-model="subItem.desc"
                     :readonly="!isEditStyle"
                     type="text"
                     @blur="handleInputBlur"
-                /></span>
+                  />
+                  <OIcon
+                    v-show="isEditStyle"
+                    class="icon-add"
+                    @click="toggleAgendaDlg(true)"
+                  >
+                    <IconAdd />
+                  </OIcon>
+                </span>
                 <div v-if="subItem.person[0]" class="name-box">
                   <div
                     v-for="(personItem, personIndex) in subItem.person"
                     :key="personItem.id"
                     class="name-item"
                   >
-                    <span class="name">
+                    <span v-show="personItem.name" class="name">
                       <el-input
                         v-model="personItem.name"
                         :readonly="!isEditStyle"
@@ -568,6 +585,35 @@ onMounted(() => {
     </el-container>
   </div>
   <el-dialog
+    v-model="agendaDialogVisiable"
+    class="agenda-dialog"
+    :show-close="false"
+    width="640"
+  >
+    <template #header>
+      <h3>编辑议题简介</h3>
+    </template>
+    <div class="line-input">
+      <span class="label">议题名称</span> <el-input></el-input>
+    </div>
+    <div class="line-input">
+      <span class="label">议题简介</span>
+      <el-input
+        type="textarea"
+        maxlength="300"
+        show-word-limit
+        :autosize="{ minRows: 12, maxRows: 20 }"
+      ></el-input>
+    </div>
+    <!-- TODO: 用户名 -->
+    <template #footer>
+      <o-button size="small" @click="toggleAgendaDlg(false)">取消</o-button>
+      <o-button size="small" type="primary" @click="confirmDelContent()">
+        确定</o-button
+      >
+    </template>
+  </el-dialog>
+  <el-dialog
     v-model="delRowDialogVisiable"
     class="publish-dialog"
     :show-close="false"
@@ -617,7 +663,6 @@ onMounted(() => {
   </el-dialog>
   <div class="contoral-box">
     <el-button @click="savePageData">保存</el-button>
-    <!-- <el-button @click="createNewPage">新建</el-button> -->
   </div>
 </template>
 
@@ -875,16 +920,35 @@ onMounted(() => {
   }
 }
 .is-edit {
+  :deep(.el-input__wrapper) {
+    &:hover {
+      border: 1px solid var(--o-color-brand1);
+      box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+    }
+  }
   :deep(.el-input) {
-    .el-input__wrapper {
-      &:hover {
-        border: 1px solid var(--o-color-brand1);
-        box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+    .is-focus {
+      border: none;
+      box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
+    }
+  }
+  .name-item {
+    position: relative;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+    &:hover {
+      border: 1px solid var(--o-color-brand1);
+      box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+      .name {
+        display: inline-block !important;
       }
     }
-    .is-focus {
-      border: none !important;
-      box-shadow: 0 0 0 1px var(--o-color-brand1) inset !important;
+    &:focus-within {
+      border: 1px solid var(--o-color-brand1);
+      box-shadow: none;
+      .post {
+        border-left: 1px solid var(--o-color-brand1);
+      }
     }
   }
 }
@@ -951,9 +1015,6 @@ onMounted(() => {
     }
     .name-box {
       position: relative;
-      .name-item {
-        position: relative;
-      }
       .icon-add,
       .icon-del {
         position: relative;
@@ -1030,12 +1091,26 @@ onMounted(() => {
       }
     }
     .desc {
+      position: relative;
       font-size: 18px;
       line-height: 26px;
       color: var(--o-color-text1);
       display: inline-block;
       margin-right: 36px;
       cursor: default;
+      &:focus-within {
+        .o-icon {
+          display: block;
+        }
+      }
+      .o-icon {
+        position: absolute;
+        right: -8px;
+        top: -8px;
+        width: 16px;
+        height: 16px;
+        background-color: var(--o-color-bg2);
+      }
       @media (max-width: 1100px) {
         margin-right: 0;
         font-size: 12px;
@@ -1049,6 +1124,10 @@ onMounted(() => {
       color: var(--o-color-text3);
       font-size: 16px;
       line-height: 24px;
+      :deep(.el-input__wrapper) {
+        box-shadow: none;
+        border: none;
+      }
       @media (max-width: 1100px) {
         font-size: 12px;
         line-height: 18px;
@@ -1061,31 +1140,32 @@ onMounted(() => {
       font-size: 16px;
       line-height: 24px;
       flex: 1;
+      border-left: 1px solid transparent;
+      transition: all 0.3s;
       :deep(.el-textarea) {
         textarea {
           resize: none;
-          border: 1px solid transparent;
           min-height: 38px !important;
           padding: 8px 14px !important;
-          &:not(:focus) {
-            box-shadow: none;
-          }
-          &:hover:not(:focus):not([readonly]) {
-            border: 1px solid var(--o-color-brand1);
-            box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
-          }
-          &[readonly] {
-            cursor: text;
-            padding: 0;
-            box-shadow: none;
+          // &:not(:focus) {
+          //   box-shadow: none;
+          // }
+          // &:hover:not(:focus):not([readonly]) {
+          //   border: 1px solid var(--o-color-brand1);
+          //   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+          // }
+          // &[readonly] {
+          cursor: text;
+          padding: 0;
+          box-shadow: none;
+          border: none;
+          resize: none;
+          &:focus-visible {
             border: none;
-            resize: none;
-            &:focus-visible {
-              border: none;
-              box-shadow: none;
-              outline: none;
-            }
+            box-shadow: none;
+            outline: none;
           }
+          // }
         }
       }
       @media (max-width: 1100px) {
@@ -1216,6 +1296,41 @@ onMounted(() => {
   .sub-container {
     .content-item {
       grid-template-columns: 192px auto 96px 410px;
+    }
+  }
+}
+</style>
+<style lang="scss">
+.agenda-dialog {
+  h3 {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--o-color-text1);
+    line-height: 32px;
+    text-align: center;
+  }
+  .line-input {
+    display: flex;
+    align-items: center;
+    &:not(:first-child) {
+      margin-top: 16px;
+    }
+    .is-focus {
+      box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
+    }
+    .label {
+      font-size: var(--o-font-size-text);
+      color: #555;
+      flex-shrink: 0;
+      width: fit-content;
+      margin-right: 40px;
+    }
+  }
+  .el-dialog__footer {
+    display: flex;
+    justify-content: center;
+    .o-button:first-child {
+      margin-right: 16px;
     }
   }
 }

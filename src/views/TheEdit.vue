@@ -7,7 +7,7 @@ import OIcon from '@/components/OIcon.vue';
 
 import IconSearch from '~icons/app/icon-search.svg';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
-import { profileData } from '@/api/api-easy-edit';
+import { profileData, getDataByVersion1 } from '@/api/api-easy-edit';
 import { getUrlParams } from '@/shared/utils';
 
 interface EditData {
@@ -17,6 +17,9 @@ interface EditData {
   path: string;
   updated_at: string;
 }
+getDataByVersion1().then((res) => {
+  console.log(res);
+});
 
 const router = useRouter();
 

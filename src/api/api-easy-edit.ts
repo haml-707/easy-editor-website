@@ -173,3 +173,16 @@ export function getDataByVersion(path: string, version: number) {
       console.error(e);
     });
 }
+/**
+ * 查询某个网页的某个发布版本内容
+ * @name getDataByVersion
+ */
+export function getDataByVersion1() {
+  const url = `/api-edit/publish/latest?path=https://www.openeuler.org/zh/interaction/summit-list/devday2023/`;
+  return request
+    .get(url)
+    .then((res: AxiosResponse) => res?.data)
+    .catch((e: any) => {
+      console.error(e);
+    });
+}
