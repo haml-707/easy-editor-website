@@ -38,7 +38,7 @@ const scheduleDataTemp: any = ref({
             {
               id: window.crypto.randomUUID(),
               time: ['14:00', '14:05'],
-              desc: 'XXX领导致辞',
+              desc: '',
               person: [
                 {
                   id: window.crypto.randomUUID(),
@@ -51,7 +51,7 @@ const scheduleDataTemp: any = ref({
                   post: 'XXX成员',
                 },
               ],
-              detail: '描述',
+              detail: '描述5555',
             },
           ],
         },
@@ -102,16 +102,20 @@ const scheduleDataTemp: any = ref({
   ],
 });
 const scheduleData = ref(
-  ''
+  usePageData().pageData.get('schedule')?.content
     ? JSON.parse(usePageData().pageData.get('schedule').content)
     : scheduleDataTemp.value
 );
+
+const dialogTopicTitle = ref('');
+
+const dialogTopicContnet = ref('');
 watch(
   () => usePageData().pageData.get('schedule'),
   () => {
-    // scheduleData.value = JSON.parse(
-    //   usePageData().pageData.get('schedule').content
-    // );
+    scheduleData.value = JSON.parse(
+      usePageData().pageData.get('schedule').content
+    );
   },
   {
     deep: true,
@@ -149,10 +153,6 @@ const tabType = ref(0);
 const otherTabType = ref(0);
 function tabClick() {
   otherTabType.value = 0;
-}
-
-function handleInputBlur() {
-  console.log('失焦事件');
 }
 
 // function addSubtitle() {
@@ -299,8 +299,22 @@ function savePageData() {
 function toggleDelDlg(val: boolean) {
   delRowDialogVisiable.value = val;
 }
-function toggleAgendaDlg(val: boolean) {
+function toggleAgendaDlg(val: boolean, listIndex?: number) {
+  if (listIndex || listIndex === 0) {
+    const targetData =
+      scheduleData.value.content[tabType.value].content[otherTabType.value]
+        .content[listIndex];
+    dialogTopicContnet.value = targetData.detail;
+    dialogTopicTitle.value = targetData.desc;
+    idShow.value = listIndex;
+  }
   agendaDialogVisiable.value = val;
+}
+function confirmSaveAgenda() {
+  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
+    idShow.value
+  ].detail = dialogTopicContnet.value;
+  toggleAgendaDlg(false);
 }
 function toggleDelTabDlg(val: boolean) {
   delTabDialogVisiable.value = val;
@@ -326,7 +340,6 @@ onMounted(() => {
         v-model="scheduleData.title"
         :readonly="!isEditStyle"
         type="text"
-        @blur="handleInputBlur"
       />
     </h4>
     <el-tabs
@@ -345,7 +358,6 @@ onMounted(() => {
               v-model="itemList.lable"
               :readonly="!isEditStyle"
               type="text"
-              @blur="handleInputBlur"
             />
             <!-- <span
               v-if="isEditStyle"
@@ -384,7 +396,6 @@ onMounted(() => {
                       v-model="itemList.name"
                       :readonly="!isEditStyle"
                       type="text"
-                      @blur="handleInputBlur"
                     />
                     <span
                       v-show="isEditStyle"
@@ -419,7 +430,7 @@ onMounted(() => {
                 v-model="itemList.title"
                 :readonly="!isEditStyle"
                 type="text"
-                @blur="handleInputBlur"
+                
               />
             </h4> -->
             <div class="content-list">
@@ -449,7 +460,6 @@ onMounted(() => {
                     class="el-input-time"
                     :readonly="!isEditStyle"
                     type="text"
-                    @blur="handleInputBlur"
                   />
                   -
                   <el-input
@@ -457,7 +467,6 @@ onMounted(() => {
                     class="el-input-time"
                     :readonly="!isEditStyle"
                     type="text"
-                    @blur="handleInputBlur"
                   />
                   <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
                 </span>
@@ -474,12 +483,11 @@ onMounted(() => {
                     v-model="subItem.desc"
                     :readonly="!isEditStyle"
                     type="text"
-                    @blur="handleInputBlur"
                   />
                   <OIcon
                     v-show="isEditStyle"
                     class="icon-add"
-                    @click="toggleAgendaDlg(true)"
+                    @click="toggleAgendaDlg(true, subIndex)"
                   >
                     <IconAdd />
                   </OIcon>
@@ -496,7 +504,6 @@ onMounted(() => {
                         :readonly="!isEditStyle"
                         placeholder="输入名称"
                         type="text"
-                        @blur="handleInputBlur"
                       />
                     </span>
                     <span class="post">
@@ -506,10 +513,8 @@ onMounted(() => {
                         v-model="personItem.post"
                         :readonly="!isEditStyle"
                         :autosize="{ minRows: 1, maxRows: 10 }"
-                        placeholder="输入附属信息"
                         maxlength="100"
                         type="textarea"
-                        @blur="handleInputBlur"
                       />
                     </span>
                     <span
@@ -536,13 +541,9 @@ onMounted(() => {
                     <span>议题简介：</span
                     ><span
                       ><span class="detail-text">
-                        <el-input
-                          v-model="subItem.detail"
-                          :readonly="!isEditStyle"
-                          type="text"
-                          @blur="handleInputBlur"
-                        /> </span
-                    ></span>
+                        {{ subItem.detail }}
+                      </span></span
+                    >
                   </p>
                   <!-- <p v-if="subItem.person[0]">
                     <span>发言人：</span>
@@ -594,21 +595,22 @@ onMounted(() => {
       <h3>编辑议题简介</h3>
     </template>
     <div class="line-input">
-      <span class="label">议题名称</span> <el-input></el-input>
+      <span class="label">议题名称</span>
+      <el-input readonly v-model="dialogTopicTitle"></el-input>
     </div>
     <div class="line-input">
       <span class="label">议题简介</span>
       <el-input
+        v-model="dialogTopicContnet"
         type="textarea"
         maxlength="300"
         show-word-limit
         :autosize="{ minRows: 12, maxRows: 20 }"
       ></el-input>
     </div>
-    <!-- TODO: 用户名 -->
     <template #footer>
       <o-button size="small" @click="toggleAgendaDlg(false)">取消</o-button>
-      <o-button size="small" type="primary" @click="confirmDelContent()">
+      <o-button size="small" type="primary" @click="confirmSaveAgenda()">
         确定</o-button
       >
     </template>
@@ -629,7 +631,6 @@ onMounted(() => {
       <span class="danger1">删除</span>
       本行
     </h3>
-    <!-- TODO: 用户名 -->
     <template #footer>
       <o-button size="small" @click="toggleDelDlg(false)">取消</o-button>
       <o-button size="small" type="primary" @click="confirmDelContent()">
@@ -653,7 +654,6 @@ onMounted(() => {
       <span class="danger1">删除</span>
       本分论坛所有日程
     </h3>
-    <!-- TODO: 用户名 -->
     <template #footer>
       <o-button size="small" @click="toggleDelTabDlg(false)">取消</o-button>
       <o-button size="small" type="primary" @click="confirmDelTab()">
@@ -674,15 +674,17 @@ onMounted(() => {
 :deep(.el-input) {
   .el-input__wrapper {
     border: 1px solid transparent;
-    box-shadow: none;
+    &:not(.is-focus) {
+      box-shadow: none;
+    }
     input {
       &[readonly] {
         cursor: text;
         padding: 0;
         box-shadow: none;
-        border: none;
+        border: 1px solid transparent;
         &:focus-visible {
-          border: none;
+          border: 1px solid transparent;
           box-shadow: none;
           outline: none;
         }
@@ -928,7 +930,7 @@ onMounted(() => {
   }
   :deep(.el-input) {
     .is-focus {
-      border: none;
+      border: 1px solid transparent;
       box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
     }
   }
@@ -1126,7 +1128,7 @@ onMounted(() => {
       line-height: 24px;
       :deep(.el-input__wrapper) {
         box-shadow: none;
-        border: none;
+        border: 1px solid transparent;
       }
       @media (max-width: 1100px) {
         font-size: 12px;
@@ -1147,25 +1149,16 @@ onMounted(() => {
           resize: none;
           min-height: 38px !important;
           padding: 8px 14px !important;
-          // &:not(:focus) {
-          //   box-shadow: none;
-          // }
-          // &:hover:not(:focus):not([readonly]) {
-          //   border: 1px solid var(--o-color-brand1);
-          //   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
-          // }
-          // &[readonly] {
           cursor: text;
           padding: 0;
           box-shadow: none;
-          border: none;
+          border: 1px solid transparent;
           resize: none;
           &:focus-visible {
-            border: none;
+            border: 1px solid transparent;
             box-shadow: none;
             outline: none;
           }
-          // }
         }
       }
       @media (max-width: 1100px) {
@@ -1312,15 +1305,22 @@ onMounted(() => {
   .line-input {
     display: flex;
     align-items: center;
+    .el-input {
+      .el-input__wrapper {
+        box-shadow: 0 0 0 1px #cccccc inset;
+        .el-input__inner {
+          color: #999999;
+          cursor: not-allowed;
+        }
+      }
+    }
     &:not(:first-child) {
       margin-top: 16px;
     }
-    .is-focus {
-      box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
-    }
+
     .label {
       font-size: var(--o-font-size-text);
-      color: #555;
+      color: var(--o-color-text4);
       flex-shrink: 0;
       width: fit-content;
       margin-right: 40px;
