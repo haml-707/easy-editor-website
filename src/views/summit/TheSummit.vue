@@ -18,7 +18,6 @@ import AppEditTemplate from '@/components/AppEditTemplate.vue';
   display: flex;
   flex-direction: column;
   gap: var(--o-gap-5) 0;
-  overflow: hidden;
   max-width: 1504px;
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
   margin: 0 auto;

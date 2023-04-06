@@ -18,26 +18,6 @@ import { usePageData } from '@/stores';
 
 const { locale } = useI18n();
 
-// const scheduleData = computed({
-//   get: () =>
-//     usePageData().pageData.get('schedule')
-//       ? JSON.parse(usePageData().pageData.get('schedule').content)
-//       : scheduleDataTemp.value;
-//   ,
-//   set:(val) =>
-//   val
-//   ,
-// });
-// const scheduleData = computed({
-//   get: () =>
-//     usePageData().pageData.get('schedule')
-//       ? JSON.parse(usePageData().pageData.get('schedule').content)
-//       : scheduleDataTemp.value,
-//   set: (val) => {
-//     val;
-//   },
-// });
-
 const modeType = inject('modeType') as Ref<boolean>;
 
 const isEditStyle = computed(() => {
@@ -63,7 +43,12 @@ const scheduleDataTemp: any = ref({
                 {
                   id: window.crypto.randomUUID(),
                   name: '姓名',
-                  post: ['XXX成员'],
+                  post: 'XXX成员',
+                },
+                {
+                  id: window.crypto.randomUUID(),
+                  name: '姓名',
+                  post: 'XXX成员',
                 },
               ],
               detail: '描述',
@@ -87,7 +72,7 @@ const scheduleDataTemp: any = ref({
               person: [
                 {
                   name: '冯冠霖',
-                  post: ['开放原子开源基金会秘书长'],
+                  post: '开放原子开源基金会秘书长',
                 },
               ],
               detail: '描述',
@@ -105,7 +90,7 @@ const scheduleDataTemp: any = ref({
               person: [
                 {
                   name: '任启',
-                  post: ['麒麟信安高级副总裁'],
+                  post: '麒麟信安高级副总裁',
                 },
               ],
               detail: '描述',
@@ -117,16 +102,16 @@ const scheduleDataTemp: any = ref({
   ],
 });
 const scheduleData = ref(
-  usePageData().pageData.get('schedule')
+  ''
     ? JSON.parse(usePageData().pageData.get('schedule').content)
     : scheduleDataTemp.value
 );
 watch(
   () => usePageData().pageData.get('schedule'),
   () => {
-    scheduleData.value = JSON.parse(
-      usePageData().pageData.get('schedule').content
-    );
+    // scheduleData.value = JSON.parse(
+    //   usePageData().pageData.get('schedule').content
+    // );
   },
   {
     deep: true,
@@ -185,7 +170,7 @@ function handleInputBlur() {
 //               {
 //                 id: window.crypto.randomUUID(),
 //                 name: '姓名',
-//                 post: ['XXX成员'],
+//                 post: '',
 //               },
 //             ],
 //             detail: '描述',
@@ -209,7 +194,7 @@ function addContent() {
     person: [
       {
         name: '姓名',
-        post: ['XXX成员'],
+        post: '',
       },
     ],
     detail: '描述',
@@ -219,6 +204,27 @@ function addContent() {
 function delContent(index: number) {
   delIndex.value = index;
   toggleDelDlg(true);
+}
+// 新增附属信息
+function addPersonData(index: number) {
+  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
+    index
+  ].person.push({
+    name: '',
+    post: '',
+  });
+}
+// 删除附属信息
+function delPersonData(subIndex: number, personIndex: number) {
+  if (
+    scheduleData.value.content[tabType.value].content[otherTabType.value]
+      .content[subIndex].person.length === 1
+  ) {
+    return false;
+  }
+  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
+    subIndex
+  ].person.splice(personIndex, 1);
 }
 function confirmDelContent() {
   scheduleData.value.content[tabType.value].content[
@@ -250,7 +256,12 @@ function addSubtitle2() {
           {
             id: window.crypto.randomUUID(),
             name: 'xxx',
-            post: ['开放原子开源基金会秘书长'],
+            post: '',
+          },
+          {
+            id: window.crypto.randomUUID(),
+            name: 'xxx',
+            post: '',
           },
         ],
         detail: '描述',
@@ -458,34 +469,44 @@ onMounted(() => {
                 /></span>
                 <div v-if="subItem.person[0]" class="name-box">
                   <div
-                    v-for="personItem in subItem.person"
+                    v-for="(personItem, personIndex) in subItem.person"
                     :key="personItem.id"
+                    class="name-item"
                   >
                     <span class="name">
                       <el-input
                         v-model="personItem.name"
                         :readonly="!isEditStyle"
+                        placeholder="输入名称"
                         type="text"
+                        @blur="handleInputBlur"
+                      />
+                    </span>
+                    <span class="post">
+                      <label :for="`textarea${personIndex}`"></label>
+                      <el-input
+                        :id="`textarea${personIndex}`"
+                        v-model="personItem.post"
+                        :readonly="!isEditStyle"
+                        :autosize="{ minRows: 1, maxRows: 10 }"
+                        placeholder="输入附属信息"
+                        maxlength="100"
+                        type="textarea"
                         @blur="handleInputBlur"
                       />
                     </span>
                     <span
-                      v-for="(postItem, postIndex) in personItem.post"
-                      :key="postIndex"
-                      class="post"
+                      v-show="isEditStyle"
+                      class="icon-del"
+                      @click="delPersonData(subIndex, personIndex)"
+                      ><span class="tip">删除附属信息</span></span
                     >
-                      <el-input
-                        v-model="personItem.post[postIndex]"
-                        :readonly="!isEditStyle"
-                        type="text"
-                        @blur="handleInputBlur"
-                      />
-                    </span>
                   </div>
-                  <span v-show="isEditStyle" class="icon-del"
-                    ><span class="tip">删除附属信息</span></span
+                  <OIcon
+                    v-show="isEditStyle"
+                    class="icon-add"
+                    @click="addPersonData(subIndex)"
                   >
-                  <OIcon v-show="isEditStyle" class="icon-add">
                     <span class="tip">新增附属信息</span>
                     <IconAdd />
                   </OIcon>
@@ -506,7 +527,7 @@ onMounted(() => {
                         /> </span
                     ></span>
                   </p>
-                  <p v-if="subItem.person[0]">
+                  <!-- <p v-if="subItem.person[0]">
                     <span>发言人：</span>
                     <span
                       v-for="personItem in subItem.person"
@@ -514,15 +535,11 @@ onMounted(() => {
                       >{{ personItem.name }}
                       <template v-if="personItem.post[0]">
                         <span>(</span>
-                        <span
-                          v-for="(postItem, postIndex) in personItem.post"
-                          :key="postIndex"
-                          >{{ postItem }}</span
-                        >
+                        <span>{{ personItem.post.split('\n') }}</span>
                         <span>)</span>
                       </template>
                     </span>
-                  </p>
+                  </p> -->
                 </div>
                 <div
                   v-show="
@@ -934,14 +951,33 @@ onMounted(() => {
     }
     .name-box {
       position: relative;
+      .name-item {
+        position: relative;
+      }
       .icon-add,
       .icon-del {
+        position: relative;
         width: 16px;
         height: 16px;
         right: -8px;
         background-color: var(--o-color-bg2);
+        &:hover {
+          .tip {
+            display: block;
+          }
+        }
         .tip {
           display: none;
+          position: absolute;
+          transform: translate(100%, -50%);
+          color: #555;
+          width: max-content;
+          right: -8px;
+          top: 50%;
+          font-size: var(--o-font-size-tip);
+          padding: 4px 8px;
+          background-color: var(--o-color-bg2);
+          box-shadow: var(--o-shadow-1);
         }
       }
       .icon-add {
@@ -949,6 +985,7 @@ onMounted(() => {
         bottom: -8px;
       }
       .icon-del {
+        position: absolute;
         top: 0;
         left: inherit;
         &::after {
@@ -1024,6 +1061,33 @@ onMounted(() => {
       font-size: 16px;
       line-height: 24px;
       flex: 1;
+      :deep(.el-textarea) {
+        textarea {
+          resize: none;
+          border: 1px solid transparent;
+          min-height: 38px !important;
+          padding: 8px 14px !important;
+          &:not(:focus) {
+            box-shadow: none;
+          }
+          &:hover:not(:focus):not([readonly]) {
+            border: 1px solid var(--o-color-brand1);
+            box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+          }
+          &[readonly] {
+            cursor: text;
+            padding: 0;
+            box-shadow: none;
+            border: none;
+            resize: none;
+            &:focus-visible {
+              border: none;
+              box-shadow: none;
+              outline: none;
+            }
+          }
+        }
+      }
       @media (max-width: 1100px) {
         font-size: 12px;
         line-height: 18px;
