@@ -29,7 +29,7 @@ export default (err: AxiosError) => {
             : '未授权，请重新登录(401)';
         break;
       case 403:
-        err.message = res?.message || '拒绝访问(403)';
+        err.message = res?.data || res?.message || '拒绝访问(403)';
         break;
       case 404:
         err.message = '请求出错(404)';
@@ -47,7 +47,7 @@ export default (err: AxiosError) => {
         err.message = '网络错误(502)';
         break;
       case 503:
-        err.message = '服务不可用(503)';
+        err.message = res?.data || res?.message || '服务不可用(503)';
         break;
       case 504:
         err.message = '网络超时(504)';
