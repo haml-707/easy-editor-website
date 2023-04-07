@@ -466,9 +466,6 @@ onMounted(() => {
             <span class="title-text">{{ t('sig.SIG_DETAIL.MAINTAINER') }}</span>
           </h2>
           <div class="member-box">
-            <h5>
-              {{ sigDetailName + ' ' + t('sig.SIG_DETAIL.MAINTAINER_EN') }}
-            </h5>
             <ul>
               <li v-for="item in memberList" :key="item.gitee_id">
                 <div class="member-img">
@@ -965,12 +962,12 @@ onMounted(() => {
           }
         }
         ul {
-          // display: flex;
           margin-top: var(--o-spacing-h2);
           padding: 0 var(--o-spacing-h7);
           display: flex;
           justify-content: start;
           flex-wrap: wrap;
+          gap: 24px 0;
           li {
             flex: 0 0 25%;
             text-align: center;

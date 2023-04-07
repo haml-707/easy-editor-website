@@ -21,9 +21,9 @@ export default (err: AxiosError) => {
       case 401:
         if (
           res === 'authentication failed: token expires' ||
-          res === 'authentication failed: has no permission' ||
           res?.message === 'token expires'
         ) {
+          // 清除过期token
           tokenFailIndicateLogin();
           err.message = '您的账号信息已过期，请重新登陆';
           router.push({

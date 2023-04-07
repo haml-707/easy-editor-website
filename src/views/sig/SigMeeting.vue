@@ -58,6 +58,7 @@ const props = defineProps({
 const { t } = useI18n();
 
 const guard = ref(true);
+const meetRef = ref();
 
 const modeType = inject('modeType') as Ref<boolean>;
 const isEditStyle = computed(() => {
@@ -151,6 +152,11 @@ function setMeetingDay() {
   currentMeet = JSON.parse(JSON.stringify(props.tableData)).pop();
   if (currentMeet && currentMeet.date) {
     renderData.value = currentMeet;
+    nextTick(() => {
+      if (meetRef.value?.length) {
+        meetRef.value[0].click();
+      }
+    });
     currentDay.value = resolveDate(currentMeet.date);
   }
 }
@@ -256,7 +262,12 @@ const watchData = watch(
         <div class="info-body">
           <h5>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}</h5>
           <p class="email">
-            <span>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}:</span>
+            <a
+              :href="
+                oldEmail ? `mailto:${oldEmail}` : `mailto:dev@openeuler.org`
+              "
+              >{{ oldEmail || 'dev@openeuler.org' }}</a
+            >
             <a
               v-if="
                 (oldEmail?.split('@').length &&
@@ -347,7 +358,7 @@ const watchData = watch(
               >
                 <el-collapse-item :name="index">
                   <template #title>
-                    <div class="meet-item">
+                    <div ref="meetRef" class="meet-item">
                       <div class="meet-left">
                         <div class="left-top">
                           <p class="meet-name">{{ item.name || item.title }}</p>
