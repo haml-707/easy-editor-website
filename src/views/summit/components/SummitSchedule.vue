@@ -155,37 +155,37 @@ function tabClick() {
   otherTabType.value = 0;
 }
 
-// function addSubtitle() {
-//   scheduleData.value.content.push({
-//     lable: '请输入论坛名称',
-//     id: window.crypto.randomUUID(),
-//     content: [
-//       {
-//         id: window.crypto.randomUUID(),
-//         name: '填写标题',
-//         content: [
-//           {
-//             id: window.crypto.randomUUID(),
-//             time: ['14:00', '14:05'],
-//             desc: 'XXX领导致辞',
-//             person: [
-//               {
-//                 id: window.crypto.randomUUID(),
-//                 name: '姓名',
-//                 post: '',
-//               },
-//             ],
-//             detail: '描述',
-//           },
-//         ],
-//       },
-//     ],
-//   });
-// }
-// function delSubtitle(index: number) {
-//   scheduleData.value.content.splice(index, 1);
-//   tabType.value = 0;
-// }
+function addSubtitle() {
+  scheduleData.value.content.push({
+    lable: '请输入论坛名称',
+    id: window.crypto.randomUUID(),
+    content: [
+      {
+        id: window.crypto.randomUUID(),
+        name: '填写标题',
+        content: [
+          {
+            id: window.crypto.randomUUID(),
+            time: ['14:00', '14:05'],
+            desc: 'XXX领导致辞',
+            person: [
+              {
+                id: window.crypto.randomUUID(),
+                name: '姓名',
+                post: '',
+              },
+            ],
+            detail: '描述',
+          },
+        ],
+      },
+    ],
+  });
+}
+function delSubtitle(index: number) {
+  scheduleData.value.content.splice(index, 1);
+  tabType.value = 0;
+}
 // 增加一行表格
 function addContent() {
   scheduleData.value.content[tabType.value].content[
@@ -347,28 +347,40 @@ onMounted(() => {
       class="schedule-tabs"
       @tab-click="tabClick"
     >
-      <el-tab-pane
-        v-for="(itemList, index) in scheduleData.content"
-        :key="itemList.id"
-        :name="index"
-      >
-        <template #label>
-          <div class="one-level-tabs">
-            <el-input
-              v-model="itemList.lable"
-              :readonly="!isEditStyle"
-              type="text"
-            />
-            <!-- <span
-              v-if="isEditStyle"
-              title="删除"
-              @click.stop="delSubtitle(index)"
-              >X</span
-            > -->
-          </div>
-        </template>
-      </el-tab-pane>
-      <!-- <el-button v-if="isEditStyle" @click="addSubtitle">增加副标题</el-button> -->
+      <template v-if="scheduleData.content?.length >= 2">
+        <el-tab-pane
+          v-for="(itemList, index) in scheduleData.content"
+          :key="itemList.id"
+          :name="index"
+        >
+          <template #label>
+            <div class="one-level-tabs">
+              <el-input
+                v-model="itemList.lable"
+                :readonly="!isEditStyle"
+                type="text"
+              />
+
+              <span
+                v-show="isEditStyle"
+                class="icon-del del-title"
+                @click.stop="delSubtitle(index)"
+              ></span>
+            </div>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane v-if="isEditStyle">
+          <template #label>
+            <OIcon
+              class="icon-add"
+              :class="scheduleData.content?.length ? 'margin-left' : ''"
+              @click.stop="addSubtitle"
+            >
+              <IconAdd />
+            </OIcon>
+          </template>
+        </el-tab-pane>
+      </template>
     </el-tabs>
     <el-container :level-index="1">
       <template
