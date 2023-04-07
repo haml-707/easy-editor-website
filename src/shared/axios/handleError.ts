@@ -1,5 +1,6 @@
 import type { AxiosError } from 'axios';
 import { router } from '@/routers';
+import { tokenFailIndicateLogin } from '@/shared/login';
 
 export default (err: AxiosError) => {
   const { response } = err;
@@ -10,6 +11,8 @@ export default (err: AxiosError) => {
     }
     err.code = String(response.status);
     const res = err.response?.data as any;
+    console.log(res);
+
     switch (response?.status) {
       case 200:
         err.message = '错误响应也会有状态码为200的情况';
@@ -18,15 +21,21 @@ export default (err: AxiosError) => {
         err.message = res?.message || '请求错误(400)';
         break;
       case 401:
-        if (import.meta.env.VITE_IS_DEV === 'false') {
+        if (
+          res === 'authentication failed: token expires' ||
+          res?.message === 'token expires'
+        ) {
+          tokenFailIndicateLogin();
+          err.message === '您的账号信息已过期，请重新登陆';
+          router.push({
+            path: '/zh/login',
+          });
+        } else {
+          err.message === '未授权，请重新登录(401)';
           router.push({
             path: '/zh/404',
           });
         }
-        err.message =
-          res?.message === 'token expires'
-            ? '您的账号信息已过期，请重新登陆'
-            : '未授权，请重新登录(401)';
         break;
       case 403:
         err.message = res?.data || res?.message || '拒绝访问(403)';
