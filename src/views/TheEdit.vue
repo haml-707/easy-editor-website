@@ -7,8 +7,9 @@ import OIcon from '@/components/OIcon.vue';
 
 import IconSearch from '~icons/app/icon-search.svg';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
-import { profileData, getDataByVersion1 } from '@/api/api-easy-edit';
+import { profileData } from '@/api/api-easy-edit';
 import { getUrlParams } from '@/shared/utils';
+import { useVersionData } from '@/stores';
 
 interface EditData {
   siteName: string;
@@ -17,9 +18,6 @@ interface EditData {
   path: string;
   updated_at: string;
 }
-getDataByVersion1().then((res) => {
-  console.log(res);
-});
 
 const router = useRouter();
 
@@ -39,6 +37,7 @@ const pageTypeList = ref<string[]>([]);
 pageNameList.value = [];
 pageTypeList.value = [];
 
+// 前端筛选 获取所有siteName, type
 function filterOption() {
   editData.value.forEach((item) => {
     if (!pageNameList.value.includes(item.siteName)) {
@@ -69,10 +68,11 @@ const goEdit = (item: EditData) => {
   } else {
     path = `/${item.locale}/edit/${item.type}/${item.path.split('/').at(-2)}/`;
   }
-
+  useVersionData().setCoverData(true);
   router.push(path);
 };
 
+// 分页size修改
 const handleSizeChange = (val: number) => {
   queryData.per_page = val;
   totalPage.value = Math.ceil(total.value / val);
