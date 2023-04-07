@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { OButton } from '@/components/button';
@@ -7,33 +7,25 @@ import OIcon from '@/components/OIcon.vue';
 
 import IconSearch from '~icons/app/icon-search.svg';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
+import { profileData, getDataByVersion1 } from '@/api/api-easy-edit';
+import { getUrlParams } from '@/shared/utils';
+
+interface EditData {
+  siteName: string;
+  type: string;
+  locale: string;
+  path: string;
+  updated_at: string;
+}
+getDataByVersion1().then((res) => {
+  console.log(res);
+});
 
 const router = useRouter();
 
-const editData = ref([
-  {
-    name: 'A-Tune',
-    type: '峰会',
-    lang: '中文',
-    path: '../zh/sig/sig-detail/?name=A-Tune',
-    time: '2023-3-08',
-  },
-  {
-    name: 'A-Tune',
-    type: '峰会',
-    lang: '中文',
-    path: '../zh/sig/sig-detail/?name=A-Tune',
-    time: '2023-3-08',
-  },
-  {
-    name: 'A-Tune',
-    type: '峰会',
-    lang: '中文',
-    path: '../zh/sig/sig-detail/?name=A-Tune',
-    time: '2023-3-08',
-  },
-]);
+const editData = ref<EditData[]>([]);
 const total = ref(0);
+const pageSize = ref(10);
 const currentPage = ref(1);
 const totalPage = ref(0);
 const layout = ref('sizes, prev, pager, next, slot, jumper');
@@ -41,19 +33,44 @@ const layout = ref('sizes, prev, pager, next, slot, jumper');
 const queryData = reactive({
   page: 1,
   per_page: 10,
-  search: '',
+});
+const pageNameList = ref<string[]>([]);
+const pageTypeList = ref<string[]>([]);
+pageNameList.value = [];
+pageTypeList.value = [];
+
+function filterOption() {
+  editData.value.forEach((item) => {
+    if (!pageNameList.value.includes(item.siteName)) {
+      pageNameList.value.push(item.siteName);
+    }
+    if (!pageTypeList.value.includes(item.type)) {
+      pageTypeList.value.push(item.type);
+    }
+  });
+}
+
+const optionQuery = reactive({
+  siteName: '',
+  type: '',
 });
 
-const pageName = ref('');
+const randerData = computed(() => {
+  return editData.value.slice(
+    pageSize.value * (currentPage.value - 1),
+    pageSize.value * currentPage.value
+  );
+});
 
-// const optionQuery = reactive({
-//   page: 1,
-//   per_page: 40,
-//   keyword: '',
-// });
+const goEdit = (item: EditData) => {
+  let path = '';
+  if (item.type === 'sig') {
+    path = `/${item.locale}/edit/${item.type}/${getUrlParams(item.path)?.name}`;
+  } else {
+    path = `/${item.locale}/edit/${item.type}/${item.path.split('/').at(-2)}/`;
+  }
 
-const goEdit = (path: string) => {
-  router.push(`/zh/edit/${path}`);
+  router.push(path);
 };
 
 const handleSizeChange = (val: number) => {
@@ -66,10 +83,26 @@ const handleCurrentChange = (val: number) => {
   currentPage.value = val;
 };
 
+function getPageData(isFirstGet: boolean) {
+  profileData(optionQuery).then((res) => {
+    if (res?.statusCode === 200) {
+      editData.value = res.data;
+      if (isFirstGet) {
+        pageNameList.value = [];
+        pageTypeList.value = [];
+        filterOption();
+      }
+    } else {
+      editData.value = [];
+    }
+  });
+}
+getPageData(true);
 watch(
-  () => queryData,
+  () => optionQuery,
   () => {
-    console.log('发送请求');
+    getPageData(false);
+    currentPage.value = 1;
   },
   {
     deep: true,
@@ -83,14 +116,14 @@ watch(
     <div class="select-box">
       <div class="select-item">
         <div class="select-label">页面名称</div>
-        <el-select v-model="pageName" filterable clearable>
+        <el-select v-model="optionQuery.siteName" filterable clearable>
           <template #prefix>
             <OIcon>
               <IconSearch />
             </OIcon>
           </template>
           <el-option
-            v-for="item in 3"
+            v-for="item in pageNameList"
             :key="item"
             :label="item"
             :value="item"
@@ -98,15 +131,15 @@ watch(
         </el-select>
       </div>
       <div class="select-item">
-        <div class="select-label">页面名称</div>
-        <el-select v-model="pageName" filterable clearable>
+        <div class="select-label">页面类别</div>
+        <el-select v-model="optionQuery.type" filterable clearable>
           <template #prefix>
             <OIcon>
               <IconSearch />
             </OIcon>
           </template>
           <el-option
-            v-for="item in 3"
+            v-for="item in pageTypeList"
             :key="item"
             :label="item"
             :value="item"
@@ -115,42 +148,44 @@ watch(
       </div>
     </div>
     <div class="input-container"></div>
-    <el-table :data="editData">
-      <el-table-column label="页面名称" prop="name" min-width="110">
+    <el-table :data="randerData">
+      <el-table-column label="页面名称" prop="siteName" min-width="150">
       </el-table-column>
-      <el-table-column label="页面类别" prop="type" min-width="110">
+      <el-table-column label="页面类别" prop="type" min-width="80">
       </el-table-column>
-      <el-table-column label="页面语言" prop="lang" min-width="110">
+      <el-table-column label="页面语言" prop="locale" min-width="80">
       </el-table-column>
       <el-table-column label="目标页面链接" prop="path" min-width="310">
         <template #default="scope">
-          <a :href="`https://www.openeuler.org`"> {{ scope.row.path }} </a>
+          <a :href="scope.row.path" target="_blank"> {{ scope.row.path }} </a>
         </template>
       </el-table-column>
-      <el-table-column label="最新修改时间" prop="time" min-width="110">
+      <el-table-column label="最新修改时间" prop="updated_at" min-width="110">
       </el-table-column>
-      <el-table-column min-width="110">
-        <OButton
-          class="start-edit"
-          animation
-          type="text"
-          @click="goEdit('A-Tune')"
-          >开始编辑
-          <template #suffixIcon>
-            <OIcon>
-              <IconArrowRight></IconArrowRight>
-            </OIcon>
-          </template>
-        </OButton>
+      <el-table-column min-width="110" prop="path">
+        <template #default="scope">
+          <OButton
+            class="start-edit"
+            animation
+            type="text"
+            @click="goEdit(scope.row)"
+            >开始编辑
+            <template #suffixIcon>
+              <OIcon>
+                <IconArrowRight></IconArrowRight>
+              </OIcon>
+            </template>
+          </OButton>
+        </template>
       </el-table-column>
     </el-table>
     <el-pagination
-      v-model:page-size="queryData.per_page"
-      v-model:currentPage="queryData.page"
+      v-model:currentPage="currentPage"
+      v-model:page-size="pageSize"
       class="pagination"
       :page-sizes="[5, 10, 20, 40, 80]"
       :layout="layout"
-      :total="total"
+      :total="editData.length"
       :background="true"
       :hide-on-single-page="true"
       @size-change="handleSizeChange"
@@ -165,7 +200,7 @@ watch(
 .edit-table {
   padding: 64px 40px;
   background-color: var(--o-color-bg1);
-
+  margin-bottom: 64px;
   .edit-table-title {
     font-weight: 300;
     text-align: center;
@@ -183,6 +218,14 @@ watch(
       .select-label {
         margin-right: 24px;
       }
+      :deep(.el-select) {
+        .el-input__wrapper:not(.is-focus) {
+          box-shadow: var(--o-shadow-l1);
+        }
+        .el-input__prefix-inner {
+          color: var(--o-color-neutral8);
+        }
+      }
     }
   }
   .el-table {
@@ -193,6 +236,9 @@ watch(
         color: var(--o-color-primary1);
       }
     }
+  }
+  .pagination {
+    margin-top: 24px;
   }
 }
 </style>

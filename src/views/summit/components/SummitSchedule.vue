@@ -1,21 +1,31 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import IconTime from '~icons/app/icon-time.svg';
+import { ref, onMounted, Ref, inject, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import { modifyPageData, getPageData } from '@/api/api-easy-edit';
+// import { getPageData } from '@/api/api-easy-edit';
+import { modifyFloorData } from '@/api/api-easy-edit';
+
+import OIcon from '@/components/OIcon.vue';
+import { OButton } from '@/components/button';
+
+import IconAdd from '~icons/app/icon-add.svg';
+import IconTime from '~icons/app/icon-time.svg';
+import IconWarn from '~icons/edit/icon-warn.svg';
 
 import { ElMessage } from 'element-plus';
 
-// const value1 = ref<[Date, Date]>([
-//   new Date(2016, 9, 10, 8, 40),
-//   new Date(2016, 9, 10, 9, 40),
-// ]);
-// const value1 = ref<any>(['15:55', '15:59']);
+import { usePageData } from '@/stores';
 
-const isEditor = ref(false);
+const { locale } = useI18n();
 
-const scheduleData: any = ref({
-  title: '输入标题',
+const modeType = inject('modeType') as Ref<boolean>;
+
+const isEditStyle = computed(() => {
+  return !modeType.value;
+});
+
+const scheduleDataTemp: any = ref({
+  title: '12月28日 操作系统产业峰会 2022',
   content: [
     {
       lable: '上午：主论坛',
@@ -28,15 +38,20 @@ const scheduleData: any = ref({
             {
               id: window.crypto.randomUUID(),
               time: ['14:00', '14:05'],
-              desc: 'XXX领导致辞',
+              desc: '',
               person: [
                 {
                   id: window.crypto.randomUUID(),
                   name: '姓名',
-                  post: ['XXX成员'],
+                  post: 'XXX成员',
+                },
+                {
+                  id: window.crypto.randomUUID(),
+                  name: '姓名',
+                  post: 'XXX成员',
                 },
               ],
-              detail: [''],
+              detail: '描述5555',
             },
           ],
         },
@@ -51,15 +66,16 @@ const scheduleData: any = ref({
           name: '麒麟软件',
           content: [
             {
+              id: window.crypto.randomUUID(),
               time: ['14:00', '14:10'],
               desc: '欧拉社区领导致辞',
               person: [
                 {
                   name: '冯冠霖',
-                  post: ['开放原子开源基金会秘书长'],
+                  post: '开放原子开源基金会秘书长',
                 },
               ],
-              detail: ['EEEEEE'],
+              detail: '描述',
             },
           ],
         },
@@ -68,68 +84,16 @@ const scheduleData: any = ref({
           name: '麒麟信安',
           content: [
             {
+              id: window.crypto.randomUUID(),
               time: ['14:00', '14:10'],
               desc: '致辞',
               person: [
                 {
                   name: '任启',
-                  post: ['麒麟信安高级副总裁'],
+                  post: '麒麟信安高级副总裁',
                 },
               ],
-              detail: [''],
-            },
-          ],
-        },
-        {
-          id: 2,
-          name: '统信软件',
-          content: [
-            {
-              time: ['14:00', '14:05'],
-              desc: '欢迎致辞',
-              person: [
-                {
-                  name: '张木梁',
-                  post: ['统信软件生态中心副总经理'],
-                },
-              ],
-              detail: [''],
-            },
-          ],
-        },
-        {
-          id: 3,
-          name: '软通动力',
-          title: '',
-          content: [
-            {
-              time: ['14:00', '14:10'],
-              desc: '欧拉社区领导致辞',
-              person: [
-                {
-                  name: '冯冠霖',
-                  post: ['开放原子开源基金会秘书长'],
-                },
-              ],
-              detail: ['3333333'],
-            },
-          ],
-        },
-        {
-          id: 4,
-          name: '中科创达',
-          title: '开放融合创新 崛起数智行业',
-          content: [
-            {
-              time: ['14:00', '14:05'],
-              desc: '欧拉社区领导致辞',
-              person: [
-                {
-                  name: '熊伟',
-                  post: ['开放原子开源基金会TOC委员'],
-                },
-              ],
-              detail: [''],
+              detail: '描述',
             },
           ],
         },
@@ -137,6 +101,45 @@ const scheduleData: any = ref({
     },
   ],
 });
+const scheduleData = ref(
+  usePageData().pageData.get('schedule')?.content
+    ? JSON.parse(usePageData().pageData.get('schedule').content)
+    : scheduleDataTemp.value
+);
+
+const dialogTopicTitle = ref('');
+
+const dialogTopicContnet = ref('');
+watch(
+  () => usePageData().pageData.get('schedule'),
+  () => {
+    scheduleData.value = JSON.parse(
+      usePageData().pageData.get('schedule').content
+    );
+  },
+  {
+    deep: true,
+  }
+);
+const param = {
+  content: '',
+  name: 'schedule',
+  description: '',
+  path: 'https://www.openeuler.org/zh/interaction/summit-list/devday2023/',
+  title: '',
+  isPrivate: false,
+  type: 'event',
+  locale: locale.value,
+  contentType: 'application/json;charset=UTF-8',
+};
+
+const delRowDialogVisiable = ref(false);
+
+const delTabDialogVisiable = ref(false);
+
+const agendaDialogVisiable = ref(false);
+
+const delIndex = ref(0);
 // 控制分论坛的详情弹窗显示
 const indexShow: any = ref(-1);
 const idShow: any = ref(-1);
@@ -146,25 +149,10 @@ function changeIndexShow(id: number, index: number) {
 }
 // 控制主论坛及各个分论坛的显示
 const tabType = ref(0);
-console.log(tabType.value);
 
 const otherTabType = ref(0);
 function tabClick() {
   otherTabType.value = 0;
-}
-
-function handleGetPageData() {
-  getPageData(6).then((res) => {
-    try {
-      scheduleData.value = JSON.parse(res.data.content);
-    } catch (error) {
-      console.error(error);
-    }
-  });
-}
-
-function handleInputBlur() {
-  console.log('失焦事件');
 }
 
 function addSubtitle() {
@@ -184,10 +172,10 @@ function addSubtitle() {
               {
                 id: window.crypto.randomUUID(),
                 name: '姓名',
-                post: ['XXX成员'],
+                post: '',
               },
             ],
-            detail: [''],
+            detail: '描述',
           },
         ],
       },
@@ -198,6 +186,7 @@ function delSubtitle(index: number) {
   scheduleData.value.content.splice(index, 1);
   tabType.value = 0;
 }
+// 增加一行表格
 function addContent() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value
@@ -207,20 +196,55 @@ function addContent() {
     person: [
       {
         name: '姓名',
-        post: ['XXX成员'],
+        post: '',
       },
     ],
-    detail: [''],
+    detail: '描述',
   });
 }
+// 删除一行表格
 function delContent(index: number) {
+  delIndex.value = index;
+  toggleDelDlg(true);
+}
+// 新增附属信息
+function addPersonData(index: number) {
+  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
+    index
+  ].person.push({
+    name: '',
+    post: '',
+  });
+}
+// 删除附属信息
+function delPersonData(subIndex: number, personIndex: number) {
+  if (
+    scheduleData.value.content[tabType.value].content[otherTabType.value]
+      .content[subIndex].person.length === 1
+  ) {
+    return false;
+  }
+  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
+    subIndex
+  ].person.splice(personIndex, 1);
+}
+function confirmDelContent() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value
-  ].content.splice(index, 1);
+  ].content.splice(delIndex.value, 1);
+  toggleDelDlg(false);
 }
+function confirmDelTab() {
+  scheduleData.value.content[tabType.value].content.splice(delIndex.value, 1);
+  otherTabType.value = delIndex.value === 0 ? 0 : delIndex.value - 1;
+  toggleDelTabDlg(false);
+}
+// 删除分论坛标题
 function delSubtitle2(index: number) {
-  scheduleData.value.content[tabType.value].content.splice(index, 1);
+  delIndex.value = index;
+  toggleDelTabDlg(true);
 }
+// 增加分论坛标题
 function addSubtitle2() {
   scheduleData.value.content[tabType.value].content.push({
     id: window.crypto.randomUUID(),
@@ -234,43 +258,88 @@ function addSubtitle2() {
           {
             id: window.crypto.randomUUID(),
             name: 'xxx',
-            post: ['开放原子开源基金会秘书长'],
+            post: '',
+          },
+          {
+            id: window.crypto.randomUUID(),
+            name: 'xxx',
+            post: '',
           },
         ],
-        detail: ['EEEEEE'],
+        detail: '描述',
       },
     ],
   });
+  const index = scheduleData.value.content[tabType.value].content.length;
+  otherTabType.value = index === 0 ? 0 : index - 1;
 }
+// 保持页面数据
 function savePageData() {
-  modifyPageData(6, JSON.stringify(scheduleData.value)).then(() => {
-    ElMessage({
-      type: 'success',
-      message: '保存成功',
+  param.content = JSON.stringify(scheduleData.value);
+  modifyFloorData(param)
+    .then((res: { statusCode: number }) => {
+      if (res?.statusCode !== 200) {
+        // 修改出错内容回显
+        // getSingleFloorData(param.path, param.name).then((res: any) => {
+        //   param.content = res?.data?.content;
+        //   param.title = res?.data?.title;
+        //   usePageData().pageData.set(param.name, param);
+        // });
+      } else {
+        ElMessage({
+          type: 'success',
+          message: '保持成功',
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
     });
-  });
+}
+function toggleDelDlg(val: boolean) {
+  delRowDialogVisiable.value = val;
+}
+function toggleAgendaDlg(val: boolean, listIndex?: number) {
+  if (listIndex || listIndex === 0) {
+    const targetData =
+      scheduleData.value.content[tabType.value].content[otherTabType.value]
+        .content[listIndex];
+    dialogTopicContnet.value = targetData.detail;
+    dialogTopicTitle.value = targetData.desc;
+    idShow.value = listIndex;
+  }
+  agendaDialogVisiable.value = val;
+}
+function confirmSaveAgenda() {
+  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
+    idShow.value
+  ].detail = dialogTopicContnet.value;
+  toggleAgendaDlg(false);
+}
+function toggleDelTabDlg(val: boolean) {
+  delTabDialogVisiable.value = val;
 }
 // function createNewPage() {
-//   createPage(JSON.stringify(scheduleData.value)).then(() => {
+//   createPage(param).then(() => {
 //     ElMessage({
 //       type: 'success',
-//       message: '保存成功',
+//       message: '成功',
 //     });
 //   });
 // }
 onMounted(() => {
-  handleGetPageData();
+  // handleGetPageData();
 });
 </script>
 
 <template>
-  <div class="schedule">
+  <div class="schedule" :class="isEditStyle ? 'is-edit' : ''">
+    <h3>会议日程</h3>
     <h4 class="meeting-title">
-      <input
+      <el-input
         v-model="scheduleData.title"
-        :readonly="!isEditor"
+        :readonly="!isEditStyle"
         type="text"
-        @blur="handleInputBlur"
       />
     </h4>
     <el-tabs
@@ -278,60 +347,87 @@ onMounted(() => {
       class="schedule-tabs"
       @tab-click="tabClick"
     >
-      <el-tab-pane
-        v-for="(itemList, index) in scheduleData.content"
-        :key="itemList.id"
-        :name="index"
-      >
-        <template #label>
-          <div class="time-tabs">
-            <input
-              v-model="itemList.lable"
-              :readonly="!isEditor"
-              type="text"
-              @blur="handleInputBlur"
-            />
-            <span v-if="isEditor" title="删除" @click.stop="delSubtitle(index)"
-              >X</span
-            >
-          </div>
-        </template>
-      </el-tab-pane>
-      <el-button v-if="isEditor" @click="addSubtitle">增加副标题</el-button>
-    </el-tabs>
-    <el-button v-if="isEditor" @click="addSubtitle2">增加三级标题</el-button>
+      <template v-if="scheduleData.content?.length >= 2">
+        <el-tab-pane
+          v-for="(itemList, index) in scheduleData.content"
+          :key="itemList.id"
+          :name="index"
+        >
+          <template #label>
+            <div class="one-level-tabs">
+              <el-input
+                v-model="itemList.lable"
+                :readonly="!isEditStyle"
+                type="text"
+              />
 
+              <span
+                v-show="isEditStyle"
+                class="icon-del del-title"
+                @click.stop="delSubtitle(index)"
+              ></span>
+            </div>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane v-if="isEditStyle">
+          <template #label>
+            <OIcon
+              class="icon-add"
+              :class="scheduleData.content?.length ? 'margin-left' : ''"
+              @click.stop="addSubtitle"
+            >
+              <IconAdd />
+            </OIcon>
+          </template>
+        </el-tab-pane>
+      </template>
+    </el-tabs>
     <el-container :level-index="1">
       <template
         v-for="(scheduleItem, index) in scheduleData.content"
         :key="scheduleItem.id"
       >
         <div
-          v-show="tabType == index && scheduleItem.content[0].content"
+          v-show="tabType == index && scheduleItem?.content[0].content"
           class="schedule-item other"
         >
           <el-tabs
-            v-if="scheduleItem.content[1]"
+            v-if="isEditStyle || scheduleItem.content[1]"
             v-model.number="otherTabType"
             class="other-tabs"
           >
-            <el-tab-pane
-              v-for="(itemList, scheduleIndex) in scheduleItem.content"
-              :key="itemList.id"
-              :name="scheduleIndex"
-            >
+            <template v-if="scheduleItem.content[1]">
+              <el-tab-pane
+                v-for="(itemList, scheduleIndex) in scheduleItem.content"
+                :key="itemList.id"
+                :name="scheduleIndex"
+              >
+                <template #label>
+                  <div class="time-tabs">
+                    <el-input
+                      v-model="itemList.name"
+                      :readonly="!isEditStyle"
+                      type="text"
+                    />
+                    <span
+                      v-show="isEditStyle"
+                      class="icon-del del-title"
+                      @click.stop="delSubtitle2(scheduleIndex)"
+                    ></span>
+                  </div>
+                </template>
+              </el-tab-pane>
+            </template>
+
+            <el-tab-pane v-if="isEditStyle">
               <template #label>
-                <div class="time-tabs">
-                  <input
-                    v-model="itemList.name"
-                    :readonly="!isEditor"
-                    type="text"
-                    @blur="handleInputBlur"
-                  />
-                  <span v-show="isEditor" @click="delSubtitle2(scheduleIndex)"
-                    >X</span
-                  >
-                </div>
+                <OIcon
+                  class="icon-add"
+                  :class="scheduleItem.content.length ? 'margin-left' : ''"
+                  @click.stop="addSubtitle2"
+                >
+                  <IconAdd />
+                </OIcon>
               </template>
             </el-tab-pane>
           </el-tabs>
@@ -341,12 +437,12 @@ onMounted(() => {
             :key="itemList.id"
             class="content"
           >
-            <!-- <h4 v-if="itemList.title || isEditor" class="other-title">
-              <input
+            <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
+              <el-input
                 v-model="itemList.title"
-                :readonly="!isEditor"
+                :readonly="!isEditStyle"
                 type="text"
-                @blur="handleInputBlur"
+                
               />
             </h4> -->
             <div class="content-list">
@@ -363,7 +459,7 @@ onMounted(() => {
                     v-model="subItem.time"
                     is-range
                     value-format="HH:mm"
-                    :readonly="!isEditor"
+                    :readonly="!isEditStyle"
                     format="HH:mm"
                     start-placeholder="Start"
                     end-placeholder="End"
@@ -371,82 +467,97 @@ onMounted(() => {
                   /> -->
                   <!-- {{ subItem.time }} -->
                   <IconTime />
-                  <input
+                  <el-input
                     v-model="subItem.time[0]"
-                    class="input-time"
-                    :readonly="!isEditor"
+                    class="el-input-time"
+                    :readonly="!isEditStyle"
                     type="text"
-                    @blur="handleInputBlur"
                   />
                   -
-                  <input
+                  <el-input
                     v-model="subItem.time[1]"
-                    class="input-time"
-                    :readonly="!isEditor"
+                    class="el-input-time"
+                    :readonly="!isEditStyle"
                     type="text"
-                    @blur="handleInputBlur"
                   />
                   <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
                 </span>
                 <span
                   class="desc"
                   :class="{ 'exit-detail': subItem.detail[0] }"
-                  @click="changeIndexShow(listIndex, subIndex as any)"
+                  @click="
+                    !isEditStyle
+                      ? changeIndexShow(listIndex, subIndex as any)
+                      : ''
+                  "
                 >
-                  <input
+                  <el-input
                     v-model="subItem.desc"
-                    :readonly="!isEditor"
+                    :readonly="!isEditStyle"
                     type="text"
-                    @blur="handleInputBlur"
-                /></span>
+                  />
+                  <OIcon
+                    v-show="isEditStyle"
+                    class="icon-add"
+                    @click="toggleAgendaDlg(true, subIndex)"
+                  >
+                    <IconAdd />
+                  </OIcon>
+                </span>
                 <div v-if="subItem.person[0]" class="name-box">
                   <div
-                    v-for="personItem in subItem.person"
+                    v-for="(personItem, personIndex) in subItem.person"
                     :key="personItem.id"
+                    class="name-item"
                   >
-                    <span class="name">
-                      <input
+                    <span v-show="personItem.name" class="name">
+                      <el-input
                         v-model="personItem.name"
-                        :readonly="!isEditor"
+                        :readonly="!isEditStyle"
+                        placeholder="输入名称"
                         type="text"
-                        @blur="handleInputBlur"
+                      />
+                    </span>
+                    <span class="post">
+                      <label :for="`textarea${personIndex}`"></label>
+                      <el-input
+                        :id="`textarea${personIndex}`"
+                        v-model="personItem.post"
+                        :readonly="!isEditStyle"
+                        :autosize="{ minRows: 1, maxRows: 10 }"
+                        maxlength="100"
+                        type="textarea"
                       />
                     </span>
                     <span
-                      v-for="(postItem, postIndex) in personItem.post"
-                      :key="postIndex"
-                      class="post"
+                      v-show="isEditStyle"
+                      class="icon-del"
+                      @click="delPersonData(subIndex, personIndex)"
+                      ><span class="tip">删除附属信息</span></span
                     >
-                      <input
-                        v-model="personItem.post[postIndex]"
-                        :readonly="!isEditor"
-                        type="text"
-                        @blur="handleInputBlur"
-                      />
-                    </span>
                   </div>
+                  <OIcon
+                    v-show="isEditStyle"
+                    class="icon-add"
+                    @click="addPersonData(subIndex)"
+                  >
+                    <span class="tip">新增附属信息</span>
+                    <IconAdd />
+                  </OIcon>
                 </div>
-                <div v-if="subItem.detail[0]" class="detail">
+                <div v-if="subItem.detail" class="detail">
                   <p>
                     <span>议题名称：</span><span> {{ subItem.desc }}</span>
                   </p>
-                  <p v-if="subItem.detail[0]">
+                  <p v-if="subItem.detail">
                     <span>议题简介：</span
                     ><span
-                      ><span
-                        v-for="(itemDetail, detailIndex) in subItem.detail"
-                        :key="detailIndex"
-                        class="detail-text"
-                      >
-                        <input
-                          v-model="subItem.detail[detailIndex]"
-                          :readonly="!isEditor"
-                          type="text"
-                          @blur="handleInputBlur"
-                        /> </span
-                    ></span>
+                      ><span class="detail-text">
+                        {{ subItem.detail }}
+                      </span></span
+                    >
                   </p>
-                  <p v-if="subItem.person[0]">
+                  <!-- <p v-if="subItem.person[0]">
                     <span>发言人：</span>
                     <span
                       v-for="personItem in subItem.person"
@@ -454,15 +565,11 @@ onMounted(() => {
                       >{{ personItem.name }}
                       <template v-if="personItem.post[0]">
                         <span>(</span>
-                        <span
-                          v-for="(postItem, postIndex) in personItem.post"
-                          :key="postIndex"
-                          >{{ postItem }}</span
-                        >
+                        <span>{{ personItem.post.split('\n') }}</span>
                         <span>)</span>
                       </template>
                     </span>
-                  </p>
+                  </p> -->
                 </div>
                 <div
                   v-show="
@@ -472,65 +579,146 @@ onMounted(() => {
                   @click="changeIndexShow(-1, -1)"
                 ></div>
                 <span
-                  v-if="isEditor"
-                  class="del-content"
+                  v-if="isEditStyle"
+                  class="icon-del del-content"
                   @click="delContent(subIndex)"
-                  >X</span
-                >
+                ></span>
               </div>
             </div>
-            <el-button v-if="isEditor" class="add-content" @click="addContent">
-              增加日程
-            </el-button>
+            <OIcon
+              v-if="isEditStyle"
+              class="icon-add add-content"
+              @click="addContent"
+            >
+              <IconAdd />
+            </OIcon>
           </div>
         </div>
       </template>
     </el-container>
   </div>
+  <el-dialog
+    v-model="agendaDialogVisiable"
+    class="agenda-dialog"
+    :show-close="false"
+    width="640"
+  >
+    <template #header>
+      <h3>编辑议题简介</h3>
+    </template>
+    <div class="line-input">
+      <span class="label">议题名称</span>
+      <el-input readonly v-model="dialogTopicTitle"></el-input>
+    </div>
+    <div class="line-input">
+      <span class="label">议题简介</span>
+      <el-input
+        v-model="dialogTopicContnet"
+        type="textarea"
+        maxlength="300"
+        show-word-limit
+        :autosize="{ minRows: 12, maxRows: 20 }"
+      ></el-input>
+    </div>
+    <template #footer>
+      <o-button size="small" @click="toggleAgendaDlg(false)">取消</o-button>
+      <o-button size="small" type="primary" @click="confirmSaveAgenda()">
+        确定</o-button
+      >
+    </template>
+  </el-dialog>
+  <el-dialog
+    v-model="delRowDialogVisiable"
+    class="publish-dialog"
+    :show-close="false"
+    width="640"
+  >
+    <template #header>
+      <OIcon class="danger1">
+        <IconWarn />
+      </OIcon>
+    </template>
+    <h3>
+      是否确认
+      <span class="danger1">删除</span>
+      本行
+    </h3>
+    <template #footer>
+      <o-button size="small" @click="toggleDelDlg(false)">取消</o-button>
+      <o-button size="small" type="primary" @click="confirmDelContent()">
+        确定</o-button
+      >
+    </template>
+  </el-dialog>
+  <el-dialog
+    v-model="delTabDialogVisiable"
+    class="publish-dialog"
+    :show-close="false"
+    width="640"
+  >
+    <template #header>
+      <OIcon class="danger1">
+        <IconWarn />
+      </OIcon>
+    </template>
+    <h3>
+      是否确认
+      <span class="danger1">删除</span>
+      本分论坛所有日程
+    </h3>
+    <template #footer>
+      <o-button size="small" @click="toggleDelTabDlg(false)">取消</o-button>
+      <o-button size="small" type="primary" @click="confirmDelTab()">
+        确定</o-button
+      >
+    </template>
+  </el-dialog>
   <div class="contoral-box">
-    <el-button @click="isEditor = !isEditor">{{
-      isEditor ? '预览' : '编辑'
-    }}</el-button
-    ><el-button @click="savePageData">保存</el-button>
-    <!-- <el-button @click="createNewPage">新建</el-button> -->
+    <el-button @click="savePageData">保存</el-button>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.el-button {
-  border-radius: 0;
+.danger1 {
+  color: #e02020;
 }
 
-input {
-  padding: 4px;
-  background-color: transparent;
-  color: inherit;
-  font-size: inherit;
-  border: 1px solid #707070;
-  max-width: 100%;
-  &:focus-visible {
-    box-shadow: none;
-    outline: none;
-    border: 1px solid var(--o-color-primary1);
+:deep(.el-input) {
+  .el-input__wrapper {
+    border: 1px solid transparent;
+    &:not(.is-focus) {
+      box-shadow: none;
+    }
+    input {
+      &[readonly] {
+        cursor: text;
+        padding: 0;
+        box-shadow: none;
+        border: 1px solid transparent;
+        &:focus-visible {
+          border: 1px solid transparent;
+          box-shadow: none;
+          outline: none;
+        }
+      }
+    }
   }
 }
-input[readonly] {
-  cursor: pointer;
-  padding: 0;
-  text-align: center;
-  border: none;
-  &:focus-visible {
-    border: none;
-    box-shadow: none;
-    outline: none;
-  }
-}
+
 .el-date-editor.el-input__wrapper {
   background-color: transparent;
 }
 .schedule {
-  margin-top: 20px;
+  h3 {
+    position: relative;
+    text-align: center;
+    font-size: var(--o-font-size-h3);
+    line-height: var(--o-line-height-h3);
+    color: var(--o-color-text1);
+    font-weight: 300;
+  }
   .meeting-title {
+    margin-top: 40px;
     font-weight: 400;
     color: var(--o-color-text1);
     font-size: 20px;
@@ -539,6 +727,10 @@ input[readonly] {
     @media screen and (max-width: 768px) {
       font-size: 14px;
       line-height: 22px;
+    }
+    :deep(.el-input__inner) {
+      font-size: var(--o-font-size-h6);
+      text-align: center;
     }
   }
   :deep(.el-tabs) {
@@ -587,10 +779,30 @@ input[readonly] {
       }
     }
 
-    .is-active .time-tabs {
-      color: #fff;
-      background: var(--o-color-primary1);
+    .one-level-tabs {
+      background: var(--o-color-bg2);
       border-color: var(--o-color-primary2);
+      :deep(.el-input) {
+        cursor: pointer;
+        .el-input__inner {
+          cursor: pointer;
+          width: min-content;
+          color: var(--o-color-text1);
+          text-align: center;
+        }
+      }
+    }
+    .is-active {
+      .one-level-tabs {
+        background: var(--o-color-primary1);
+        :deep(.el-input) {
+          .el-input__inner {
+            width: min-content;
+            color: var(--o-color-text2);
+            text-align: center;
+          }
+        }
+      }
     }
   }
   .schedule-item {
@@ -601,10 +813,21 @@ input[readonly] {
       padding: 16px;
     }
     &.other {
+      .del-title {
+        left: inherit;
+        right: -8px;
+        width: 16px;
+        height: 16px;
+        top: -18px;
+        &::after {
+          height: 2px;
+          width: calc(100% - 6px);
+        }
+      }
       :deep(.el-tabs) {
         margin-bottom: 24px;
         .el-tabs__header.is-top .el-tabs__item.is-top {
-          padding: 10px 20px 10px 0;
+          // padding: 10px 20px 10px 0;
           @media (max-width: 1100px) {
             height: auto;
             padding: 6px 18px 6px 0;
@@ -621,6 +844,12 @@ input[readonly] {
         .el-tabs__header {
           text-align: center;
           margin: 0;
+          .el-tabs__nav-wrap {
+            overflow: visible;
+            .el-tabs__nav-scroll {
+              overflow: visible;
+            }
+          }
           .el-tabs__item {
             @media (max-width: 1100px) {
               font-size: 12px;
@@ -697,6 +926,83 @@ input[readonly] {
       display: none;
     }
   }
+  .add-content {
+    margin-top: 16px;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+}
+.is-edit {
+  :deep(.el-input__wrapper) {
+    &:hover {
+      border: 1px solid var(--o-color-brand1);
+      box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+    }
+  }
+  :deep(.el-input) {
+    .is-focus {
+      border: 1px solid transparent;
+      box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
+    }
+  }
+  .name-item {
+    position: relative;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+    &:hover {
+      border: 1px solid var(--o-color-brand1);
+      box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+      .name {
+        display: inline-block !important;
+      }
+    }
+    &:focus-within {
+      border: 1px solid var(--o-color-brand1);
+      box-shadow: none;
+      .post {
+        border-left: 1px solid var(--o-color-brand1);
+      }
+    }
+  }
+}
+.icon-del {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: -36px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #e02020;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    border-radius: 1px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 3px;
+    width: calc(100% - 10px);
+    background-color: #e02020;
+  }
+}
+.icon-add {
+  margin: 0 auto;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: var(--o-font-size-text);
+  border-radius: 50%;
+  border: 1px solid var(--o-color-brand1);
+  color: var(--o-color-brand1);
+}
+.margin-left {
+  margin-left: 40px;
 }
 .content-list {
   @media screen and (max-width: 1100px) {
@@ -704,16 +1010,14 @@ input[readonly] {
   }
   .content-item {
     display: grid;
-    grid-template-columns: 192px 580px 445px;
-    // border-bottom: 1px solid var(--o-color-border2);
+    grid-template-columns: 192px 580px 400px;
     padding: 20px 0;
     transition: all 0.25s ease;
     align-items: center;
     min-height: 64px;
     position: relative;
-    & + .content-item {
-      border-top: 1px solid var(--o-color-border2);
-    }
+    border-bottom: 1px solid var(--o-color-border2);
+
     @media screen and (max-width: 1328px) {
       grid-template-columns: 192px 450px 400px;
     }
@@ -723,10 +1027,48 @@ input[readonly] {
       min-height: 36px;
       position: static;
     }
-    &:hover {
-      background-color: var(--o-color-bg4);
-    }
     .name-box {
+      position: relative;
+      .icon-add,
+      .icon-del {
+        position: relative;
+        width: 16px;
+        height: 16px;
+        right: -8px;
+        background-color: var(--o-color-bg2);
+        &:hover {
+          .tip {
+            display: block;
+          }
+        }
+        .tip {
+          display: none;
+          position: absolute;
+          transform: translate(100%, -50%);
+          color: #555;
+          width: max-content;
+          right: -8px;
+          top: 50%;
+          font-size: var(--o-font-size-tip);
+          padding: 4px 8px;
+          background-color: var(--o-color-bg2);
+          box-shadow: var(--o-shadow-1);
+        }
+      }
+      .icon-add {
+        position: absolute;
+        bottom: -8px;
+      }
+      .icon-del {
+        position: absolute;
+        top: 0;
+        left: inherit;
+        &::after {
+          height: 2px;
+          border-radius: 1px;
+          width: calc(100% - 6px);
+        }
+      }
       @media screen and (max-width: 1100px) {
         grid-column-end: 3;
       }
@@ -745,15 +1087,44 @@ input[readonly] {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      right: 12px;
+      left: -36px;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      border: 1px solid #e02020;
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        border-radius: 1px;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        height: 3px;
+        width: calc(100% - 10px);
+        background-color: #e02020;
+      }
     }
     .desc {
+      position: relative;
       font-size: 18px;
       line-height: 26px;
       color: var(--o-color-text1);
       display: inline-block;
       margin-right: 36px;
       cursor: default;
+      &:focus-within {
+        .o-icon {
+          display: block;
+        }
+      }
+      .o-icon {
+        position: absolute;
+        right: -8px;
+        top: -8px;
+        width: 16px;
+        height: 16px;
+        background-color: var(--o-color-bg2);
+      }
       @media (max-width: 1100px) {
         margin-right: 0;
         font-size: 12px;
@@ -767,6 +1138,10 @@ input[readonly] {
       color: var(--o-color-text3);
       font-size: 16px;
       line-height: 24px;
+      :deep(.el-input__wrapper) {
+        box-shadow: none;
+        border: 1px solid transparent;
+      }
       @media (max-width: 1100px) {
         font-size: 12px;
         line-height: 18px;
@@ -778,8 +1153,26 @@ input[readonly] {
       color: var(--o-color-text3);
       font-size: 16px;
       line-height: 24px;
-      // word-break: keep-all;
       flex: 1;
+      border-left: 1px solid transparent;
+      transition: all 0.3s;
+      :deep(.el-textarea) {
+        textarea {
+          resize: none;
+          min-height: 38px !important;
+          padding: 8px 14px !important;
+          cursor: text;
+          padding: 0;
+          box-shadow: none;
+          border: 1px solid transparent;
+          resize: none;
+          &:focus-visible {
+            border: 1px solid transparent;
+            box-shadow: none;
+            outline: none;
+          }
+        }
+      }
       @media (max-width: 1100px) {
         font-size: 12px;
         line-height: 18px;
@@ -806,15 +1199,21 @@ input[readonly] {
       svg {
         width: 18px;
         height: 18px;
-        color: var(--o-color-text3);
+        color: var(--o-color-text4);
         margin-right: 6px;
         @media screen and (max-width: 1100px) {
           display: none;
         }
       }
-      .input-time {
-        width: 60px;
+      .el-input-time {
+        width: 40px;
         text-align: center;
+        :deep(.el-input__wrapper) {
+          padding: 0;
+          .el-input__inner {
+            color: var(--o-color-text4);
+          }
+        }
       }
     }
     .info .desc {
@@ -902,6 +1301,48 @@ input[readonly] {
   .sub-container {
     .content-item {
       grid-template-columns: 192px auto 96px 410px;
+    }
+  }
+}
+</style>
+<style lang="scss">
+.agenda-dialog {
+  h3 {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--o-color-text1);
+    line-height: 32px;
+    text-align: center;
+  }
+  .line-input {
+    display: flex;
+    align-items: center;
+    .el-input {
+      .el-input__wrapper {
+        box-shadow: 0 0 0 1px #cccccc inset;
+        .el-input__inner {
+          color: #999999;
+          cursor: not-allowed;
+        }
+      }
+    }
+    &:not(:first-child) {
+      margin-top: 16px;
+    }
+
+    .label {
+      font-size: var(--o-font-size-text);
+      color: var(--o-color-text4);
+      flex-shrink: 0;
+      width: fit-content;
+      margin-right: 40px;
+    }
+  }
+  .el-dialog__footer {
+    display: flex;
+    justify-content: center;
+    .o-button:first-child {
+      margin-right: 16px;
     }
   }
 }

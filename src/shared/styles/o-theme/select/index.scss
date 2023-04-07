@@ -1,27 +1,29 @@
 @charset 'UFT-8';
 @use './var.scss';
-
-.el-select {
-  .el-input__wrapper {
-    background-color: var(--o-select-color-bg);
-    border-radius: 0;
-  }
-
-  &:hover:not(.el-select--disabled) {
+body {
+  .el-select {
     .el-input__wrapper {
-      box-shadow: 0 0 0 1px var(--o-input-border-color) inset;
+      padding: 3px 8px;
+      background-color: var(--o-select-color-bg);
+      border-radius: 0;
     }
-  }
-  .el-input__prefix-inner {
-    .o-icon {
-      display: flex;
-      align-items: center;
+
+    &:hover:not(.el-select--disabled) {
+      .el-input__wrapper {
+        box-shadow: 0 0 0 1px var(--o-input-border-color) inset;
+      }
     }
-  }
-  .el-input__suffix {
-    .el-icon {
-      svg {
-        color: var(--o-select-font);
+    .el-input__prefix-inner {
+      .o-icon {
+        display: flex;
+        align-items: center;
+      }
+    }
+    .el-input__suffix {
+      .el-icon {
+        svg {
+          color: var(--o-select-font);
+        }
       }
     }
   }

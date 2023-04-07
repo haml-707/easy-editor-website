@@ -1,4 +1,5 @@
 import type { AxiosError } from 'axios';
+import { router } from '@/routers';
 
 export default (err: AxiosError) => {
   const { response } = err;
@@ -8,18 +9,27 @@ export default (err: AxiosError) => {
       err.message = '有response但没有response.status的情况';
     }
     err.code = String(response.status);
-    switch (response && response.status) {
+    const res = err.response?.data as any;
+    switch (response?.status) {
       case 200:
         err.message = '错误响应也会有状态码为200的情况';
         break;
       case 400:
-        err.message = '请求错误(400)';
+        err.message = res?.message || '请求错误(400)';
         break;
       case 401:
-        err.message = '未授权，请重新登录(401)';
+        if (import.meta.env.VITE_IS_DEV === 'false') {
+          router.push({
+            path: '/zh/404',
+          });
+        }
+        err.message =
+          res?.message === 'token expires'
+            ? '您的账号信息已过期，请重新登陆'
+            : '未授权，请重新登录(401)';
         break;
       case 403:
-        err.message = '拒绝访问(403)';
+        err.message = res?.data || res?.message || '拒绝访问(403)';
         break;
       case 404:
         err.message = '请求出错(404)';
@@ -37,7 +47,7 @@ export default (err: AxiosError) => {
         err.message = '网络错误(502)';
         break;
       case 503:
-        err.message = '服务不可用(503)';
+        err.message = res?.data || res?.message || '服务不可用(503)';
         break;
       case 504:
         err.message = '网络超时(504)';

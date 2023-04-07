@@ -9,7 +9,6 @@ import OIcon from '@/components/OIcon.vue';
 
 import { showGuard, logout, getUserAuth, useStoreData } from '@/shared/login';
 import communityLogoWhite from '@/assets/common/header/openeuler-logo.png';
-// import EasyEditorLogo from '@/assets/common/header/quickissue-logo.png';
 import IconLogin from '~icons/app/icon-login.svg';
 
 const { t } = useI18n();
@@ -31,18 +30,12 @@ const jumpToUserZone = () => {
   <header class="app-header">
     <div class="wrap">
       <div class="header-logo">
-        <!-- <img class="quickissue-logo" :src="EasyEditorLogo" alt="" /> -->
         <router-link to="/zh/">EasyEdit</router-link>
         <span class="line"></span>
         <a target="_blank" :href="`https://www.openeuler.org/${lang}/`"
           ><img class="community-logo" :src="communityLogoWhite"
         /></a>
       </div>
-      <!-- <div class="login">
-        <OIcon class="icon">
-          <IconLogin />
-        </OIcon>
-      </div> -->
       <div class="opt-user">
         <div v-if="token">
           <div class="opt-info">
@@ -67,26 +60,6 @@ const jumpToUserZone = () => {
           </OIcon>
         </div>
       </div>
-      <!-- <div class="language">
-        <el-dropdown popper-class="language-change" @command="handleCommand">
-          <span class="el-dropdown-link">
-            {{ t('quickIssue.LANG') }}
-            <OIcon><IconDown></IconDown></OIcon>
-          </span>
-
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="(item, key) in options"
-                :key="key"
-                :class="{ active: lang === item.value }"
-                :command="item"
-                >{{ item.label }}</el-dropdown-item
-              >
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div> -->
     </div>
   </header>
 </template>
@@ -101,6 +74,9 @@ const jumpToUserZone = () => {
     align-items: center;
     max-width: 1504px;
     height: 80px;
+    // @media (max-width: 1680px) {
+    //   max-width: 1300px;
+    // }
     .new-issue {
       flex-shrink: 0;
       .o-button {
@@ -168,9 +144,9 @@ const jumpToUserZone = () => {
   }
 }
 .opt-user {
-  margin-right: 40px;
   height: 100%;
   display: flex;
+  justify-content: flex-end;
   align-items: center;
   position: relative;
   .opt-info {

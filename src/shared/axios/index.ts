@@ -15,6 +15,7 @@ import { LoadingInstance } from 'element-plus/lib/components/loading/src/loading
 
 interface RequestConfig<D = any> extends AxiosRequestConfig {
   data?: D;
+  $ignoreLoading?: boolean; // 是否出现loading框
   $doException?: boolean; // 是否弹出错误提示框
   global?: boolean; // 是否为全局请求， 全局请求在清除请求池时，不清除
 }
@@ -80,7 +81,7 @@ const pendingPool: Map<string, any> = new Map();
  */
 const requestInterceptorId = request.interceptors.request.use(
   (config) => {
-    if (loadingCount === 0) {
+    if (loadingCount === 0 && !(config as RequestConfig).$ignoreLoading) {
       loadingInstance = ElLoading.service({
         fullscreen: true,
         target: 'body',
@@ -88,7 +89,7 @@ const requestInterceptorId = request.interceptors.request.use(
         background: 'transparent',
       });
     }
-    loadingCount++;
+    (config as RequestConfig).$ignoreLoading ? '' : loadingCount++;
     // 存储请求信息
     // request.config = Object.assign({}, config);
     // 定义取消请求
@@ -120,12 +121,13 @@ const requestInterceptorId = request.interceptors.request.use(
 const responseInterceptorId = request.interceptors.response.use(
   // @ts-ignore
   (response: AxiosResponse) => {
-    loadingCount--;
+    const { config } = response;
+
+    (config as RequestConfig).$ignoreLoading ? '' : loadingCount--;
     if (loadingCount === 0 && loadingInstance) {
       loadingInstance.close();
       loadingInstance = null;
     }
-    const { config } = response;
     // 请求完成，移除请求池
     if (config.url) {
       pendingPool.delete(config.url);
@@ -138,12 +140,8 @@ const responseInterceptorId = request.interceptors.response.use(
       loadingInstance.close();
     }
     const { config } = err;
-    if (!(config as RequestConfig).$doException) {
-      ElMessage({
-        type: 'error',
-        message: err.toString(),
-      });
-    }
+    console.log();
+
     // 非取消请求发生异常，同样将请求移除请求池
     if (!axios.isCancel(err) && config?.url) {
       pendingPool.delete(config.url);
@@ -151,6 +149,14 @@ const responseInterceptorId = request.interceptors.response.use(
 
     if (err.response) {
       err = handleError(err);
+    }
+    if (!(config as RequestConfig)?.$doException) {
+      ElMessage({
+        type: 'error',
+        message: err.message,
+        showClose: true,
+        duration:0
+      });
     }
     // 没有response(没有状态码)的情况
     // 如: 超时；断网；请求重复被取消；主动取消请求；

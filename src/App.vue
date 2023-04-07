@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { watch, computed, ref } from 'vue';
+import { watch, computed, ref, provide } from 'vue';
 import AppHeader from './components/AppHeader.vue';
 import AppFooter from './components/AppFooter.vue';
 import { useRoute } from 'vue-router';
@@ -9,19 +9,20 @@ import { useLangStore } from '@/stores';
 import EditHeader from '@/views/edit/EditHeader.vue';
 import EditFooter from '@/views/edit/EditFooter.vue';
 import EditTextTitle from '@/views/edit/EditTextTitle.vue';
+import { refreshInfo } from '@/shared/login';
 
-const { t } = useI18n();
+refreshInfo();
+const { t, locale } = useI18n();
 const route = useRoute();
-const { locale } = useI18n();
 const langStore = useLangStore();
 const isEditPage = computed(() => {
-  return route.name === 'edit';
+  return route.path.includes('edit');
 });
-const isPreviewMode = ref(false);
+const isPreviewMode = ref<boolean>(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
 }
-
+provide('modeType', isPreviewMode);
 watch(
   () => langStore.lang,
   (val) => {
@@ -32,11 +33,11 @@ watch(
 
 <template>
   <header><AppHeader /></header>
-  <main :class="isEditPage ? 'edit-page' : ''">
+  <main :class="[isEditPage ? 'edit-page' : '', locale]">
     <component
       :is="isEditPage ? EditHeader : EditTextTitle"
       :title="t('edit.TITLE')"
-      @switch-change="getModeType"
+      @change-switch="getModeType"
     ></component>
     <div class="content">
       <RouterView class="router-view" :mode-type="isPreviewMode"></RouterView>
@@ -77,7 +78,6 @@ main {
     background-color: var(--o-color-bg1);
     .router-view {
       margin: 0 auto;
-      max-width: 1504px;
     }
   }
 }

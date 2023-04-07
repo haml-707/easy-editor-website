@@ -1,6 +1,13 @@
 <script lang="ts" setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed, inject, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
+import { useStoreData } from '@/shared/login';
+import { useVersionData } from '@/stores';
+
+import { useRoute } from 'vue-router';
+
+import { publishPage } from '@/api/api-easy-edit';
 
 import { OButton } from '@/components/button';
 import OIcon from '@/components/OIcon.vue';
@@ -8,11 +15,36 @@ import OIcon from '@/components/OIcon.vue';
 import IconArrowRight from '~icons/app/icon-arrow-right.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
 
+import { ElMessage } from 'element-plus';
+
 import type { FormInstance } from 'element-plus';
+// import _ from 'lodash-es';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const { guardAuthClient } = useStoreData();
+const route = useRoute();
+const modeType = inject('modeType') as Ref<boolean>;
 
-const userName = ref('haml');
+const sigDetailName = ref(route.params.name as string);
+
+// const isCententEqual = computed(() => {
+//   return _.isEqual(usePageData().pageData, usePageData().laststData);
+// });
+
+const pathMap: any = {
+  sig: `sig/sig-detail/?name=${sigDetailName.value}`,
+  event: `interaction/summit-list/${route.params.name}/`,
+};
+
+const path = ref(
+  `https://www.openeuler.org/${locale.value}/${
+    pathMap[route.path.split('/')[3]]
+  }`
+);
+
+const userName = computed(() => {
+  return guardAuthClient?.value.username;
+});
 
 const isDialogVisiable = ref(false);
 const formRef = ref<FormInstance>();
@@ -46,8 +78,15 @@ function checkName(rule: any, value: string, callback: any) {
 }
 
 function toggleDelDlg(val: boolean) {
+  // if (isCententEqual.value) {
+  //   return false;
+  // }
+  // if (val && !useVersionData().isCoverLatest) {
+  //   useVersionData().setDialogData('footer');
+  // } else {
   ruleForm.name === userName.value;
   isDialogVisiable.value = val;
+  // }
 }
 function confirmPublish(verify: FormInstance | undefined) {
   if (!verify) {
@@ -55,16 +94,44 @@ function confirmPublish(verify: FormInstance | undefined) {
   }
   verify.validate(async (res: boolean) => {
     if (res) {
-      console.log(5555);
-      // TODO:
+      publishPage(
+        path.value,
+        ruleForm.name,
+        useVersionData().activeVersion === -1
+          ? 'latest'
+          : useVersionData().activeVersion.toString()
+      ).then((res) => {
+        if (res.statusCode === 200) {
+          ElMessage({
+            type: 'success',
+            message: '发布成功',
+          });
+          useVersionData().setVersionData(path.value);
+          toggleDelDlg(false);
+        }
+      });
     }
   });
 }
+// watch(
+//   () => useVersionData().isCoverDialogShown,
+//   (val, oldVal) => {
+//     if (!val && oldVal === 'footer' && useVersionData().isCoverLatest) {
+//       toggleDelDlg(true);
+//     }
+//   }
+// );
 </script>
 <template>
   <div class="edit-footer">
-    <p>{{ t('edit.CONFIRE_PUBLISH') }}</p>
-    <OButton class="post-edit" animation @click="toggleDelDlg(true)"
+    <p>
+      {{ t('edit.CONFIRE_PUBLISH') }}
+    </p>
+    <OButton
+      class="post-edit"
+      :class="[modeType ? '' : 'disabled']"
+      :animation="modeType"
+      @click="modeType ? toggleDelDlg(true) : ''"
       >{{ t('edit.PUBLISH_PAGE') }}
       <template #suffixIcon>
         <OIcon>
@@ -132,6 +199,11 @@ function confirmPublish(verify: FormInstance | undefined) {
     border: transparent;
     background-color: var(--o-color-major1);
     color: var(--o-color-text1);
+  }
+  .disabled {
+    cursor: not-allowed;
+    color: var(--o-color-white);
+    background-color: var(--o-color-info3);
   }
 }
 </style>

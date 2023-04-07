@@ -22,6 +22,7 @@ const props = defineProps({
     default: '',
   },
 });
+
 const contributionSelectBox = ref([
   {
     color: 'bg-color-maintainer',
@@ -113,7 +114,7 @@ const componentName = 'member';
 const loading = ref(true);
 const getContributeInfo = (e: IObject) => {
   param.value[e.id] = e.active;
-  getMemberData();
+  // getMemberData();
   switchType();
 };
 const typeLable = ref('');
@@ -134,8 +135,9 @@ switchType();
 watch(
   () => props.sig,
   () => {
-    getMemberData();
-  }
+    // getMemberData();
+  },
+  { immediate: true }
 );
 onMounted(() => {
   loading.value = false;
@@ -155,13 +157,14 @@ const querySearch = () => {
       item.gitee_id.toLowerCase().includes(searchInput.value)
     );
     reallData.value = newList;
+
     filterReallData();
   } else {
     getMemberData();
   }
 };
 const clearSearchInput = () => {
-  getMemberData();
+  // getMemberData();
   searchInput.value = '';
 };
 
@@ -253,7 +256,6 @@ const turnPage = (option: string) => {
               currentPage * pageSize
             )
           "
-          style="width: 100%"
         >
           <el-table-column
             prop="rank"

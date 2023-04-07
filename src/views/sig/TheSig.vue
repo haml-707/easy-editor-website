@@ -1,20 +1,29 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, Ref, inject, watch } from 'vue';
 import { useLangStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import _ from 'lodash-es';
 
 import useWindowResize from '@/components/hooks/useWindowResize';
-
 import BreadCrumbs from '@/components/BreadCrumbs.vue';
-// import AppCalendar from '@/components/AppCalendar.vue';
+import SigMeeting from './SigMeeting.vue';
+import SigIntroduction from './SigIntroduction.vue';
+import MarkdownEdit from './MarkdownEdit.vue';
+import OIcon from '@/components/OIcon.vue';
+import AppEditTemplate from '@/components/AppEditTemplate.vue';
 import MobileRepositoryList from './MobileRepositoryList.vue';
 import ContributList from './ContributList.vue';
 import AppPaginationMo from '@/components/AppPaginationMo.vue';
 
+import { OButton } from '@/components/button';
+import { ElMessage } from 'element-plus';
+
 import IconEmail from '~icons/app/icon-mail.svg';
 import IconGitee from '~icons/app/icon-gitee.svg';
 import IconSearch from '~icons/app/icon-search.svg';
+import IconAdd from '~icons/app/icon-add.svg';
+import IconWarn from '~icons/edit/icon-warn.svg';
 
 import {
   getSigDetail,
@@ -23,27 +32,228 @@ import {
   getSigList,
 } from '@/api/api-sig';
 
-import IconChevronRight from '~icons/app/icon-chevron-right.svg';
+import {
+  modifyFloorData,
+  deleteFloor,
+  createPage,
+  getSingleFloorData,
+} from '@/api/api-easy-edit';
 
-interface SIGLIST {
+import { usePageData, useVersionData } from '@/stores';
+
+interface SigList {
   group_name: string;
   maillist: string;
 }
-
-const props = defineProps({
-  modeType: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-console.log(props.modeType);
 
 const lang = useLangStore().lang;
 
 const route = useRoute();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const sigDetailName = ref(route.params.name as string);
+
+const path = ref(
+  `https://www.openeuler.org/${locale.value}/sig/sig-detail/?name=${sigDetailName.value}`
+);
+
+let params = {
+  title: '介绍',
+  description: '介绍',
+  content: '',
+  contentType: 'text/plain',
+  name: '',
+  path: path.value,
+  type: 'sig',
+  locale: locale.value,
+  isPrivate: false,
+};
+
+const pageData = computed(() => {
+  return usePageData().pageData;
+});
+const isDialogVisiable = ref(false);
+const isEditVisiable = ref('');
+const modeType = inject('modeType') as Ref<boolean>;
+
+// 新建楼层，赋值默认markdown
+const addFloor = async function (name: string) {
+  dataMap[name].value['name'] = name;
+  dataMap[name].value['content'] = t('edit.MARKDOWN_TEMPLATE');
+  await creatFloor(name);
+  isEditVisiable.value = name;
+};
+
+const meetingData = computed({
+  get: () =>
+    pageData.value.get('meeting') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+
+const introductData = computed({
+  get: () =>
+    pageData.value.get('introduction') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+
+const markdownData1 = computed({
+  get: () =>
+    pageData.value.get('markdown1') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+
+const markdownData2 = computed({
+  get: () =>
+    pageData.value.get('markdown2') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+const markdownData3 = computed({
+  get: () =>
+    pageData.value.get('markdown3') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+const markdownData4 = computed({
+  get: () =>
+    pageData.value.get('markdown4') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+const markdownData5 = computed({
+  get: () =>
+    pageData.value.get('markdown5') || {
+      content: '',
+      title: '',
+    },
+  set: (val) => {
+    val;
+  },
+});
+
+// name和数据映射
+const dataMap: any = {
+  ['markdown1']: markdownData1,
+  ['markdown2']: markdownData2,
+  ['markdown3']: markdownData3,
+  ['markdown4']: markdownData4,
+  ['markdown5']: markdownData5,
+  meeting: meetingData,
+  introduction: introductData,
+};
+
+function saveData(name: string) {
+  if (pageData.value.has(name)) {
+    params = dataMap[name as keyof typeof dataMap].value;
+  }
+  params.name = name;
+  params.path = path.value;
+  modifyFloorData(params)
+    .then((res: { statusCode: number }) => {
+      if (res?.statusCode !== 200) {
+        // 修改出错内容回显
+        getSingleFloorData(path.value, name).then((res: any) => {
+          params.content = res?.data?.content;
+          params.title = res?.data?.title;
+          usePageData().pageData.set(name, params);
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+// 新键楼层 如果已存在 调用保存
+function creatFloor(name: string) {
+  if (!useVersionData().isCoverLatest) {
+    return false;
+  }
+  if (pageData.value.has(name)) {
+    saveData(name);
+  } else {
+    const param = {
+      content: dataMap[name].value.content,
+      name: name,
+      description: '',
+      path: path.value,
+      title: dataMap[name].value.title,
+      isPrivate: false,
+      type: 'sig',
+      locale: locale.value,
+      contentType: 'text/plain',
+    };
+    createPage(param).then((res: { statusCode: number }) => {
+      if (res?.statusCode === 200) {
+        ElMessage({
+          type: 'success',
+          message: '创建成功',
+        });
+        pageData.value.set(name, _.cloneDeep(param));
+        usePageData().tempData.set(name, _.cloneDeep(param));
+      }
+    });
+  }
+  isEditVisiable.value = '';
+}
+// 确认删除
+function confirmDel() {
+  deleteFloor(path.value, isEditVisiable.value).then((res) => {
+    if (res.statusCode === 200) {
+      ElMessage({
+        type: 'success',
+        message: '删除成功',
+      });
+    }
+    pageData.value.delete(isEditVisiable.value);
+    dataMap[isEditVisiable.value].value.name = '';
+    isEditVisiable.value = '';
+    toggleDelDlg(false);
+  });
+}
+function toggleDelDlg(val: boolean, name?: string) {
+  isDialogVisiable.value = val;
+  isEditVisiable.value = name || '';
+}
+
+// 切换预览模式 清除编辑状态
+watch(
+  () => modeType.value,
+  () => {
+    if (modeType.value) {
+      isEditVisiable.value = '';
+    }
+  }
+);
+
+////////////////////////////////////////////////////////////////////////
 
 const screenWidth = useWindowResize();
 const isIphone = computed(() => {
@@ -54,39 +264,40 @@ const paginLayout = computed(() =>
     ? 'prev, slot, jumper, next'
     : 'sizes, prev, pager, next, slot, jumper'
 );
-const sigDetailName = ref(route.params.name as string);
 
 const sigMeetingData: any = ref('');
 const sigMemberData: any = ref('');
 const memberList: any = ref([]);
-const oldEmail = ref('');
-function getSigDetails() {
-  try {
-    getSigDetail(sigDetailName.value).then((res: any) => {
-      sigMeetingData.value = res;
-    });
-  } catch (error) {
-    console.error(error);
-  }
-}
 
+function getSigDetails() {
+  getSigDetail(sigDetailName.value)
+    .then((res: any) => {
+      sigMeetingData.value = res;
+    })
+    .catch((error) => {
+      throw new Error(error);
+    });
+}
+const oldEmail = ref('');
+const giteeHomeLink = ref('');
 function getOldEmail() {
   getSigList().then((res) => {
-    const targetData = res.filter((item: SIGLIST) => {
+    const targetData = res.filter((item: SigList) => {
       return item.group_name === sigDetailName.value;
     });
     if (targetData.length) {
       oldEmail.value = targetData[0].maillist;
+      giteeHomeLink.value = targetData[0].home_page;
     }
   });
 }
 function getSigMembers() {
-  try {
-    const param = {
-      community: 'openeuler',
-      sig: sigDetailName.value,
-    };
-    getSigMember(param).then((res: any) => {
+  const param = {
+    community: 'openeuler',
+    sig: sigDetailName.value,
+  };
+  getSigMember(param)
+    .then((res: any) => {
       if (res?.data[0]) {
         const data = res.data[0];
         sigMemberData.value = data;
@@ -95,10 +306,10 @@ function getSigMembers() {
           memberList.value = maintainer_info;
         }
       }
+    })
+    .catch((error) => {
+      throw new Error(error);
     });
-  } catch (error) {
-    console.error(error);
-  }
 }
 
 // 仓库列表过滤参数
@@ -186,293 +397,457 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="sig-detail">
-    <BreadCrumbs
-      bread1="SIG"
-      :bread2="sigDetailName"
-      link1="/zh/sig/sig-list/"
-    />
-    <div class="content">
-      <h3>{{ sigDetailName }}</h3>
-      <div class="brief-introduction">
-        <h4>{{ t('sig.SIG_DETAIL.INTRODUCTION') }}</h4>
-        <p v-if="sigMemberData.description" class="no-meeting">
-          {{ sigMemberData.description }}
-        </p>
-        <p v-else class="no-meeting">
-          {{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT1')
-          }}<a
-            target="_blank"
-            :href="`https://gitee.com/openeuler/community/tree/master/sig/${sigDetailName}`"
-            >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT2') }}</a
-          >{{ t('sig.SIG_DETAIL.SIG_EMPTY_TEXT3') }}
-        </p>
-        <p class="email">
-          <span>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}:</span>
-          <a :href="`mailto:${oldEmail}`">{{
-            oldEmail || 'dev@openeuler.org'
-          }}</a>
-        </p>
-      </div>
-      <div v-if="lang === 'zh'" class="meeting">
-        <h5>{{ t('sig.SIG_DETAIL.ORGANIZING_MEETINGS') }}</h5>
-        <div v-if="sigMeetingData.tableData" class="calender-wrapper">
-          <!-- <AppCalendar
-            :is-home-page="false"
+  <AppEditTemplate>
+    <div class="sig-detail">
+      <BreadCrumbs
+        bread1="SIG"
+        :bread2="sigDetailName"
+        link1="https://www.openeuler.org/zh/sig/sig-list/"
+      />
+      <div class="content">
+        <div class="introduction">
+          <SigIntroduction
+            v-model="introductData"
+            @auto-save="creatFloor('introduction')"
+          ></SigIntroduction>
+        </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown1')"
+          class="add-floor square"
+          @click="addFloor('markdown1')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="pageData.has('markdown1')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData1"
+            markdown-id="markdown1"
+            @auto-save="creatFloor('markdown1')"
+            @handle-del="toggleDelDlg(true, 'markdown1')"
+          />
+        </div>
+        <div v-if="locale === 'zh'" class="meeting">
+          <SigMeeting
+            v-if="sigMeetingData.tableData"
+            v-model="meetingData"
+            class="calender-box"
             :table-data="sigMeetingData.tableData"
-          /> -->
+            @auto-save="creatFloor('meeting')"
+          />
+          <p v-else class="sig-introduction">
+            {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
+          </p>
         </div>
-        <p v-else class="no-meeting">
-          {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
-        </p>
-      </div>
-      <div v-if="memberList.length" class="member">
-        <h5>{{ t('sig.SIG_DETAIL.MAINTAINER') }}</h5>
-        <ul>
-          <li v-for="item in memberList" :key="item.gitee_id">
-            <div class="member-img">
-              <img
-                :src="item.avatar_url"
-                :alt="item.name"
-                @error="setDefaultImage($event)"
-              />
-            </div>
-            <p class="name">{{ item.gitee_id }}</p>
-            <p class="introduction">
-              <span>Maintainer</span>
-            </p>
-            <div class="icon-link">
-              <a :href="`https://gitee.com/${item.gitee_id}`" target="_blank">
-                <OIcon class="icon"> <IconGitee /> </OIcon
-              ></a>
-              <a :href="`mailto:${item.email}`">
-                <OIcon class="icon"> <IconEmail /> </OIcon
-              ></a>
-            </div>
-          </li>
-        </ul>
-      </div>
-      <div class="repository">
-        <h5>
-          {{
-            `${sigDetailName} ${t('sig.SIG_DETAIL.REPOSITORY_LIST')} (${
-              _totalRepositoryList.length
-            })`
-          }}
-        </h5>
-        <div class="repository-filter">
-          <div :class="isIphone ? 'select-box-phone' : 'select-box'">
-            <div class="select-item">
-              <span class="select-item-name">
-                {{ t('sig.SIG_DETAIL.REPOSITORY_NAME') }}
-              </span>
-              <el-select
-                v-model="repositoryNameSelected"
-                filterable
-                clearable
-                :placeholder="t('sig.SIG_ALL')"
-                @change="filterRepositoryList()"
-              >
-                <template #prefix>
-                  <OIcon>
-                    <IconSearch />
-                  </OIcon>
-                </template>
-                <el-option
-                  v-for="item in repositoryNameList"
-                  :key="item"
-                  :label="item"
-                  :value="item"
-                />
-              </el-select>
-            </div>
-            <div v-if="isIphone" class="split-line"></div>
-            <div class="select-item">
-              <span class="select-item-name"> Maintainer </span>
-              <el-select
-                v-model="maintainerSelected"
-                filterable
-                clearable
-                :placeholder="t('sig.SIG_ALL')"
-                @change="filterRepositoryList()"
-              >
-                <template #prefix>
-                  <OIcon>
-                    <IconSearch />
-                  </OIcon>
-                </template>
-                <el-option
-                  v-for="item in maintainerList"
-                  :key="item"
-                  :value="item"
-                  :lable="item"
-                />
-              </el-select>
-            </div>
-            <div v-if="isIphone" class="split-line"></div>
-            <div class="select-item">
-              <span class="select-item-name"> Committer </span>
-              <el-select
-                v-model="committerSelected"
-                filterable
-                clearable
-                :placeholder="t('sig.SIG_ALL')"
-                @change="filterRepositoryList()"
-              >
-                <template #prefix>
-                  <OIcon>
-                    <IconSearch />
-                  </OIcon>
-                </template>
-                <el-option
-                  v-for="item in committerList"
-                  :key="item"
-                  :value="item"
-                  :lable="item"
-                />
-              </el-select>
-            </div>
-          </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown2') && locale === 'zh'"
+          class="add-floor square"
+          @click="addFloor('markdown2')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
         </div>
-
-        <el-table v-if="!isIphone" :data="repositoryList">
-          <el-table-column
-            :label="t('sig.SIG_DETAIL.REPOSITORY_NAME')"
-            width="550px"
-          >
-            <template #default="scope">
-              <a target="_blank" :href="`https://gitee.com/${scope.row.repo}`">
-                {{ scope.row.repo }}
-              </a>
-            </template>
-          </el-table-column>
-          <el-table-column label="Maintainer">
-            <template #default="scope">
-              <a
-                v-for="(item, index) in scope.row.maintainers"
-                :key="item"
-                target="_blank"
-                :href="`https://gitee.com/${item}`"
-              >
-                {{ item
-                }}<span v-show="index !== scope.row.maintainers.length - 1">{{
-                  lang === 'zh' ? '、' : ',&nbsp;'
-                }}</span>
-              </a>
-            </template>
-          </el-table-column>
-          <el-table-column label="Committer">
-            <template #default="scope">
-              <a
-                v-for="(item, index) in scope.row.gitee_id"
-                :key="item"
-                target="_blank"
-                :href="`https://gitee.com/${item}`"
-              >
-                {{ item
-                }}<span v-show="index !== scope.row.gitee_id.length - 1">{{
-                  lang === 'zh' ? '、' : ',&nbsp;'
-                }}</span>
-              </a>
-            </template>
-          </el-table-column>
-        </el-table>
-        <MobileRepositoryList
-          v-else
-          :data="repositoryList"
-        ></MobileRepositoryList>
-        <div class="sig-pagination">
-          <el-pagination
-            v-model:currentPage="currentPage"
-            v-model:page-size="pageSize"
-            class="repository-pagin"
-            :hide-on-single-page="true"
-            :page-sizes="[10, 20, 30, 40]"
-            :background="true"
-            :layout="paginLayout"
-            :total="totalRepositoryList.length"
-          >
-            <span class="pagination-slot"
-              >{{ currentPage }}/{{ totalPage }}</span
-            >
-          </el-pagination>
-          <AppPaginationMo
-            :current-page="currentPage"
-            :total-page="totalRepositoryList.length"
-            @turn-page="turnPage"
-          >
-          </AppPaginationMo>
+        <div v-if="pageData.has('markdown2')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData2"
+            markdown-id="markdown2"
+            @auto-save="creatFloor('markdown2')"
+            @handle-del="toggleDelDlg(true, 'markdown2')"
+          />
         </div>
-      </div>
-      <div class="repository">
-        <h5>
-          {{ `${sigDetailName} ${t('sig.SIG_DETAIL.USER_CONTRIBUTOR')}` }}
-        </h5>
-        <div class="repository-filter">
-          <ContributList :sig="sigDetailName"></ContributList>
-        </div>
-      </div>
-      <div class="recent-event">
-        <h5>{{ t('sig.SIG_DETAIL.LATEST_DYNAMIC') }}</h5>
-        <div class="dynamic">
-          <div class="item">
-            <div class="header">
-              <span class="left">{{ t('sig.SIG_DETAIL.BLOG') }}</span>
-              <a :href="'/' + lang + '/interaction/blog-list/'" class="right">
-                <span>{{ t('sig.SIG_DETAIL.MORE') }}</span>
-                <OIcon class="icon-more">
-                  <IconChevronRight />
-                </OIcon>
-              </a>
-            </div>
-            <ul class="item-body">
-              <li class="empty">
-                {{ t('sig.SIG_DETAIL.BLOG_EMPTY1')
-                }}<a
-                  :href="'/' + lang + '/interaction/post-blog/'"
-                  target="_blank"
-                  >{{ t('sig.SIG_DETAIL.BLOG_EMPTY2') }}</a
-                >{{ t('sig.SIG_DETAIL.BLOG_EMPTY3') }}
+        <div v-if="memberList.length" class="member">
+          <h2>
+            <span class="title-bg">{{
+              t('sig.SIG_DETAIL.MAINTAINER_BG')
+            }}</span>
+            <span class="title-text">{{ t('sig.SIG_DETAIL.MAINTAINER') }}</span>
+          </h2>
+          <div class="member-box">
+            <h5>
+              {{ sigDetailName + ' ' + t('sig.SIG_DETAIL.MAINTAINER_EN') }}
+            </h5>
+            <ul>
+              <li v-for="item in memberList" :key="item.gitee_id">
+                <div class="member-img">
+                  <img
+                    :src="item.avatar_url"
+                    :alt="item.name"
+                    @error="setDefaultImage($event)"
+                  />
+                </div>
+                <p class="name">{{ item.gitee_id }}</p>
+                <p class="introduction">
+                  <span>Maintainer</span>
+                </p>
+                <div class="icon-link">
+                  <a
+                    :href="`https://gitee.com/${item.gitee_id}`"
+                    target="_blank"
+                  >
+                    <OIcon class="icon"> <IconGitee /> </OIcon
+                  ></a>
+                  <a :href="`mailto:${item.email}`">
+                    <OIcon class="icon"> <IconEmail /> </OIcon
+                  ></a>
+                </div>
               </li>
             </ul>
           </div>
-          <div class="item">
-            <div class="header">
-              <span class="left">{{ t('sig.SIG_DETAIL.NEWS') }}</span>
-              <a :href="'/' + lang + '/interaction/news-list/'" class="right">
-                <span>{{ t('sig.SIG_DETAIL.MORE') }}</span>
-                <OIcon class="icon-more">
-                  <IconChevronRight />
-                </OIcon>
-              </a>
+        </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown3')"
+          class="add-floor square"
+          @click="addFloor('markdown3')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="pageData.has('markdown3')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData3"
+            markdown-id="markdown3"
+            @auto-save="creatFloor('markdown3')"
+            @handle-del="toggleDelDlg(true, 'markdown3')"
+          />
+        </div>
+        <div class="repository">
+          <h2>
+            <span class="title-bg">{{
+              t('sig.SIG_DETAIL.REPOSITORY_LIST_BG')
+            }}</span>
+            <span class="title-text">{{
+              t('sig.SIG_DETAIL.REPOSITORY_LIST')
+            }}</span>
+          </h2>
+          <div class="repository-box">
+            <h5>
+              {{
+                `${sigDetailName} ${t('sig.SIG_DETAIL.REPOSITORY_LIST')} (${
+                  _totalRepositoryList.length
+                })`
+              }}
+            </h5>
+            <div class="repository-filter">
+              <div :class="isIphone ? 'select-box-phone' : 'select-box'">
+                <div class="select-item">
+                  <span class="select-item-name">
+                    {{ t('sig.SIG_DETAIL.REPOSITORY_NAME') }}
+                  </span>
+                  <el-select
+                    v-model="repositoryNameSelected"
+                    filterable
+                    clearable
+                    :placeholder="t('sig.SIG_ALL')"
+                    @change="filterRepositoryList()"
+                  >
+                    <template #prefix>
+                      <OIcon>
+                        <IconSearch />
+                      </OIcon>
+                    </template>
+                    <el-option
+                      v-for="item in repositoryNameList"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                    />
+                  </el-select>
+                </div>
+                <div v-if="isIphone" class="split-line"></div>
+                <div class="select-item">
+                  <span class="select-item-name"> Maintainer </span>
+                  <el-select
+                    v-model="maintainerSelected"
+                    filterable
+                    clearable
+                    :placeholder="t('sig.SIG_ALL')"
+                    @change="filterRepositoryList()"
+                  >
+                    <template #prefix>
+                      <OIcon>
+                        <IconSearch />
+                      </OIcon>
+                    </template>
+                    <el-option
+                      v-for="item in maintainerList"
+                      :key="item"
+                      :value="item"
+                      :lable="item"
+                    />
+                  </el-select>
+                </div>
+                <div v-if="isIphone" class="split-line"></div>
+                <div class="select-item">
+                  <span class="select-item-name"> Committer </span>
+                  <el-select
+                    v-model="committerSelected"
+                    filterable
+                    clearable
+                    :placeholder="t('sig.SIG_ALL')"
+                    @change="filterRepositoryList()"
+                  >
+                    <template #prefix>
+                      <OIcon>
+                        <IconSearch />
+                      </OIcon>
+                    </template>
+                    <el-option
+                      v-for="item in committerList"
+                      :key="item"
+                      :value="item"
+                      :lable="item"
+                    />
+                  </el-select>
+                </div>
+              </div>
             </div>
-            <ul class="item-body">
-              <li class="empty">
-                {{ t('sig.SIG_DETAIL.NEWS_EMPTY')
-                }}<a
-                  :href="'/' + lang + '/interaction/post-news/'"
-                  target="_blank"
-                  >{{ t('sig.SIG_DETAIL.NEWS_EMPTY3') }}</a
-                >{{ t('sig.SIG_DETAIL.NEWS_EMPTY4') }}
-              </li>
-            </ul>
+            <el-table v-if="!isIphone" :data="repositoryList">
+              <el-table-column
+                :label="t('sig.SIG_DETAIL.REPOSITORY_NAME')"
+                width="550px"
+              >
+                <template #default="scope">
+                  <a
+                    target="_blank"
+                    :href="`https://gitee.com/${scope.row.repo}`"
+                  >
+                    {{ scope.row.repo }}
+                  </a>
+                </template>
+              </el-table-column>
+              <el-table-column label="Maintainer">
+                <template #default="scope">
+                  <a
+                    v-for="(item, index) in scope.row.maintainers"
+                    :key="item"
+                    target="_blank"
+                    :href="`https://gitee.com/${item}`"
+                  >
+                    {{ item
+                    }}<span
+                      v-show="index !== scope.row.maintainers.length - 1"
+                      >{{ lang === 'zh' ? '、' : ',&nbsp;' }}</span
+                    >
+                  </a>
+                </template>
+              </el-table-column>
+              <el-table-column label="Committer">
+                <template #default="scope">
+                  <a
+                    v-for="(item, index) in scope.row.gitee_id"
+                    :key="item"
+                    target="_blank"
+                    :href="`https://gitee.com/${item}`"
+                  >
+                    {{ item
+                    }}<span v-show="index !== scope.row.gitee_id.length - 1">{{
+                      lang === 'zh' ? '、' : ',&nbsp;'
+                    }}</span>
+                  </a>
+                </template>
+              </el-table-column>
+            </el-table>
+            <MobileRepositoryList
+              v-else
+              :data="repositoryList"
+            ></MobileRepositoryList>
+            <div class="sig-pagination">
+              <el-pagination
+                v-model:currentPage="currentPage"
+                v-model:page-size="pageSize"
+                class="repository-pagin"
+                :hide-on-single-page="true"
+                :page-sizes="[10, 20, 30, 40]"
+                :background="true"
+                :layout="paginLayout"
+                :total="totalRepositoryList.length"
+              >
+                <span class="pagination-slot"
+                  >{{ currentPage }}/{{ totalPage }}</span
+                >
+              </el-pagination>
+              <AppPaginationMo
+                :current-page="currentPage"
+                :total-page="totalRepositoryList.length"
+                @turn-page="turnPage"
+              >
+              </AppPaginationMo>
+            </div>
           </div>
+        </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown4')"
+          class="add-floor square"
+          @click="addFloor('markdown4')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="pageData.has('markdown4')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData4"
+            markdown-id="markdown4"
+            @auto-save="creatFloor('markdown4')"
+            @handle-del="toggleDelDlg(true, 'markdown4')"
+          />
+        </div>
+        <div class="contribution">
+          <h2>
+            <span class="title-bg">{{
+              t('sig.SIG_DETAIL.CONTRIBUTION_BG')
+            }}</span>
+            <span class="title-text">{{
+              t('sig.SIG_DETAIL.CONTRIBUTION')
+            }}</span>
+          </h2>
+          <div class="contribution-box">
+            <h5>
+              {{ `${sigDetailName} ${t('sig.SIG_DETAIL.USER_CONTRIBUTOR')}` }}
+            </h5>
+            <ContributList
+              class="contribution-content"
+              :sig="sigDetailName"
+            ></ContributList>
+          </div>
+        </div>
+        <div
+          v-show="!modeType && !pageData.has('markdown5')"
+          class="add-floor square"
+          @click="addFloor('markdown5')"
+        >
+          <OIcon>
+            <IconAdd />
+          </OIcon>
+        </div>
+        <div v-if="pageData.has('markdown5')" class="markdown-floor">
+          <MarkdownEdit
+            v-model="markdownData5"
+            markdown-id="markdown5"
+            @auto-save="creatFloor('markdown5')"
+            @handle-del="toggleDelDlg(true, 'markdown5')"
+          />
         </div>
       </div>
     </div>
-  </div>
+    <el-dialog
+      v-model="isDialogVisiable"
+      class="publish-dialog"
+      :show-close="false"
+      width="640"
+    >
+      <template #header>
+        <OIcon class="danger1">
+          <IconWarn />
+        </OIcon>
+      </template>
+      <h3>
+        {{ t('edit.CONFIRM_DEL1') }}
+        <span class="danger1">{{ t('edit.CONFIRM_DEL2') }}</span>
+        {{ t('edit.CONFIRM_DEL3') }}
+      </h3>
+      <!-- TODO: 用户名 -->
+      <template #footer>
+        <o-button size="small" @click="toggleDelDlg(false)">取消</o-button>
+        <o-button size="small" type="primary" @click="confirmDel()">
+          确定</o-button
+        >
+      </template>
+    </el-dialog>
+  </AppEditTemplate>
 </template>
 <style lang="scss" scoped>
-.sig-detail {
+.danger1 {
+  color: #e02020;
+}
+
+.editable-floor {
+  position: relative;
+  z-index: 11;
+}
+.edit-type {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 12;
+  max-width: 1504px;
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
   margin: 0 auto;
+}
+
+@mixin title {
+  text-align: center;
+  position: relative;
+  height: 64px;
+  @media screen and (max-width: 768px) {
+    height: 30px;
+  }
+  .title-bg {
+    display: none;
+    color: var(--o-color-neutral10);
+    font-size: 40px;
+    font-weight: 300;
+    @media screen and (max-width: 768px) {
+      font-size: var(--o-font-size-h8);
+    }
+  }
+  .title-text {
+    font-size: var(--o-font-size-h3);
+    line-height: var(--o-line-height-h3);
+    color: var(--o-color-text1);
+    font-weight: 400;
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    transform: translateX(-50%);
+    @media screen and (max-width: 768px) {
+      top: 8px;
+      font-size: var(--o-font-size-h8);
+      line-height: var(--o-line-height-h8);
+    }
+  }
+}
+@mixin section-box {
+  margin-top: var(--o-spacing-h2);
+  background-color: var(--o-color-bg2);
+  padding: var(--o-spacing-h2);
+  @media screen and (max-width: 768px) {
+    margin-top: var(--o-spacing-h5);
+    padding: var(--o-spacing-h5);
+  }
+}
+:deep(.el-textarea) {
+  textarea {
+    min-height: 56px !important;
+    &[readonly] {
+      min-height: 21px !important;
+      cursor: text;
+      padding: 0;
+      box-shadow: none;
+      border: none;
+      resize: none;
+      &:focus-visible {
+        border: none;
+        box-shadow: none;
+        outline: none;
+      }
+    }
+  }
+}
+.sig-detail {
+  max-width: 1504px;
+  padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
+  margin: 0 auto;
+  @media (max-width: 1680px) {
+    max-width: 1300px;
+  }
   .content {
     width: 100%;
     margin-top: var(--o-spacing-h2);
-    background-color: var(--o-color-bg2);
-    @media (max-width: 1100px) {
-      margin-top: var(--o-spacing-h5);
-    }
     .sig-pagination {
       margin-top: var(--o-spacing-h2);
       @media screen and (max-width: 768px) {
@@ -485,39 +860,81 @@ onMounted(() => {
       color: var(--o-color-text1);
       line-height: var(--o-spacing-h4);
     }
-    h3 {
-      font-size: var(--o-font-size-h3);
-      line-height: var(--o-line-height-h3);
-      color: var(--o-color-text1);
-      font-weight: 500;
+    .introduction {
+      position: relative;
     }
     .brief-introduction {
-      margin-top: var(--o-spacing-h2);
-      h4 {
-        font-size: var(--o-font-size-h5);
-        line-height: var(--o-line-height-h5);
+      position: relative;
+      @include section-box;
+      padding: 24px;
+      .brief-introduction-title {
+        font-size: var(--o-font-size-h3);
+        line-height: var(--o-line-height-h3);
         color: var(--o-color-text1);
+        font-weight: 300;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        @media screen and (max-width: 768px) {
+          font-size: var(--o-font-size-h8);
+          line-height: var(--o-line-height-h8);
+        }
+        a {
+          margin-left: var(--o-spacing-h4);
+          font-size: var(--o-font-size-h5);
+          display: flex;
+          align-items: center;
+          @media screen and (max-width: 768px) {
+            margin-left: var(--o-spacing-h6);
+            font-size: var(--o-font-size-h8);
+          }
+        }
       }
-      p {
+      .sig-introduction {
         margin-top: var(--o-spacing-h5);
         font-size: var(--o-font-size-text);
         line-height: 22px;
         color: var(--o-color-text3);
+        position: relative;
+        z-index: 11;
+        @media screen and (max-width: 768px) {
+          margin-top: var(--o-spacing-h6);
+          font-size: var(--o-font-size-tip);
+          line-height: var(--o-line-height-tip);
+        }
+      }
+    }
+    .markdown-floor {
+      margin-top: 40px;
+      position: relative;
+      z-index: 11;
+      h2 {
+        @include title;
+      }
+      .markdown-main {
+        margin-top: 40px;
+        padding: 40px;
+        box-shadow: var(--o-shadow-l2);
       }
     }
     .meeting {
+      position: relative;
       margin-top: var(--o-spacing-h2);
       color: var(--o-color-text1);
-      .no-meeting {
+      .sig-introduction {
         padding: var(--o-spacing-h5) 0;
         text-align: center;
+        position: relative;
+        z-index: 11;
       }
-      .calender-wrapper {
-        margin-top: var(--o-spacing-h5);
+      h2 {
+        @include title;
       }
-      h5 {
-        font-size: var(--o-font-size-h6);
-        line-height: var(--o-line-height-h6);
+      .calender-box {
+        margin-top: var(--o-spacing-h2);
+        @media screen and (max-width: 768px) {
+          margin-top: var(--o-spacing-h5);
+        }
       }
       .schedule {
         margin-top: var(--o-spacing-h4);
@@ -530,59 +947,71 @@ onMounted(() => {
     .member {
       margin-top: var(--o-spacing-h2);
       color: var(--o-color-text1);
-      h5 {
-        font-size: var(--o-font-size-h6);
-        line-height: var(--o-line-height-h6);
+      h2 {
+        @include title;
       }
-      ul {
-        // display: flex;
-        // margin-top: var(--o-spacing-h4);
-        padding: 0 var(--o-spacing-h7);
-        display: flex;
-        justify-content: start;
-        flex-wrap: wrap;
-        li {
-          flex: 0 0 25%;
-          text-align: center;
-          margin-top: var(--o-spacing-h5);
-          .icon-link {
-            display: flex;
-            justify-content: center;
-            margin-top: var(--o-spacing-h8);
-            font-size: var(--o-font-size-h5);
-            a {
-              margin: 0 var(--o-spacing-h8);
-            }
-          }
-          @media (max-width: 1080px) {
-            flex: 0 0 50%;
-            .icon-link {
-              font-size: var(--o-font-size-h7);
-              a {
-                margin: 0 var(--o-spacing-h9);
-              }
-            }
-          }
-          .member-img {
-            width: 120px;
-            height: 120px;
-            display: block;
-            margin: 0 auto;
-            img {
-              width: 120px;
-              height: 120px;
-              border-radius: 50%;
-            }
-          }
-
-          .name {
-            margin-top: var(--o-spacing-h5);
+      .member-box {
+        @include section-box;
+        box-shadow: var(--o-shadow-l2);
+        h5 {
+          font-size: var(--o-font-size-h6);
+          line-height: var(--o-line-height-h6);
+          font-weight: 400;
+          color: var(--o-color-text1);
+          @media screen and (max-width: 768px) {
             font-size: var(--o-font-size-h8);
             line-height: var(--o-line-height-h8);
           }
-          .introduction {
-            font-size: var(--o-font-size-tip);
-            line-height: var(--o-line-height-tip);
+        }
+        ul {
+          // display: flex;
+          margin-top: var(--o-spacing-h2);
+          padding: 0 var(--o-spacing-h7);
+          display: flex;
+          justify-content: start;
+          flex-wrap: wrap;
+          li {
+            flex: 0 0 25%;
+            text-align: center;
+            .icon-link {
+              display: flex;
+              justify-content: center;
+              margin-top: var(--o-spacing-h8);
+              font-size: var(--o-font-size-h5);
+              a {
+                margin: 0 var(--o-spacing-h8);
+              }
+            }
+            @media (max-width: 1080px) {
+              flex: 0 0 50%;
+              .icon-link {
+                font-size: var(--o-font-size-h7);
+                a {
+                  margin: 0 var(--o-spacing-h9);
+                }
+              }
+            }
+            .member-img {
+              width: 120px;
+              height: 120px;
+              display: block;
+              margin: 0 auto;
+              img {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+              }
+            }
+
+            .name {
+              margin-top: var(--o-spacing-h5);
+              font-size: var(--o-font-size-h8);
+              line-height: var(--o-line-height-h8);
+            }
+            .introduction {
+              font-size: var(--o-font-size-tip);
+              line-height: var(--o-line-height-tip);
+            }
           }
         }
       }
@@ -590,10 +1019,19 @@ onMounted(() => {
     .repository {
       margin-top: var(--o-spacing-h2);
       color: var(--o-color-text1);
-      h5 {
-        font-size: var(--o-font-size-h6);
-        line-height: var(--o-line-height-h6);
+      h2 {
+        @include title;
       }
+      .repository-box {
+        box-shadow: var(--o-shadow-l2);
+        @include section-box;
+        h5 {
+          font-size: var(--o-font-size-h6);
+          font-weight: 400;
+          color: var(--o-color-text1);
+        }
+      }
+
       a {
         cursor: pointer;
         color: var(--o-color-brand1);
@@ -649,12 +1087,33 @@ onMounted(() => {
         display: none;
       }
     }
+    .contribution {
+      margin-top: var(--o-spacing-h2);
+      color: var(--o-color-text1);
+      h2 {
+        @include title;
+      }
+      .contribution-box {
+        box-shadow: var(--o-shadow-l2);
+        @include section-box;
+        h5 {
+          font-size: var(--o-font-size-h6);
+          font-weight: 400;
+          color: var(--o-color-text1);
+        }
+        .contribution-content {
+          margin: var(--o-spacing-h4) 0;
+        }
+      }
+      @media screen and (max-width: 768px) {
+        display: none;
+      }
+    }
     .recent-event {
       margin-top: var(--o-spacing-h2);
       color: var(--o-color-text1);
-      h5 {
-        font-size: var(--o-font-size-h6);
-        line-height: var(--o-line-height-h6);
+      h2 {
+        @include title;
       }
       .dynamic {
         display: grid;
@@ -712,21 +1171,149 @@ onMounted(() => {
         }
       }
     }
-  }
-  @media screen and (min-width: 857px) {
-    .content {
-      padding: var(--o-spacing-h2);
+    .square {
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      z-index: 11;
+      border: 1px solid var(--o-color-brand1);
+      .o-icon {
+        padding: 8px;
+        font-size: 32px;
+        color: var(--o-color-brand1);
+        // TODO:'阴影'
+        box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+      }
     }
-  }
-  @media screen and (max-width: 857px) {
-    .content {
-      padding: var(--o-spacing-h5);
+    .add-floor {
+      position: relative;
+      margin: 64px auto 24px;
+      width: fit-content;
+    }
+    .edit-floor {
+      position: absolute;
+      top: 104px;
+      right: -104px;
+      &.first-floor {
+        top: 0;
+      }
     }
   }
 }
 @media (max-width: 1100px) {
   .sig-detail {
     padding: 16px 16px var(--o-spacing-h2);
+  }
+}
+</style>
+
+<style lang="scss">
+@mixin title {
+  text-align: center;
+  position: relative;
+  height: 64px;
+  @media screen and (max-width: 768px) {
+    height: 30px;
+  }
+  .title-bg {
+    color: var(--o-color-neutral10);
+    font-size: 40px;
+    font-weight: 300;
+    @media screen and (max-width: 768px) {
+      font-size: var(--o-font-size-h8);
+    }
+  }
+  .title-text {
+    font-size: var(--o-font-size-h3);
+    line-height: var(--o-line-height-h3);
+    color: var(--o-color-text1);
+    font-weight: 400;
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    transform: translateX(-50%);
+    @media screen and (max-width: 768px) {
+      top: 8px;
+      font-size: var(--o-font-size-h8);
+      line-height: var(--o-line-height-h8);
+    }
+  }
+}
+@mixin section-box {
+  // margin-top: var(--o-spacing-h2);
+  background-color: var(--o-color-bg2);
+  padding: var(--o-spacing-h2);
+  @media screen and (max-width: 768px) {
+    margin-top: var(--o-spacing-h5);
+    padding: var(--o-spacing-h5);
+  }
+}
+.edit-dialog {
+  padding: var(--o-spacing-h2);
+  background-color: var(--o-color-bg1);
+  .el-dialog__header {
+    display: none;
+  }
+  .el-dialog__body {
+    margin: 0 auto;
+    max-width: 1424px;
+    padding: 0;
+    .brief-introduction {
+      position: relative;
+      @include section-box;
+      padding: 40px 24px;
+
+      .brief-introduction-title {
+        padding: 16px;
+        padding-bottom: 0;
+        font-size: var(--o-font-size-h3);
+        line-height: var(--o-line-height-h3);
+        color: var(--o-color-text1);
+        font-weight: 300;
+        display: flex;
+        align-items: center;
+        @media screen and (max-width: 768px) {
+          font-size: var(--o-font-size-h8);
+          line-height: var(--o-line-height-h8);
+        }
+        a {
+          margin-left: var(--o-spacing-h4);
+          font-size: var(--o-font-size-h5);
+          display: flex;
+          align-items: center;
+          @media screen and (max-width: 768px) {
+            margin-left: var(--o-spacing-h6);
+            font-size: var(--o-font-size-h8);
+          }
+        }
+      }
+      .sig-introduction {
+        // padding: 16px;
+        margin-top: var(--o-spacing-h5);
+        font-size: var(--o-font-size-text);
+        line-height: 22px;
+        color: var(--o-color-text3);
+        position: relative;
+        z-index: 11;
+        @media screen and (max-width: 768px) {
+          margin-top: var(--o-spacing-h6);
+          font-size: var(--o-font-size-tip);
+          line-height: var(--o-line-height-tip);
+        }
+      }
+    }
+  }
+  .el-dialog__footer {
+    padding: 40px 0 0 0;
+    margin: 0 auto;
+    max-width: 1424px;
+    display: flex;
+    gap: 0 24px;
+    justify-content: center;
+    // background-color: var(--o-color-bg2);
+  }
+  .edit-floor {
+    display: none;
   }
 }
 </style>

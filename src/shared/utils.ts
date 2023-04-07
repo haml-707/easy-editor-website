@@ -1,3 +1,4 @@
+import { Ref } from 'vue';
 // 格式化数字
 export function formatNumber(num: number) {
   return num >= 1e3 && num < 1e4
@@ -151,5 +152,20 @@ export function getUrlParam(paraName: string) {
     return '';
   } else {
     return '';
+  }
+}
+// guardFunc
+export function guardFunc(bool: boolean, guard: Ref<boolean>) {
+  if (bool && guard.value) {
+    guard.value = true;
+    return true;
+  } else {
+    if (guard.value) {
+      guard.value = false;
+      return true;
+    } else {
+      guard.value = true;
+      return false;
+    }
   }
 }
