@@ -66,12 +66,13 @@ export default defineConfig({
     port: 80,
     proxy: {
       '/api-edit/': {
-        target: 'https://easyeditor.test.osinfra.cn/api/',
+        target: 'https://easyeditor.openeuler.org/api/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-edit/, ''),
       },
       '/api-omapi/': {
-        target: 'https://omapi.test.osinfra.cn/',
+        target: 'https://omapi.osinfra.cn/',
+        // target: 'https://omapi.test.osinfra.cn/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-omapi/, ''),
       },
