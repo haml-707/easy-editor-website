@@ -75,7 +75,8 @@ export function logout(community = 'openeuler') {
 
 // 跳转首页
 export function goToHome() {
-  window?.location?.reload();
+  window.location.href = '/zh/login/';
+  // window?.location?.reload();
 }
 
 function createClient(
@@ -107,7 +108,7 @@ export function tokenFailIndicateLogin() {
   saveUserAuth();
   const { guardAuthClient } = useStoreData();
   guardAuthClient.value = {};
-  goToHome();
+  // goToHome();
 }
 
 /**

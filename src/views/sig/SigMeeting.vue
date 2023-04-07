@@ -29,7 +29,6 @@ import IconClose from '~icons/app/icon-close.svg';
 import notFoundImg from '@/assets/common/404/404.png';
 
 import useWindowResize from '@/components/hooks/useWindowResize';
-import { getSigMember } from '@/api/api-sig';
 
 import { guardFunc } from '@/shared/utils';
 
@@ -51,10 +50,15 @@ const props = defineProps({
       return {};
     },
   },
+  oldEmail: {
+    type: String,
+    default: '',
+  },
 });
 const { t } = useI18n();
 
 const guard = ref(true);
+const meetRef = ref();
 
 const modeType = inject('modeType') as Ref<boolean>;
 const isEditStyle = computed(() => {
@@ -148,6 +152,11 @@ function setMeetingDay() {
   currentMeet = JSON.parse(JSON.stringify(props.tableData)).pop();
   if (currentMeet && currentMeet.date) {
     renderData.value = currentMeet;
+    nextTick(() => {
+      if (meetRef.value?.length) {
+        meetRef.value[0].click();
+      }
+    });
     currentDay.value = resolveDate(currentMeet.date);
   }
 }
@@ -195,22 +204,7 @@ const resolveDate = (date: string) => {
   return date;
 };
 const sigDetailName = ref('');
-const oldEmail = ref('');
-function getOldEmail() {
-  const param = {
-    community: 'openeuler',
-    sig: sigDetailName.value,
-  };
-  getSigMember(param)
-    .then((res: any) => {
-      if (res?.data[0]) {
-        oldEmail.value = res.data[0].mailing_list;
-      }
-    })
-    .catch((error) => {
-      throw new Error(error);
-    });
-}
+
 function getUrlParam(paraName: any) {
   const url = document.location.toString();
   const arrObj = url.split('?');
@@ -230,7 +224,6 @@ function getUrlParam(paraName: any) {
 }
 onMounted(() => {
   sigDetailName.value = getUrlParam('name');
-  getOldEmail();
 });
 const watchData = watch(
   () => props.tableData.length,
@@ -269,12 +262,24 @@ const watchData = watch(
         <div class="info-body">
           <h5>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}</h5>
           <p class="email">
-            <span>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}:</span>
             <a
               :href="
                 oldEmail ? `mailto:${oldEmail}` : `mailto:dev@openeuler.org`
               "
               >{{ oldEmail || 'dev@openeuler.org' }}</a
+            >
+            <a
+              v-if="
+                (oldEmail?.split('@').length &&
+                  oldEmail?.split('@')[1] === 'openeuler.org') ||
+                !oldEmail
+              "
+              :href="`https://mailweb.openeuler.org/postorius/lists/${
+                oldEmail || 'dev@openeuler.org'
+              }/`"
+              target="_blank"
+              class="subscribe"
+              >{{ t('sig.SIG_DETAIL.SUBSCRIBE') }}</a
             >
           </p>
           <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
@@ -353,7 +358,7 @@ const watchData = watch(
               >
                 <el-collapse-item :name="index">
                   <template #title>
-                    <div class="meet-item">
+                    <div ref="meetRef" class="meet-item">
                       <div class="meet-left">
                         <div class="left-top">
                           <p class="meet-name">{{ item.name || item.title }}</p>
@@ -719,6 +724,22 @@ h2 {
         padding: var(--o-spacing-h5);
         font-size: var(--o-font-size-tip);
         min-height: 0;
+      }
+      .email {
+        display: flex;
+        align-items: center;
+        .subscribe {
+          cursor: pointer;
+          color: var(--o-color-brand1);
+          padding: 2px 11px;
+          margin-left: 8px;
+          font-size: var(--o-font-size-tip);
+          line-height: var(--o-line-height-tip);
+          border: 1px solid var(--o-color-brand1);
+          &:hover {
+            border: 1px solid var(--o-color-brand2);
+          }
+        }
       }
       h5 {
         padding: 0 16px;
