@@ -29,7 +29,6 @@ import IconClose from '~icons/app/icon-close.svg';
 import notFoundImg from '@/assets/common/404/404.png';
 
 import useWindowResize from '@/components/hooks/useWindowResize';
-import { getSigMember } from '@/api/api-sig';
 
 import { guardFunc } from '@/shared/utils';
 
@@ -50,6 +49,10 @@ const props = defineProps({
     default: () => {
       return {};
     },
+  },
+  oldEmail: {
+    type: String,
+    default: '',
   },
 });
 const { t } = useI18n();
@@ -195,22 +198,7 @@ const resolveDate = (date: string) => {
   return date;
 };
 const sigDetailName = ref('');
-const oldEmail = ref('');
-function getOldEmail() {
-  const param = {
-    community: 'openeuler',
-    sig: sigDetailName.value,
-  };
-  getSigMember(param)
-    .then((res: any) => {
-      if (res?.data[0]) {
-        oldEmail.value = res.data[0].mailing_list;
-      }
-    })
-    .catch((error) => {
-      throw new Error(error);
-    });
-}
+
 function getUrlParam(paraName: any) {
   const url = document.location.toString();
   const arrObj = url.split('?');
@@ -230,7 +218,6 @@ function getUrlParam(paraName: any) {
 }
 onMounted(() => {
   sigDetailName.value = getUrlParam('name');
-  getOldEmail();
 });
 const watchData = watch(
   () => props.tableData.length,
@@ -271,10 +258,17 @@ const watchData = watch(
           <p class="email">
             <span>{{ t('sig.SIG_DETAIL.MAIL_LIST') }}:</span>
             <a
-              :href="
-                oldEmail ? `mailto:${oldEmail}` : `mailto:dev@openeuler.org`
+              v-if="
+                (oldEmail?.split('@').length &&
+                  oldEmail?.split('@')[1] === 'openeuler.org') ||
+                !oldEmail
               "
-              >{{ oldEmail || 'dev@openeuler.org' }}</a
+              :href="`https://mailweb.openeuler.org/postorius/lists/${
+                oldEmail || 'dev@openeuler.org'
+              }/`"
+              target="_blank"
+              class="subscribe"
+              >{{ t('sig.SIG_DETAIL.SUBSCRIBE') }}</a
             >
           </p>
           <h5 class="meeting-title">{{ t('sig.SIG_DETAIL.MEETING_TITLE') }}</h5>
@@ -719,6 +713,22 @@ h2 {
         padding: var(--o-spacing-h5);
         font-size: var(--o-font-size-tip);
         min-height: 0;
+      }
+      .email {
+        display: flex;
+        align-items: center;
+        .subscribe {
+          cursor: pointer;
+          color: var(--o-color-brand1);
+          padding: 2px 11px;
+          margin-left: 8px;
+          font-size: var(--o-font-size-tip);
+          line-height: var(--o-line-height-tip);
+          border: 1px solid var(--o-color-brand1);
+          &:hover {
+            border: 1px solid var(--o-color-brand2);
+          }
+        }
       }
       h5 {
         padding: 0 16px;

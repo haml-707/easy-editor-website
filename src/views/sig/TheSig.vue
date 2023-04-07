@@ -433,6 +433,7 @@ onMounted(() => {
             v-if="sigMeetingData.tableData"
             v-model="meetingData"
             class="calender-box"
+            :old-email="oldEmail"
             :table-data="sigMeetingData.tableData"
             @auto-save="creatFloor('meeting')"
           />

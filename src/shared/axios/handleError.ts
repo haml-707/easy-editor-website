@@ -11,8 +11,6 @@ export default (err: AxiosError) => {
     }
     err.code = String(response.status);
     const res = err.response?.data as any;
-    console.log(res);
-
     switch (response?.status) {
       case 200:
         err.message = '错误响应也会有状态码为200的情况';
@@ -23,15 +21,16 @@ export default (err: AxiosError) => {
       case 401:
         if (
           res === 'authentication failed: token expires' ||
+          res === 'authentication failed: has no permission' ||
           res?.message === 'token expires'
         ) {
           tokenFailIndicateLogin();
-          err.message === '您的账号信息已过期，请重新登陆';
+          err.message = '您的账号信息已过期，请重新登陆';
           router.push({
             path: '/zh/login',
           });
         } else {
-          err.message === '未授权，请重新登录(401)';
+          err.message = '未授权，或无访问权限(401)';
           router.push({
             path: '/zh/404',
           });

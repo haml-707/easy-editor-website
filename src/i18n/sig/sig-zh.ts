@@ -408,6 +408,7 @@ export default {
     SIG_EMPTY_TEXT3: '吧!',
     INTRODUCTION: 'SIG简介',
     NO_MEETINGS: '暂无会议',
+    SUBSCRIBE: '订阅邮箱',
     ORGANIZING_MEETINGS: '交流会议',
     ORGANIZING_MEETINGS_BG: 'COMMUNICATION',
     SIG_GROUP: 'SIG组',
