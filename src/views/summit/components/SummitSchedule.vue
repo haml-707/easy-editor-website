@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n';
 // import { getPageData } from '@/api/api-easy-edit';
 import { modifyFloorData } from '@/api/api-easy-edit';
 
+import data from '@/data';
+
 import OIcon from '@/components/OIcon.vue';
 import { OButton } from '@/components/button';
 
@@ -102,9 +104,10 @@ const scheduleDataTemp: any = ref({
   ],
 });
 const scheduleData = ref(
-  usePageData().pageData.get('schedule')?.content
-    ? JSON.parse(usePageData().pageData.get('schedule').content)
-    : scheduleDataTemp.value
+  // usePageData().pageData.get('schedule')?.content
+  //   ? JSON.parse(usePageData().pageData.get('schedule').content)
+  //   : scheduleDataTemp.value
+  data
 );
 
 const dialogTopicTitle = ref('');
@@ -113,9 +116,9 @@ const dialogTopicContnet = ref('');
 watch(
   () => usePageData().pageData.get('schedule'),
   () => {
-    scheduleData.value = JSON.parse(
-      usePageData().pageData.get('schedule').content
-    );
+    // scheduleData.value = JSON.parse(
+    //   usePageData().pageData.get('schedule').content
+    // );
   },
   {
     deep: true,
@@ -197,9 +200,11 @@ function addContent() {
       {
         name: '姓名',
         post: '',
+        id: '15',
       },
     ],
     detail: '描述',
+    id: '',
   });
 }
 // 删除一行表格
@@ -214,6 +219,7 @@ function addPersonData(index: number) {
   ].person.push({
     name: '',
     post: '',
+    id: '',
   });
 }
 // 删除附属信息
@@ -373,7 +379,7 @@ onMounted(() => {
           <template #label>
             <OIcon
               class="icon-add"
-              :class="scheduleData.content?.length ? 'margin-left' : ''"
+              :class="scheduleData.content?.length >= 2 ? 'margin-left' : ''"
               @click.stop="addSubtitle"
             >
               <IconAdd />
@@ -388,7 +394,7 @@ onMounted(() => {
         :key="scheduleItem.id"
       >
         <div
-          v-show="tabType == index && scheduleItem?.content[0].content"
+          v-if="tabType == index && scheduleItem?.content[0].content"
           class="schedule-item other"
         >
           <el-tabs
@@ -433,11 +439,11 @@ onMounted(() => {
           </el-tabs>
           <div
             v-for="(itemList, listIndex) in scheduleItem.content"
-            v-show="tabType == index && otherTabType == listIndex"
             :key="itemList.id"
             class="content"
           >
-            <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
+            <template v-if="tabType == index && otherTabType == listIndex">
+              <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
               <el-input
                 v-model="itemList.title"
                 :readonly="!isEditStyle"
@@ -445,17 +451,18 @@ onMounted(() => {
                 
               />
             </h4> -->
-            <div class="content-list">
-              <div
-                v-for="(subItem, subIndex) in itemList.content"
-                :key="subItem.id"
-                class="content-item"
-                :class="{
-                  'show-detail': indexShow === subIndex && idShow === listIndex,
-                }"
-              >
-                <span class="time">
-                  <!-- <el-time-picker
+              <div class="content-list">
+                <div
+                  v-for="(subItem, subIndex) in itemList.content"
+                  :key="subItem.id"
+                  class="content-item"
+                  :class="{
+                    'show-detail':
+                      indexShow === subIndex && idShow === listIndex,
+                  }"
+                >
+                  <span class="time">
+                    <!-- <el-time-picker
                     v-model="subItem.time"
                     is-range
                     value-format="HH:mm"
@@ -465,99 +472,101 @@ onMounted(() => {
                     end-placeholder="End"
                     @change="handleClose"
                   /> -->
-                  <!-- {{ subItem.time }} -->
-                  <IconTime />
-                  <el-input
-                    v-model="subItem.time[0]"
-                    class="el-input-time"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
-                  -
-                  <el-input
-                    v-model="subItem.time[1]"
-                    class="el-input-time"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
-                  <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
-                </span>
-                <span
-                  class="desc"
-                  :class="{ 'exit-detail': subItem.detail[0] }"
-                  @click="
-                    !isEditStyle
-                      ? changeIndexShow(listIndex, subIndex as any)
-                      : ''
-                  "
-                >
-                  <el-input
-                    v-model="subItem.desc"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
-                  <OIcon
-                    v-show="isEditStyle"
-                    class="icon-add"
-                    @click="toggleAgendaDlg(true, subIndex)"
+                    <!-- {{ subItem.time }} -->
+                    <IconTime />
+                    <el-input
+                      v-model="subItem.time[0]"
+                      class="el-input-time"
+                      :readonly="!isEditStyle"
+                      type="text"
+                    />
+                    -
+                    <el-input
+                      v-model="subItem.time[1]"
+                      class="el-input-time"
+                      :readonly="!isEditStyle"
+                      type="text"
+                    />
+                    <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
+                  </span>
+                  <span
+                    class="desc"
+                    :class="{ 'exit-detail': subItem.detail[0] }"
+                    @click="
+                      !isEditStyle
+                        ? changeIndexShow(listIndex, subIndex as any)
+                        : ''
+                    "
                   >
-                    <IconAdd />
-                  </OIcon>
-                </span>
-                <div v-if="subItem.person[0]" class="name-box">
-                  <div
-                    v-for="(personItem, personIndex) in subItem.person"
-                    :key="personItem.id"
-                    class="name-item"
-                  >
-                    <span v-show="personItem.name" class="name">
-                      <el-input
-                        v-model="personItem.name"
-                        :readonly="!isEditStyle"
-                        placeholder="输入名称"
-                        type="text"
-                      />
-                    </span>
-                    <span class="post">
-                      <label :for="`textarea${personIndex}`"></label>
-                      <el-input
-                        :id="`textarea${personIndex}`"
-                        v-model="personItem.post"
-                        :readonly="!isEditStyle"
-                        :autosize="{ minRows: 1, maxRows: 10 }"
-                        maxlength="100"
-                        type="textarea"
-                      />
-                    </span>
-                    <span
+                    <el-input
+                      v-model="subItem.desc"
+                      :readonly="!isEditStyle"
+                      :autosize="{ minRows: 1, maxRows: 10 }"
+                      maxlength="100"
+                      type="textarea"
+                    />
+                    <OIcon
                       v-show="isEditStyle"
-                      class="icon-del"
-                      @click="delPersonData(subIndex, personIndex)"
-                      ><span class="tip">删除附属信息</span></span
+                      class="icon-add"
+                      @click="toggleAgendaDlg(true, subIndex)"
                     >
+                      <IconAdd />
+                    </OIcon>
+                  </span>
+                  <div v-if="subItem.person[0]" class="name-box">
+                    <div
+                      v-for="(personItem, personIndex) in subItem.person"
+                      :key="personItem.id"
+                      class="name-item"
+                    >
+                      <span v-show="personItem.name" class="name">
+                        <el-input
+                          v-model="personItem.name"
+                          :readonly="!isEditStyle"
+                          placeholder="输入名称"
+                          type="text"
+                        />
+                      </span>
+                      <span class="post">
+                        <label :for="`textarea${personIndex}`"></label>
+                        <el-input
+                          :id="`textarea${personIndex}`"
+                          v-model="personItem.post"
+                          :readonly="!isEditStyle"
+                          :autosize="{ minRows: 1, maxRows: 10 }"
+                          maxlength="100"
+                          type="textarea"
+                        />
+                      </span>
+                      <span
+                        v-show="isEditStyle"
+                        class="icon-del"
+                        @click="delPersonData(subIndex, personIndex)"
+                        ><span class="tip">删除附属信息</span></span
+                      >
+                    </div>
+                    <OIcon
+                      v-show="isEditStyle"
+                      class="icon-add"
+                      @click="addPersonData(subIndex)"
+                    >
+                      <span class="tip">新增附属信息</span>
+                      <IconAdd />
+                    </OIcon>
                   </div>
-                  <OIcon
-                    v-show="isEditStyle"
-                    class="icon-add"
-                    @click="addPersonData(subIndex)"
-                  >
-                    <span class="tip">新增附属信息</span>
-                    <IconAdd />
-                  </OIcon>
-                </div>
-                <div v-if="subItem.detail" class="detail">
-                  <p>
-                    <span>议题名称：</span><span> {{ subItem.desc }}</span>
-                  </p>
-                  <p v-if="subItem.detail">
-                    <span>议题简介：</span
-                    ><span
-                      ><span class="detail-text">
-                        {{ subItem.detail }}
-                      </span></span
-                    >
-                  </p>
-                  <!-- <p v-if="subItem.person[0]">
+                  <div v-if="subItem.detail" class="detail">
+                    <p>
+                      <span>议题名称：</span><span> {{ subItem.desc }}</span>
+                    </p>
+                    <p v-if="subItem.detail">
+                      <span>议题简介：</span
+                      ><span
+                        ><span class="detail-text">
+                          {{ subItem.detail }}
+                        </span></span
+                      >
+                    </p>
+                    <!-- <p v-if="subItem.person[0]">
                     <span>发言人：</span>
                     <span
                       v-for="personItem in subItem.person"
@@ -570,28 +579,29 @@ onMounted(() => {
                       </template>
                     </span>
                   </p> -->
+                  </div>
+                  <div
+                    v-show="
+                      indexShow !== -1 && subItem.detail && idShow === listIndex
+                    "
+                    class="mask"
+                    @click="changeIndexShow(-1, -1)"
+                  ></div>
+                  <span
+                    v-if="isEditStyle"
+                    class="icon-del del-content"
+                    @click="delContent(subIndex)"
+                  ></span>
                 </div>
-                <div
-                  v-show="
-                    indexShow !== -1 && subItem.detail && idShow === listIndex
-                  "
-                  class="mask"
-                  @click="changeIndexShow(-1, -1)"
-                ></div>
-                <span
-                  v-if="isEditStyle"
-                  class="icon-del del-content"
-                  @click="delContent(subIndex)"
-                ></span>
               </div>
-            </div>
-            <OIcon
-              v-if="isEditStyle"
-              class="icon-add add-content"
-              @click="addContent"
-            >
-              <IconAdd />
-            </OIcon>
+              <OIcon
+                v-if="isEditStyle"
+                class="icon-add add-content"
+                @click="addContent"
+              >
+                <IconAdd />
+              </OIcon>
+            </template>
           </div>
         </div>
       </template>
@@ -708,6 +718,12 @@ onMounted(() => {
 .el-date-editor.el-input__wrapper {
   background-color: transparent;
 }
+:deep(.el-tabs__nav-wrap) {
+  overflow: visible;
+  .el-tabs__nav-scroll {
+    overflow: visible;
+  }
+}
 .schedule {
   h3 {
     position: relative;
@@ -780,6 +796,7 @@ onMounted(() => {
     }
 
     .one-level-tabs {
+      position: relative;
       background: var(--o-color-bg2);
       border-color: var(--o-color-primary2);
       :deep(.el-input) {
@@ -789,6 +806,18 @@ onMounted(() => {
           width: min-content;
           color: var(--o-color-text1);
           text-align: center;
+        }
+      }
+      .del-title {
+        left: inherit;
+        width: 16px;
+        height: 16px;
+        right: -8px;
+        top: -20px;
+        transform: none;
+        &::after {
+          height: 2px;
+          width: calc(100% - 6px);
         }
       }
     }
@@ -1115,6 +1144,29 @@ onMounted(() => {
       &:focus-within {
         .o-icon {
           display: block;
+        }
+      }
+      :deep(.el-textarea) {
+        textarea {
+          resize: none;
+          min-height: 38px !important;
+          padding: 8px 14px !important;
+          cursor: text;
+          padding: 0;
+          box-shadow: none;
+          border: 1px solid transparent;
+          resize: none;
+          &:hover:not(:focus-visible) {
+            border: 1px solid var(--o-color-brand1);
+            box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+          }
+          &:focus-visible {
+            border: 1px solid var(--o-color-brand1);
+
+            // border: 1px solid transparent;
+            // box-shadow: none;
+            outline: none;
+          }
         }
       }
       .o-icon {
