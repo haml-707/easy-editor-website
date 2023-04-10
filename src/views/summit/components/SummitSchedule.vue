@@ -13,6 +13,8 @@ import { OButton } from '@/components/button';
 import IconAdd from '~icons/app/icon-add.svg';
 import IconTime from '~icons/app/icon-time.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
+import IconLinkDefault from '~icons/edit/icon-link-default.svg';
+import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
 
 import { ElMessage } from 'element-plus';
 
@@ -26,88 +28,21 @@ const isEditStyle = computed(() => {
   return !modeType.value;
 });
 
-const scheduleDataTemp: any = ref({
-  title: '12月28日 操作系统产业峰会 2022',
-  content: [
-    {
-      lable: '上午：主论坛',
-      id: window.crypto.randomUUID(),
-      content: [
-        {
-          id: window.crypto.randomUUID(),
-          name: '请填写标题',
-          content: [
-            {
-              id: window.crypto.randomUUID(),
-              time: ['14:00', '14:05'],
-              desc: '',
-              person: [
-                {
-                  id: window.crypto.randomUUID(),
-                  name: '姓名',
-                  post: 'XXX成员',
-                },
-                {
-                  id: window.crypto.randomUUID(),
-                  name: '姓名',
-                  post: 'XXX成员',
-                },
-              ],
-              detail: '描述5555',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      lable: '下午：分论坛',
-      id: 1,
-      content: [
-        {
-          id: 0,
-          name: '麒麟软件',
-          content: [
-            {
-              id: window.crypto.randomUUID(),
-              time: ['14:00', '14:10'],
-              desc: '欧拉社区领导致辞',
-              person: [
-                {
-                  name: '冯冠霖',
-                  post: '开放原子开源基金会秘书长',
-                },
-              ],
-              detail: '描述',
-            },
-          ],
-        },
-        {
-          id: 1,
-          name: '麒麟信安',
-          content: [
-            {
-              id: window.crypto.randomUUID(),
-              time: ['14:00', '14:10'],
-              desc: '致辞',
-              person: [
-                {
-                  name: '任启',
-                  post: '麒麟信安高级副总裁',
-                },
-              ],
-              detail: '描述',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-});
+// const props = defineProps({
+//   scheduleData: {
+//     type: Object,
+//     default: () => {
+//       return {};
+//     },
+//   },
+// });
+
+// props.scheduleData
+
 const scheduleData = ref(
-  // usePageData().pageData.get('schedule')?.content
-  //   ? JSON.parse(usePageData().pageData.get('schedule').content)
-  //   : scheduleDataTemp.value
-  data
+  usePageData().pageData.get('schedule')?.content
+    ? JSON.parse(usePageData().pageData.get('schedule').content)
+    : data
 );
 
 const dialogTopicTitle = ref('');
@@ -116,9 +51,9 @@ const dialogTopicContnet = ref('');
 watch(
   () => usePageData().pageData.get('schedule'),
   () => {
-    // scheduleData.value = JSON.parse(
-    //   usePageData().pageData.get('schedule').content
-    // );
+    scheduleData.value = JSON.parse(
+      usePageData().pageData.get('schedule').content
+    );
   },
   {
     deep: true,
@@ -158,37 +93,37 @@ function tabClick() {
   otherTabType.value = 0;
 }
 
-function addSubtitle() {
-  scheduleData.value.content.push({
-    lable: '请输入论坛名称',
-    id: window.crypto.randomUUID(),
-    content: [
-      {
-        id: window.crypto.randomUUID(),
-        name: '填写标题',
-        content: [
-          {
-            id: window.crypto.randomUUID(),
-            time: ['14:00', '14:05'],
-            desc: 'XXX领导致辞',
-            person: [
-              {
-                id: window.crypto.randomUUID(),
-                name: '姓名',
-                post: '',
-              },
-            ],
-            detail: '描述',
-          },
-        ],
-      },
-    ],
-  });
-}
-function delSubtitle(index: number) {
-  scheduleData.value.content.splice(index, 1);
-  tabType.value = 0;
-}
+// function addSubtitle() {
+//   scheduleData.value.content.push({
+//     lable: '请输入论坛名称',
+//     id: window.crypto.randomUUID(),
+//     content: [
+//       {
+//         id: window.crypto.randomUUID(),
+//         name: '填写标题',
+//         content: [
+//           {
+//             id: window.crypto.randomUUID(),
+//             time: ['14:00', '14:05'],
+//             desc: 'XXX领导致辞',
+//             person: [
+//               {
+//                 id: window.crypto.randomUUID(),
+//                 name: '姓名',
+//                 post: '',
+//               },
+//             ],
+//             detail: '描述',
+//           },
+//         ],
+//       },
+//     ],
+//   });
+// }
+// function delSubtitle(index: number) {
+//   scheduleData.value.content.splice(index, 1);
+//   tabType.value = 0;
+// }
 // 增加一行表格
 function addContent() {
   scheduleData.value.content[tabType.value].content[
@@ -351,6 +286,7 @@ onMounted(() => {
     <el-tabs
       v-model.number="tabType"
       class="schedule-tabs"
+      @keydown.capture.stop
       @tab-click="tabClick"
     >
       <template v-if="scheduleData.content?.length >= 2">
@@ -367,23 +303,23 @@ onMounted(() => {
                 type="text"
               />
 
-              <span
+              <!-- <span
                 v-show="isEditStyle"
                 class="icon-del del-title"
                 @click.stop="delSubtitle(index)"
-              ></span>
+              ></span> -->
             </div>
           </template>
         </el-tab-pane>
         <el-tab-pane v-if="isEditStyle">
           <template #label>
-            <OIcon
+            <!-- <OIcon
               class="icon-add"
               :class="scheduleData.content?.length >= 2 ? 'margin-left' : ''"
               @click.stop="addSubtitle"
             >
               <IconAdd />
-            </OIcon>
+            </OIcon> -->
           </template>
         </el-tab-pane>
       </template>
@@ -409,18 +345,22 @@ onMounted(() => {
                 :name="scheduleIndex"
               >
                 <template #label>
-                  <div class="time-tabs">
+                  <div v-show="isEditStyle" class="time-tabs">
                     <el-input
                       v-model="itemList.name"
                       :readonly="!isEditStyle"
                       type="text"
                     />
+
                     <span
                       v-show="isEditStyle"
                       class="icon-del del-title"
                       @click.stop="delSubtitle2(scheduleIndex)"
                     ></span>
                   </div>
+                  <span v-show="!isEditStyle" class="previve-tab">{{
+                    itemList.name
+                  }}</span>
                 </template>
               </el-tab-pane>
             </template>
@@ -510,7 +450,8 @@ onMounted(() => {
                       class="icon-add"
                       @click="toggleAgendaDlg(true, subIndex)"
                     >
-                      <IconAdd />
+                      <IconLinkDefault v-if="!subItem.detail" />
+                      <IconLinkFilled v-else />
                     </OIcon>
                   </span>
                   <div v-if="subItem.person[0]" class="name-box">
@@ -684,7 +625,7 @@ onMounted(() => {
     </template>
   </el-dialog>
   <div class="contoral-box">
-    <el-button @click="savePageData">保存</el-button>
+    <o-button @click="savePageData">保存</o-button>
   </div>
 </template>
 
@@ -724,6 +665,7 @@ onMounted(() => {
     overflow: visible;
   }
 }
+
 .schedule {
   h3 {
     position: relative;
@@ -797,6 +739,7 @@ onMounted(() => {
 
     .one-level-tabs {
       position: relative;
+      width: 250px;
       background: var(--o-color-bg2);
       border-color: var(--o-color-primary2);
       :deep(.el-input) {
@@ -880,6 +823,11 @@ onMounted(() => {
             }
           }
           .el-tabs__item {
+            margin-right: 20px;
+
+            .previve-tab {
+              font-size: var(--o-font-size-tip);
+            }
             @media (max-width: 1100px) {
               font-size: 12px;
               line-height: 18px;
@@ -979,6 +927,11 @@ onMounted(() => {
     position: relative;
     border: 1px solid transparent;
     transition: all 0.3s;
+    :deep(.el-input) {
+      .el-input__inner {
+        color: #707070;
+      }
+    }
     &:hover {
       border: 1px solid var(--o-color-brand1);
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
@@ -989,8 +942,30 @@ onMounted(() => {
     &:focus-within {
       border: 1px solid var(--o-color-brand1);
       box-shadow: none;
-      .post {
-        border-left: 1px solid var(--o-color-brand1);
+      .name {
+        border-right: 1px solid var(--o-color-brand1);
+      }
+    }
+  }
+  .desc {
+    :deep(.el-textarea) {
+      textarea {
+        resize: none;
+        min-height: 38px !important;
+        padding: 8px 14px !important;
+        cursor: text;
+        padding: 0;
+        box-shadow: none;
+        border: 1px solid transparent;
+        resize: none;
+        &:hover:not(:focus-visible) {
+          border: 1px solid var(--o-color-brand1);
+          box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+        }
+        &:focus-visible {
+          border: 1px solid var(--o-color-brand1);
+          outline: none;
+        }
       }
     }
   }
@@ -1092,6 +1067,7 @@ onMounted(() => {
         position: absolute;
         top: 0;
         left: inherit;
+        background-color: var(--o-color-bg2);
         &::after {
           height: 2px;
           border-radius: 1px;
@@ -1156,26 +1132,25 @@ onMounted(() => {
           box-shadow: none;
           border: 1px solid transparent;
           resize: none;
-          &:hover:not(:focus-visible) {
-            border: 1px solid var(--o-color-brand1);
-            box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
-          }
-          &:focus-visible {
-            border: 1px solid var(--o-color-brand1);
-
-            // border: 1px solid transparent;
-            // box-shadow: none;
-            outline: none;
-          }
+          // &:hover:not(:focus-visible) {
+          //   border: 1px solid var(--o-color-brand1);
+          //   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+          // }
+          // &:focus-visible {
+          //   border: 1px solid var(--o-color-brand1);
+          //   outline: none;
+          // }
         }
       }
       .o-icon {
         position: absolute;
         right: -8px;
         top: -8px;
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
         background-color: var(--o-color-bg2);
+        border: none;
       }
       @media (max-width: 1100px) {
         margin-right: 0;
@@ -1193,6 +1168,9 @@ onMounted(() => {
       :deep(.el-input__wrapper) {
         box-shadow: none;
         border: 1px solid transparent;
+        .el-input__inner {
+          color: var(--o-color-text4);
+        }
       }
       @media (max-width: 1100px) {
         font-size: 12px;
@@ -1215,6 +1193,7 @@ onMounted(() => {
           padding: 8px 14px !important;
           cursor: text;
           padding: 0;
+          color: var(--o-color-text4);
           box-shadow: none;
           border: 1px solid transparent;
           resize: none;
