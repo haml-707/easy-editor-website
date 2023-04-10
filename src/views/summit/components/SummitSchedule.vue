@@ -200,7 +200,7 @@ function delSubtitle2(index: number) {
 function addSubtitle2() {
   scheduleData.value.content[tabType.value].content.push({
     id: window.crypto.randomUUID(),
-    name: '请填写标题',
+    name: '',
     content: [
       {
         id: window.crypto.randomUUID(),
@@ -781,7 +781,7 @@ onMounted(() => {
         width: 16px;
         height: 16px;
         right: -8px;
-        top: -20px;
+        top: -14px;
         transform: none;
         &::after {
           height: 2px;
@@ -815,7 +815,7 @@ onMounted(() => {
         right: -8px;
         width: 16px;
         height: 16px;
-        top: -18px;
+        top: -14px;
         &::after {
           height: 2px;
           width: calc(100% - 6px);
@@ -1006,6 +1006,8 @@ onMounted(() => {
   height: 24px;
   background-color: var(--o-color-bg2);
   border: 1px solid #e02020;
+
+  box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
   &::after {
     content: '';
     position: absolute;
@@ -1030,6 +1032,7 @@ onMounted(() => {
   border-radius: 50%;
   border: 1px solid var(--o-color-brand1);
   color: var(--o-color-brand1);
+  box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
 }
 .margin-left {
   margin-left: 40px;
