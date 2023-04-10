@@ -53,6 +53,17 @@ watch(
     deep: true,
   }
 );
+watch(
+  () => scheduleData.value,
+  () => {
+    usePageData().pageData.get(props.scheduleName).content = JSON.stringify(
+      scheduleData.value
+    );
+  },
+  {
+    deep: true,
+  }
+);
 const param = {
   content: '',
   name: props.scheduleName,
@@ -73,8 +84,8 @@ const agendaDialogVisiable = ref(false);
 
 const delIndex = ref(0);
 // 控制分论坛的详情弹窗显示
-const indexShow: any = ref(-1);
-const idShow: any = ref(-1);
+const indexShow = ref(-1);
+const idShow = ref(-1);
 function changeIndexShow(id: number, index: number) {
   idShow.value = id;
   indexShow.value = index;
@@ -124,7 +135,7 @@ function addContent() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value[tabType.value]
   ].content.push({
-    time: ['', ''],
+    time: '',
     desc: '',
     person: [
       {
@@ -167,11 +178,18 @@ function delPersonData(subIndex: number, personIndex: number) {
       otherTabType.value[tabType.value]
     ].content[subIndex].person.length === 1
   ) {
-    return false;
+    scheduleData.value.content[tabType.value].content[
+      otherTabType.value[tabType.value]
+    ].content[subIndex].person[0] = {
+      id: '',
+      name: '',
+      post: '',
+    };
+  } else {
+    scheduleData.value.content[tabType.value].content[
+      otherTabType.value[tabType.value]
+    ].content[subIndex].person.splice(personIndex, 1);
   }
-  scheduleData.value.content[tabType.value].content[
-    otherTabType.value[tabType.value]
-  ].content[subIndex].person.splice(personIndex, 1);
 }
 function confirmDelContent() {
   scheduleData.value.content[tabType.value].content[
@@ -198,7 +216,7 @@ function addSubtitle2() {
     content: [
       {
         id: window.crypto.randomUUID(),
-        time: ['', ''],
+        time: '',
         desc: '',
         person: [
           {
@@ -283,6 +301,21 @@ function toggleDelTabDlg(val: boolean) {
 //     });
 //   });
 // }
+const tabType1 = ref(0);
+const agendaData2: any = ref([]);
+watch(
+  tabType1,
+  () => {
+    if (tabType1.value === 1) {
+      agendaData2.value = scheduleData.value.content.slice(1);
+    } else {
+      agendaData2.value = scheduleData.value.content.slice(0, 1);
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 
 onMounted(() => {
   // handleGetPageData();
@@ -299,37 +332,48 @@ onMounted(() => {
         @blur="savePageData()"
       />
     </h4> -->
-    <!-- <el-tabs
-      v-if="scheduleData.content?.length >= 2"
-      v-model.number="tabType"
+    <el-tabs
+      v-if="scheduleName === 'schedule'"
+      v-model.number="tabType1"
       class="schedule-tabs"
-      @keydown.capture.stop
-      @tab-click="tabClick"
-      @blur="savePageData()"
     >
-      <el-tab-pane
-        v-for="(itemList, index) in scheduleData.content"
-        :key="itemList.id"
-        :name="index"
-      >
+      <el-tab-pane :name="0">
         <template #label>
           <div class="one-level-tabs">
-            <el-input
+            <!-- <el-input
               v-model="itemList.lable"
               :readonly="!isEditStyle"
               type="text"
               @blur="savePageData()"
-            />
-
-            <span
+            /> -->
+            上午
+            <!-- <span
               v-show="isEditStyle"
               class="icon-del del-title"
               @click.stop="delSubtitle(index)"
-            ></span>
+            ></span> -->
           </div>
         </template>
       </el-tab-pane>
-      <el-tab-pane v-if="isEditStyle">
+      <el-tab-pane :name="1">
+        <template #label>
+          <div class="one-level-tabs">
+            <!-- <el-input
+              v-model="itemList.lable"
+              :readonly="!isEditStyle"
+              type="text"
+              @blur="savePageData()"
+            /> -->
+            下午
+            <!-- <span
+              v-show="isEditStyle"
+              class="icon-del del-title"
+              @click.stop="delSubtitle(index)"
+            ></span> -->
+          </div>
+        </template>
+      </el-tab-pane>
+      <!-- <el-tab-pane v-if="isEditStyle">
         <template #label>
           <OIcon
             class="icon-add"
@@ -339,93 +383,104 @@ onMounted(() => {
             <IconAdd />
           </OIcon>
         </template>
-      </el-tab-pane>
-    </el-tabs> -->
+      </el-tab-pane> -->
+    </el-tabs>
     <el-container
       v-for="(scheduleItem, index) in scheduleData.content"
       :key="scheduleItem.id"
       :level-index="1"
     >
-      <div class="schedule-title">
-        <el-input
-          v-model="scheduleItem.lable"
-          :readonly="!isEditStyle"
-          type="text"
-        />
-      </div>
-      <div
-        v-if="scheduleItem?.content[0].content"
-        class="schedule-item other"
-        @click.capture="tabType = index"
+      <template
+        v-if="
+          scheduleName === 'schedule'
+            ? tabType1 === 0
+              ? index === 1
+              : index !== 1
+            : true
+        "
       >
-        <el-tabs
-          v-if="isEditStyle || scheduleItem.content[1]"
-          v-model.number="otherTabType[index]"
-          class="other-tabs"
+        <div v-if="scheduleName === 'schedule'" class="schedule-title">
+          <el-input
+            v-model="scheduleItem.lable"
+            :readonly="!isEditStyle"
+            type="text"
+          />
+        </div>
+        <div
+          v-if="scheduleItem?.content[0].content"
+          class="schedule-item other"
+          @click.capture="tabType = index"
         >
-          <template v-if="scheduleItem.content[1]">
-            <el-tab-pane
-              v-for="(itemList, scheduleIndex) in scheduleItem.content"
-              :key="itemList.id"
-              :name="scheduleIndex"
-            >
-              <template #label>
-                <div v-show="isEditStyle" class="time-tabs">
-                  <el-input
-                    v-model="itemList.name"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
+          <el-tabs
+            v-if="isEditStyle || scheduleItem.content[1]"
+            v-model.number="otherTabType[index]"
+            class="other-tabs"
+          >
+            <template v-if="scheduleItem.content[1]">
+              <el-tab-pane
+                v-for="(itemList, scheduleIndex) in scheduleItem.content"
+                :key="itemList.id"
+                :name="scheduleIndex"
+              >
+                <template #label>
+                  <div v-show="isEditStyle" class="time-tabs">
+                    <el-input
+                      v-model="itemList.name"
+                      :readonly="!isEditStyle"
+                      type="text"
+                    />
 
-                  <span
-                    v-show="isEditStyle"
-                    class="icon-del del-title"
-                    @click.stop="delSubtitle2(scheduleIndex)"
-                  ></span>
-                </div>
-                <span v-show="!isEditStyle" class="previve-tab">{{
-                  itemList.name
-                }}</span>
+                    <span
+                      v-show="isEditStyle"
+                      class="icon-del del-title"
+                      @click.stop="delSubtitle2(scheduleIndex)"
+                    ></span>
+                  </div>
+                  <span v-show="!isEditStyle" class="previve-tab">{{
+                    itemList.name
+                  }}</span>
+                </template>
+              </el-tab-pane>
+            </template>
+
+            <el-tab-pane v-if="isEditStyle">
+              <template #label>
+                <OIcon
+                  class="icon-add"
+                  :class="scheduleItem.content.length >= 2 ? 'margin-left' : ''"
+                  @click.stop="addSubtitle2"
+                >
+                  <IconAdd />
+                  <span class="tip">新增分论坛标题</span>
+                </OIcon>
               </template>
             </el-tab-pane>
-          </template>
-
-          <el-tab-pane v-if="isEditStyle">
-            <template #label>
-              <OIcon
-                class="icon-add"
-                :class="scheduleItem.content.length >= 2 ? 'margin-left' : ''"
-                @click.stop="addSubtitle2"
-              >
-                <IconAdd />
-              </OIcon>
-            </template>
-          </el-tab-pane>
-        </el-tabs>
-        <div
-          v-for="(itemList, listIndex) in scheduleItem.content"
-          :key="itemList.id"
-          class="content"
-        >
-          <template v-if="otherTabType[index] === listIndex">
-            <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
+          </el-tabs>
+          <div
+            v-for="(itemList, listIndex) in scheduleItem.content"
+            :key="itemList.id"
+            class="content"
+          >
+            <template v-if="otherTabType[index] === listIndex">
+              <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
               <el-input
                 v-model="itemList.title"
                 :readonly="!isEditStyle"
                 type="text"
               />
             </h4> -->
-            <div class="content-list">
-              <div
-                v-for="(subItem, subIndex) in itemList.content"
-                :key="subItem.id"
-                class="content-item"
-                :class="{
-                  'show-detail': indexShow === subIndex && idShow === listIndex,
-                }"
-              >
-                <span class="time">
-                  <!-- <el-time-picker
+              <div class="content-list">
+                <div
+                  v-for="(subItem, subIndex) in itemList.content"
+                  :key="subItem.id"
+                  class="content-item"
+                  :class="{
+                    'show-detail':
+                      indexShow === subIndex && idShow === listIndex,
+                  }"
+                >
+                  <span class="time">
+                    <!-- <el-time-picker
                     v-model="subItem.time"
                     is-range
                     value-format="HH:mm"
@@ -435,96 +490,99 @@ onMounted(() => {
                     end-placeholder="End"
                     @change="handleClose"
                   /> -->
-                  <!-- {{ subItem.time }} -->
-                  <IconTime />
-                  <el-input
-                    v-model="subItem.time"
-                    class="el-input-time"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
-                  <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
-                </span>
-                <span
-                  class="desc"
-                  :class="{ 'exit-detail': subItem.detail[0] }"
-                  @click="
-                    !isEditStyle
-                      ? changeIndexShow(listIndex, subIndex as any)
-                      : ''
-                  "
-                >
-                  <el-input
-                    v-model="subItem.desc"
-                    :readonly="!isEditStyle"
-                    :autosize="{ minRows: 1, maxRows: 10 }"
-                    maxlength="100"
-                    type="textarea"
-                  />
-                  <OIcon
-                    v-show="isEditStyle"
-                    class="icon-add"
-                    @click="toggleAgendaDlg(true, subIndex)"
+                    <!-- {{ subItem.time }} -->
+                    <IconTime />
+                    <el-input
+                      v-model="subItem.time"
+                      class="el-input-time"
+                      placeholder="时间"
+                      :readonly="!isEditStyle"
+                      type="text"
+                    />
+                    <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
+                  </span>
+                  <span
+                    class="desc"
+                    :class="{ 'exit-detail': subItem.detail[0] }"
+                    @click="
+                      !isEditStyle
+                        ? changeIndexShow(listIndex, subIndex as any)
+                        : ''
+                    "
                   >
-                    <IconLinkDefault v-if="!subItem.detail" />
-                    <IconLinkFilled v-else />
-                  </OIcon>
-                </span>
-                <div v-if="subItem.person[0]" class="name-box">
-                  <div
-                    v-for="(personItem, personIndex) in subItem.person"
-                    :key="personItem.id"
-                    class="name-item"
-                  >
-                    <span v-show="personItem.name" class="name">
-                      <el-input
-                        v-model="personItem.name"
-                        :readonly="!isEditStyle"
-                        placeholder="输入名称"
-                        type="text"
-                      />
-                    </span>
-                    <span class="post">
-                      <label :for="`textarea${personIndex}`"></label>
-                      <el-input
-                        :id="`textarea${personIndex}`"
-                        v-model="personItem.post"
-                        :readonly="!isEditStyle"
-                        :autosize="{ minRows: 1, maxRows: 10 }"
-                        maxlength="100"
-                        type="textarea"
-                        placeholder="输入嘉宾名称"
-                      />
-                    </span>
-                    <span
+                    <el-input
+                      v-model="subItem.desc"
+                      :readonly="!isEditStyle"
+                      :autosize="{ minRows: 1, maxRows: 10 }"
+                      maxlength="100"
+                      placeholder="输入议程"
+                      type="textarea"
+                    />
+                    <OIcon
                       v-show="isEditStyle"
-                      class="icon-del"
-                      @click="delPersonData(subIndex, personIndex)"
-                      ><span class="tip">删除附属信息</span></span
+                      class="icon-add"
+                      @click="toggleAgendaDlg(true, subIndex)"
                     >
+                      <IconLinkDefault v-if="!subItem.detail" />
+                      <IconLinkFilled v-else />
+                    </OIcon>
+                  </span>
+                  <div v-if="subItem.person[0]" class="name-box">
+                    <div
+                      v-for="(personItem, personIndex) in subItem.person"
+                      :key="personItem.id"
+                      class="name-item"
+                    >
+                      <span v-show="personItem.name" class="name">
+                        <el-input
+                          v-model="personItem.name"
+                          :readonly="!isEditStyle"
+                          placeholder="输入名称"
+                          type="text"
+                        />
+                      </span>
+                      <span class="post">
+                        <label :for="`textarea${personIndex}`"></label>
+                        <el-input
+                          :id="`textarea${personIndex}`"
+                          v-model="personItem.post"
+                          :class="!personItem.post ? 'empty' : ''"
+                          :readonly="!isEditStyle"
+                          :autosize="{ minRows: 1, maxRows: 10 }"
+                          maxlength="100"
+                          type="textarea"
+                          placeholder="输入嘉宾名称"
+                        />
+                      </span>
+                      <span
+                        v-show="isEditStyle"
+                        class="icon-del"
+                        @click="delPersonData(subIndex, personIndex)"
+                        ><span class="tip">删除附属信息</span></span
+                      >
+                    </div>
+                    <OIcon
+                      v-show="isEditStyle"
+                      class="icon-add"
+                      @click="addPersonData(subIndex)"
+                    >
+                      <span class="tip">新增附属信息</span>
+                      <IconAdd />
+                    </OIcon>
                   </div>
-                  <OIcon
-                    v-show="isEditStyle"
-                    class="icon-add"
-                    @click="addPersonData(subIndex)"
-                  >
-                    <span class="tip">新增附属信息</span>
-                    <IconAdd />
-                  </OIcon>
-                </div>
-                <div v-if="subItem.detail" class="detail">
-                  <p>
-                    <span>议题名称：</span><span> {{ subItem.desc }}</span>
-                  </p>
-                  <p v-if="subItem.detail">
-                    <span>议题简介：</span
-                    ><span
-                      ><span class="detail-text">
-                        {{ subItem.detail }}
-                      </span></span
-                    >
-                  </p>
-                  <!-- <p v-if="subItem.person[0]">
+                  <div v-if="subItem.detail" class="detail">
+                    <p>
+                      <span>议题名称：</span><span> {{ subItem.desc }}</span>
+                    </p>
+                    <p v-if="subItem.detail">
+                      <span>议题简介：</span
+                      ><span
+                        ><span class="detail-text">
+                          {{ subItem.detail }}
+                        </span></span
+                      >
+                    </p>
+                    <!-- <p v-if="subItem.person[0]">
                     <span>发言人：</span>
                     <span
                       v-for="personItem in subItem.person"
@@ -537,31 +595,33 @@ onMounted(() => {
                       </template>
                     </span>
                   </p> -->
+                  </div>
+                  <div
+                    v-show="
+                      indexShow !== -1 && subItem.detail && idShow === listIndex
+                    "
+                    class="mask"
+                    @click="changeIndexShow(-1, -1)"
+                  ></div>
+                  <span
+                    v-if="isEditStyle"
+                    class="icon-del del-content"
+                    @click="delContent(subIndex)"
+                  ></span>
                 </div>
-                <div
-                  v-show="
-                    indexShow !== -1 && subItem.detail && idShow === listIndex
-                  "
-                  class="mask"
-                  @click="changeIndexShow(-1, -1)"
-                ></div>
-                <span
-                  v-if="isEditStyle"
-                  class="icon-del del-content"
-                  @click="delContent(subIndex)"
-                ></span>
               </div>
-            </div>
-            <OIcon
-              v-if="isEditStyle"
-              class="icon-add add-content"
-              @click="addContent"
-            >
-              <IconAdd />
-            </OIcon>
-          </template>
+              <OIcon
+                v-if="isEditStyle"
+                class="icon-add add-content"
+                @click="addContent"
+              >
+                <IconAdd />
+                <span class="tip">新增一行内容</span>
+              </OIcon>
+            </template>
+          </div>
         </div>
-      </div>
+      </template>
     </el-container>
   </div>
   <el-dialog
@@ -717,7 +777,7 @@ onMounted(() => {
       box-shadow: var(--o-shadow-1);
     }
     .schedule-title {
-      margin: 32px 0 24px;
+      margin: 32px 0 0;
       :deep(.el-input) {
         .el-input__inner {
           font-size: 20px;
@@ -734,8 +794,9 @@ onMounted(() => {
   .schedule-tabs {
     position: relative;
     text-align: center;
-    margin-top: 24px;
+    margin-top: 32px;
     :deep(.el-tabs__content) {
+      margin-top: 0;
       overflow: visible;
       .el-button {
         position: absolute;
@@ -778,33 +839,39 @@ onMounted(() => {
 
     .one-level-tabs {
       position: relative;
-      width: 250px;
+      width: 160px;
+      height: 40px;
       background: var(--o-color-bg2);
       border-color: var(--o-color-primary2);
-      :deep(.el-input) {
-        cursor: pointer;
-        .el-input__inner {
-          cursor: pointer;
-          width: min-content;
-          color: var(--o-color-text1);
-          text-align: center;
-        }
-      }
-      .del-title {
-        left: inherit;
-        width: 16px;
-        height: 16px;
-        right: -8px;
-        top: -14px;
-        transform: none;
-        &::after {
-          height: 2px;
-          width: calc(100% - 6px);
-        }
-      }
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--o-font-size-text);
+      // :deep(.el-input) {
+      //   cursor: pointer;
+      //   .el-input__inner {
+      //     cursor: pointer;
+      //     width: min-content;
+      //     color: var(--o-color-text1);
+      //     text-align: center;
+      //   }
+      // }
+      // .del-title {
+      //   left: inherit;
+      //   width: 16px;
+      //   height: 16px;
+      //   right: -8px;
+      //   top: -14px;
+      //   transform: none;
+      //   &::after {
+      //     height: 2px;
+      //     width: calc(100% - 6px);
+      //   }
+      // }
     }
     .is-active {
       .one-level-tabs {
+        color: var(--o-color-text2);
         background: var(--o-color-primary1);
         :deep(.el-input) {
           .el-input__inner {
@@ -817,6 +884,7 @@ onMounted(() => {
     }
   }
   .schedule-item {
+    margin-top: 32px;
     width: 100%;
     padding: 24px;
     background-color: var(--o-color-bg2);
@@ -968,11 +1036,18 @@ onMounted(() => {
     position: relative;
     border: 1px solid transparent;
     transition: all 0.3s;
+    min-height: 36px;
     :deep(.el-input) {
       .el-input__inner {
         color: #707070;
       }
     }
+    &:not(:hover) .empty {
+      display: none;
+    }
+    // &:hover .empty {
+    //   display: inline-block !important;
+    // }
     &:hover {
       border: 1px solid var(--o-color-brand1);
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
@@ -1037,6 +1112,7 @@ onMounted(() => {
   }
 }
 .icon-add {
+  position: relative;
   margin: 0 auto;
   cursor: pointer;
   width: 24px;
@@ -1049,6 +1125,24 @@ onMounted(() => {
   border: 1px solid var(--o-color-brand1);
   color: var(--o-color-brand1);
   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+  &:hover {
+    .tip {
+      display: block;
+    }
+  }
+  .tip {
+    display: none;
+    position: absolute;
+    transform: translate(100%, -50%);
+    color: #555;
+    width: max-content;
+    right: -8px;
+    top: 50%;
+    font-size: var(--o-font-size-tip);
+    padding: 4px 8px;
+    background-color: var(--o-color-bg2);
+    box-shadow: var(--o-shadow-1);
+  }
 }
 .margin-left {
   margin-left: 40px;
@@ -1250,6 +1344,7 @@ onMounted(() => {
       flex: 1;
       border-left: 1px solid transparent;
       transition: all 0.3s;
+
       :deep(.el-textarea) {
         textarea {
           resize: none;
