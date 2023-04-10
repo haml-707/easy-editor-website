@@ -28,31 +28,36 @@ const isEditStyle = computed(() => {
   return !modeType.value;
 });
 
-// const props = defineProps({
-//   scheduleData: {
-//     type: Object,
-//     default: () => {
-//       return {};
-//     },
-//   },
-// });
+const props = defineProps({
+  scheduleName: {
+    type: String,
+    default: '',
+  },
+});
 
 // props.scheduleData
 
 const scheduleData = ref(
-  usePageData().pageData.get('schedule')?.content
-    ? JSON.parse(usePageData().pageData.get('schedule').content)
+  usePageData().pageData.get(props.scheduleName)?.content
+    ? JSON.parse(usePageData().pageData.get(props.scheduleName).content)
     : data
 );
+
+// const tempData = computed({
+//   get: () => props.modelValue,
+//   set: (val) => {
+//     emit('update:modelValue', val);
+//   },
+// });
 
 const dialogTopicTitle = ref('');
 
 const dialogTopicContnet = ref('');
 watch(
-  () => usePageData().pageData.get('schedule'),
+  () => usePageData().pageData.get(props.scheduleName),
   () => {
     scheduleData.value = JSON.parse(
-      usePageData().pageData.get('schedule').content
+      usePageData().pageData.get(props.scheduleName).content
     );
   },
   {
@@ -61,7 +66,7 @@ watch(
 );
 const param = {
   content: '',
-  name: 'schedule',
+  name: 'schedule-20',
   description: '',
   path: 'https://www.openeuler.org/zh/interaction/summit-list/devday2023/',
   title: '',
@@ -129,17 +134,23 @@ function addContent() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value
   ].content.push({
-    time: ['14:00', '14:05'],
-    desc: 'XXX领导致辞',
+    time: ['', ''],
+    desc: '',
     person: [
       {
-        name: '姓名',
+        name: '',
         post: '',
-        id: '15',
+        id: `id${
+          scheduleData.value.content[tabType.value].content[otherTabType.value]
+            .content.length
+        }`,
       },
     ],
-    detail: '描述',
-    id: '',
+    detail: '',
+    id: `id${
+      scheduleData.value.content[tabType.value].content[otherTabType.value]
+        .content.length
+    }`,
   });
 }
 // 删除一行表格
@@ -193,21 +204,21 @@ function addSubtitle2() {
     content: [
       {
         id: window.crypto.randomUUID(),
-        time: ['14:00', '18:30'],
-        desc: 'xxx领导致辞',
+        time: ['', ''],
+        desc: '',
         person: [
           {
             id: window.crypto.randomUUID(),
-            name: 'xxx',
+            name: '',
             post: '',
           },
           {
             id: window.crypto.randomUUID(),
-            name: 'xxx',
+            name: '',
             post: '',
           },
         ],
-        detail: '描述',
+        detail: '',
       },
     ],
   });
@@ -261,6 +272,7 @@ function toggleDelTabDlg(val: boolean) {
   delTabDialogVisiable.value = val;
 }
 // function createNewPage() {
+//   param.content = JSON.stringify(data);
 //   createPage(param).then(() => {
 //     ElMessage({
 //       type: 'success',
@@ -275,7 +287,6 @@ onMounted(() => {
 
 <template>
   <div class="schedule" :class="isEditStyle ? 'is-edit' : ''">
-    <h3>会议日程</h3>
     <h4 class="meeting-title">
       <el-input
         v-model="scheduleData.title"
@@ -284,6 +295,7 @@ onMounted(() => {
       />
     </h4>
     <el-tabs
+      v-if="scheduleData.content?.length >= 2"
       v-model.number="tabType"
       class="schedule-tabs"
       @keydown.capture.stop
@@ -324,7 +336,10 @@ onMounted(() => {
         </el-tab-pane>
       </template>
     </el-tabs>
-    <el-container :level-index="1">
+    <el-container
+      :class="scheduleData.content?.length >= 2 ? '' : 'margin-top'"
+      :level-index="1"
+    >
       <template
         v-for="(scheduleItem, index) in scheduleData.content"
         :key="scheduleItem.id"
@@ -556,6 +571,7 @@ onMounted(() => {
   >
     <template #header>
       <h3>编辑议题简介</h3>
+      <div class="detail-tip">注：Hover/点击议题名称时展开</div>
     </template>
     <div class="line-input">
       <span class="label">议题名称</span>
@@ -626,6 +642,7 @@ onMounted(() => {
   </el-dialog>
   <div class="contoral-box">
     <o-button @click="savePageData">保存</o-button>
+    <!-- <o-button @click="createNewPage">保存</o-button> -->
   </div>
 </template>
 
@@ -691,6 +708,9 @@ onMounted(() => {
       text-align: center;
     }
   }
+  .el-container {
+    box-shadow: var(--o-shadow-1);
+  }
   :deep(.el-tabs) {
     .el-tabs__header.is-top .el-tabs__item.is-top {
       padding: 0;
@@ -708,6 +728,10 @@ onMounted(() => {
         top: -75px;
         z-index: 1;
       }
+    }
+    :deep(.el-tabs__nav-prev),
+    :deep(.el-tabs__nav-next) {
+      display: none;
     }
     :deep(.el-tabs__nav) {
       float: none;
@@ -963,7 +987,7 @@ onMounted(() => {
           box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
         }
         &:focus-visible {
-          border: 1px solid var(--o-color-brand1);
+          border: 1px solid var(--o-color-brand1) !important;
           outline: none;
         }
       }
@@ -979,6 +1003,7 @@ onMounted(() => {
   border-radius: 50%;
   width: 24px;
   height: 24px;
+  background-color: var(--o-color-bg2);
   border: 1px solid #e02020;
   &::after {
     content: '';
@@ -1007,6 +1032,9 @@ onMounted(() => {
 }
 .margin-left {
   margin-left: 40px;
+}
+.margin-top {
+  margin-top: 40px;
 }
 .content-list {
   @media screen and (max-width: 1100px) {
@@ -1344,6 +1372,11 @@ onMounted(() => {
     color: var(--o-color-text1);
     line-height: 32px;
     text-align: center;
+  }
+  .detail-tip {
+    text-align: center;
+    margin-top: 8px;
+    color: #999999;
   }
   .line-input {
     display: flex;
