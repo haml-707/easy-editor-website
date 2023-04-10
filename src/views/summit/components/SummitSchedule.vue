@@ -5,12 +5,16 @@ import { useI18n } from 'vue-i18n';
 // import { getPageData } from '@/api/api-easy-edit';
 import { modifyFloorData } from '@/api/api-easy-edit';
 
+import data from '@/data';
+
 import OIcon from '@/components/OIcon.vue';
 import { OButton } from '@/components/button';
 
 import IconAdd from '~icons/app/icon-add.svg';
 import IconTime from '~icons/app/icon-time.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
+import IconLinkDefault from '~icons/edit/icon-link-default.svg';
+import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
 
 import { ElMessage } from 'element-plus';
 
@@ -24,87 +28,21 @@ const isEditStyle = computed(() => {
   return !modeType.value;
 });
 
-const scheduleDataTemp: any = ref({
-  title: '12月28日 操作系统产业峰会 2022',
-  content: [
-    {
-      lable: '上午：主论坛',
-      id: window.crypto.randomUUID(),
-      content: [
-        {
-          id: window.crypto.randomUUID(),
-          name: '请填写标题',
-          content: [
-            {
-              id: window.crypto.randomUUID(),
-              time: ['14:00', '14:05'],
-              desc: '',
-              person: [
-                {
-                  id: window.crypto.randomUUID(),
-                  name: '姓名',
-                  post: 'XXX成员',
-                },
-                {
-                  id: window.crypto.randomUUID(),
-                  name: '姓名',
-                  post: 'XXX成员',
-                },
-              ],
-              detail: '描述5555',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      lable: '下午：分论坛',
-      id: 1,
-      content: [
-        {
-          id: 0,
-          name: '麒麟软件',
-          content: [
-            {
-              id: window.crypto.randomUUID(),
-              time: ['14:00', '14:10'],
-              desc: '欧拉社区领导致辞',
-              person: [
-                {
-                  name: '冯冠霖',
-                  post: '开放原子开源基金会秘书长',
-                },
-              ],
-              detail: '描述',
-            },
-          ],
-        },
-        {
-          id: 1,
-          name: '麒麟信安',
-          content: [
-            {
-              id: window.crypto.randomUUID(),
-              time: ['14:00', '14:10'],
-              desc: '致辞',
-              person: [
-                {
-                  name: '任启',
-                  post: '麒麟信安高级副总裁',
-                },
-              ],
-              detail: '描述',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-});
+// const props = defineProps({
+//   scheduleData: {
+//     type: Object,
+//     default: () => {
+//       return {};
+//     },
+//   },
+// });
+
+// props.scheduleData
+
 const scheduleData = ref(
   usePageData().pageData.get('schedule')?.content
     ? JSON.parse(usePageData().pageData.get('schedule').content)
-    : scheduleDataTemp.value
+    : data
 );
 
 const dialogTopicTitle = ref('');
@@ -155,37 +93,37 @@ function tabClick() {
   otherTabType.value = 0;
 }
 
-function addSubtitle() {
-  scheduleData.value.content.push({
-    lable: '请输入论坛名称',
-    id: window.crypto.randomUUID(),
-    content: [
-      {
-        id: window.crypto.randomUUID(),
-        name: '填写标题',
-        content: [
-          {
-            id: window.crypto.randomUUID(),
-            time: ['14:00', '14:05'],
-            desc: 'XXX领导致辞',
-            person: [
-              {
-                id: window.crypto.randomUUID(),
-                name: '姓名',
-                post: '',
-              },
-            ],
-            detail: '描述',
-          },
-        ],
-      },
-    ],
-  });
-}
-function delSubtitle(index: number) {
-  scheduleData.value.content.splice(index, 1);
-  tabType.value = 0;
-}
+// function addSubtitle() {
+//   scheduleData.value.content.push({
+//     lable: '请输入论坛名称',
+//     id: window.crypto.randomUUID(),
+//     content: [
+//       {
+//         id: window.crypto.randomUUID(),
+//         name: '填写标题',
+//         content: [
+//           {
+//             id: window.crypto.randomUUID(),
+//             time: ['14:00', '14:05'],
+//             desc: 'XXX领导致辞',
+//             person: [
+//               {
+//                 id: window.crypto.randomUUID(),
+//                 name: '姓名',
+//                 post: '',
+//               },
+//             ],
+//             detail: '描述',
+//           },
+//         ],
+//       },
+//     ],
+//   });
+// }
+// function delSubtitle(index: number) {
+//   scheduleData.value.content.splice(index, 1);
+//   tabType.value = 0;
+// }
 // 增加一行表格
 function addContent() {
   scheduleData.value.content[tabType.value].content[
@@ -197,9 +135,11 @@ function addContent() {
       {
         name: '姓名',
         post: '',
+        id: '15',
       },
     ],
     detail: '描述',
+    id: '',
   });
 }
 // 删除一行表格
@@ -214,6 +154,7 @@ function addPersonData(index: number) {
   ].person.push({
     name: '',
     post: '',
+    id: '',
   });
 }
 // 删除附属信息
@@ -345,6 +286,7 @@ onMounted(() => {
     <el-tabs
       v-model.number="tabType"
       class="schedule-tabs"
+      @keydown.capture.stop
       @tab-click="tabClick"
     >
       <template v-if="scheduleData.content?.length >= 2">
@@ -361,23 +303,23 @@ onMounted(() => {
                 type="text"
               />
 
-              <span
+              <!-- <span
                 v-show="isEditStyle"
                 class="icon-del del-title"
                 @click.stop="delSubtitle(index)"
-              ></span>
+              ></span> -->
             </div>
           </template>
         </el-tab-pane>
         <el-tab-pane v-if="isEditStyle">
           <template #label>
-            <OIcon
+            <!-- <OIcon
               class="icon-add"
-              :class="scheduleData.content?.length ? 'margin-left' : ''"
+              :class="scheduleData.content?.length >= 2 ? 'margin-left' : ''"
               @click.stop="addSubtitle"
             >
               <IconAdd />
-            </OIcon>
+            </OIcon> -->
           </template>
         </el-tab-pane>
       </template>
@@ -388,7 +330,7 @@ onMounted(() => {
         :key="scheduleItem.id"
       >
         <div
-          v-show="tabType == index && scheduleItem?.content[0].content"
+          v-if="tabType == index && scheduleItem?.content[0].content"
           class="schedule-item other"
         >
           <el-tabs
@@ -403,18 +345,22 @@ onMounted(() => {
                 :name="scheduleIndex"
               >
                 <template #label>
-                  <div class="time-tabs">
+                  <div v-show="isEditStyle" class="time-tabs">
                     <el-input
                       v-model="itemList.name"
                       :readonly="!isEditStyle"
                       type="text"
                     />
+
                     <span
                       v-show="isEditStyle"
                       class="icon-del del-title"
                       @click.stop="delSubtitle2(scheduleIndex)"
                     ></span>
                   </div>
+                  <span v-show="!isEditStyle" class="previve-tab">{{
+                    itemList.name
+                  }}</span>
                 </template>
               </el-tab-pane>
             </template>
@@ -433,11 +379,11 @@ onMounted(() => {
           </el-tabs>
           <div
             v-for="(itemList, listIndex) in scheduleItem.content"
-            v-show="tabType == index && otherTabType == listIndex"
             :key="itemList.id"
             class="content"
           >
-            <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
+            <template v-if="tabType == index && otherTabType == listIndex">
+              <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
               <el-input
                 v-model="itemList.title"
                 :readonly="!isEditStyle"
@@ -445,17 +391,18 @@ onMounted(() => {
                 
               />
             </h4> -->
-            <div class="content-list">
-              <div
-                v-for="(subItem, subIndex) in itemList.content"
-                :key="subItem.id"
-                class="content-item"
-                :class="{
-                  'show-detail': indexShow === subIndex && idShow === listIndex,
-                }"
-              >
-                <span class="time">
-                  <!-- <el-time-picker
+              <div class="content-list">
+                <div
+                  v-for="(subItem, subIndex) in itemList.content"
+                  :key="subItem.id"
+                  class="content-item"
+                  :class="{
+                    'show-detail':
+                      indexShow === subIndex && idShow === listIndex,
+                  }"
+                >
+                  <span class="time">
+                    <!-- <el-time-picker
                     v-model="subItem.time"
                     is-range
                     value-format="HH:mm"
@@ -465,99 +412,102 @@ onMounted(() => {
                     end-placeholder="End"
                     @change="handleClose"
                   /> -->
-                  <!-- {{ subItem.time }} -->
-                  <IconTime />
-                  <el-input
-                    v-model="subItem.time[0]"
-                    class="el-input-time"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
-                  -
-                  <el-input
-                    v-model="subItem.time[1]"
-                    class="el-input-time"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
-                  <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
-                </span>
-                <span
-                  class="desc"
-                  :class="{ 'exit-detail': subItem.detail[0] }"
-                  @click="
-                    !isEditStyle
-                      ? changeIndexShow(listIndex, subIndex as any)
-                      : ''
-                  "
-                >
-                  <el-input
-                    v-model="subItem.desc"
-                    :readonly="!isEditStyle"
-                    type="text"
-                  />
-                  <OIcon
-                    v-show="isEditStyle"
-                    class="icon-add"
-                    @click="toggleAgendaDlg(true, subIndex)"
+                    <!-- {{ subItem.time }} -->
+                    <IconTime />
+                    <el-input
+                      v-model="subItem.time[0]"
+                      class="el-input-time"
+                      :readonly="!isEditStyle"
+                      type="text"
+                    />
+                    -
+                    <el-input
+                      v-model="subItem.time[1]"
+                      class="el-input-time"
+                      :readonly="!isEditStyle"
+                      type="text"
+                    />
+                    <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
+                  </span>
+                  <span
+                    class="desc"
+                    :class="{ 'exit-detail': subItem.detail[0] }"
+                    @click="
+                      !isEditStyle
+                        ? changeIndexShow(listIndex, subIndex as any)
+                        : ''
+                    "
                   >
-                    <IconAdd />
-                  </OIcon>
-                </span>
-                <div v-if="subItem.person[0]" class="name-box">
-                  <div
-                    v-for="(personItem, personIndex) in subItem.person"
-                    :key="personItem.id"
-                    class="name-item"
-                  >
-                    <span v-show="personItem.name" class="name">
-                      <el-input
-                        v-model="personItem.name"
-                        :readonly="!isEditStyle"
-                        placeholder="输入名称"
-                        type="text"
-                      />
-                    </span>
-                    <span class="post">
-                      <label :for="`textarea${personIndex}`"></label>
-                      <el-input
-                        :id="`textarea${personIndex}`"
-                        v-model="personItem.post"
-                        :readonly="!isEditStyle"
-                        :autosize="{ minRows: 1, maxRows: 10 }"
-                        maxlength="100"
-                        type="textarea"
-                      />
-                    </span>
-                    <span
+                    <el-input
+                      v-model="subItem.desc"
+                      :readonly="!isEditStyle"
+                      :autosize="{ minRows: 1, maxRows: 10 }"
+                      maxlength="100"
+                      type="textarea"
+                    />
+                    <OIcon
                       v-show="isEditStyle"
-                      class="icon-del"
-                      @click="delPersonData(subIndex, personIndex)"
-                      ><span class="tip">删除附属信息</span></span
+                      class="icon-add"
+                      @click="toggleAgendaDlg(true, subIndex)"
                     >
+                      <IconLinkDefault v-if="!subItem.detail" />
+                      <IconLinkFilled v-else />
+                    </OIcon>
+                  </span>
+                  <div v-if="subItem.person[0]" class="name-box">
+                    <div
+                      v-for="(personItem, personIndex) in subItem.person"
+                      :key="personItem.id"
+                      class="name-item"
+                    >
+                      <span v-show="personItem.name" class="name">
+                        <el-input
+                          v-model="personItem.name"
+                          :readonly="!isEditStyle"
+                          placeholder="输入名称"
+                          type="text"
+                        />
+                      </span>
+                      <span class="post">
+                        <label :for="`textarea${personIndex}`"></label>
+                        <el-input
+                          :id="`textarea${personIndex}`"
+                          v-model="personItem.post"
+                          :readonly="!isEditStyle"
+                          :autosize="{ minRows: 1, maxRows: 10 }"
+                          maxlength="100"
+                          type="textarea"
+                        />
+                      </span>
+                      <span
+                        v-show="isEditStyle"
+                        class="icon-del"
+                        @click="delPersonData(subIndex, personIndex)"
+                        ><span class="tip">删除附属信息</span></span
+                      >
+                    </div>
+                    <OIcon
+                      v-show="isEditStyle"
+                      class="icon-add"
+                      @click="addPersonData(subIndex)"
+                    >
+                      <span class="tip">新增附属信息</span>
+                      <IconAdd />
+                    </OIcon>
                   </div>
-                  <OIcon
-                    v-show="isEditStyle"
-                    class="icon-add"
-                    @click="addPersonData(subIndex)"
-                  >
-                    <span class="tip">新增附属信息</span>
-                    <IconAdd />
-                  </OIcon>
-                </div>
-                <div v-if="subItem.detail" class="detail">
-                  <p>
-                    <span>议题名称：</span><span> {{ subItem.desc }}</span>
-                  </p>
-                  <p v-if="subItem.detail">
-                    <span>议题简介：</span
-                    ><span
-                      ><span class="detail-text">
-                        {{ subItem.detail }}
-                      </span></span
-                    >
-                  </p>
-                  <!-- <p v-if="subItem.person[0]">
+                  <div v-if="subItem.detail" class="detail">
+                    <p>
+                      <span>议题名称：</span><span> {{ subItem.desc }}</span>
+                    </p>
+                    <p v-if="subItem.detail">
+                      <span>议题简介：</span
+                      ><span
+                        ><span class="detail-text">
+                          {{ subItem.detail }}
+                        </span></span
+                      >
+                    </p>
+                    <!-- <p v-if="subItem.person[0]">
                     <span>发言人：</span>
                     <span
                       v-for="personItem in subItem.person"
@@ -570,28 +520,29 @@ onMounted(() => {
                       </template>
                     </span>
                   </p> -->
+                  </div>
+                  <div
+                    v-show="
+                      indexShow !== -1 && subItem.detail && idShow === listIndex
+                    "
+                    class="mask"
+                    @click="changeIndexShow(-1, -1)"
+                  ></div>
+                  <span
+                    v-if="isEditStyle"
+                    class="icon-del del-content"
+                    @click="delContent(subIndex)"
+                  ></span>
                 </div>
-                <div
-                  v-show="
-                    indexShow !== -1 && subItem.detail && idShow === listIndex
-                  "
-                  class="mask"
-                  @click="changeIndexShow(-1, -1)"
-                ></div>
-                <span
-                  v-if="isEditStyle"
-                  class="icon-del del-content"
-                  @click="delContent(subIndex)"
-                ></span>
               </div>
-            </div>
-            <OIcon
-              v-if="isEditStyle"
-              class="icon-add add-content"
-              @click="addContent"
-            >
-              <IconAdd />
-            </OIcon>
+              <OIcon
+                v-if="isEditStyle"
+                class="icon-add add-content"
+                @click="addContent"
+              >
+                <IconAdd />
+              </OIcon>
+            </template>
           </div>
         </div>
       </template>
@@ -674,7 +625,7 @@ onMounted(() => {
     </template>
   </el-dialog>
   <div class="contoral-box">
-    <el-button @click="savePageData">保存</el-button>
+    <o-button @click="savePageData">保存</o-button>
   </div>
 </template>
 
@@ -708,6 +659,13 @@ onMounted(() => {
 .el-date-editor.el-input__wrapper {
   background-color: transparent;
 }
+:deep(.el-tabs__nav-wrap) {
+  overflow: visible;
+  .el-tabs__nav-scroll {
+    overflow: visible;
+  }
+}
+
 .schedule {
   h3 {
     position: relative;
@@ -780,6 +738,8 @@ onMounted(() => {
     }
 
     .one-level-tabs {
+      position: relative;
+      width: 250px;
       background: var(--o-color-bg2);
       border-color: var(--o-color-primary2);
       :deep(.el-input) {
@@ -789,6 +749,18 @@ onMounted(() => {
           width: min-content;
           color: var(--o-color-text1);
           text-align: center;
+        }
+      }
+      .del-title {
+        left: inherit;
+        width: 16px;
+        height: 16px;
+        right: -8px;
+        top: -20px;
+        transform: none;
+        &::after {
+          height: 2px;
+          width: calc(100% - 6px);
         }
       }
     }
@@ -851,6 +823,11 @@ onMounted(() => {
             }
           }
           .el-tabs__item {
+            margin-right: 20px;
+
+            .previve-tab {
+              font-size: var(--o-font-size-tip);
+            }
             @media (max-width: 1100px) {
               font-size: 12px;
               line-height: 18px;
@@ -950,6 +927,11 @@ onMounted(() => {
     position: relative;
     border: 1px solid transparent;
     transition: all 0.3s;
+    :deep(.el-input) {
+      .el-input__inner {
+        color: #707070;
+      }
+    }
     &:hover {
       border: 1px solid var(--o-color-brand1);
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
@@ -960,8 +942,30 @@ onMounted(() => {
     &:focus-within {
       border: 1px solid var(--o-color-brand1);
       box-shadow: none;
-      .post {
-        border-left: 1px solid var(--o-color-brand1);
+      .name {
+        border-right: 1px solid var(--o-color-brand1);
+      }
+    }
+  }
+  .desc {
+    :deep(.el-textarea) {
+      textarea {
+        resize: none;
+        min-height: 38px !important;
+        padding: 8px 14px !important;
+        cursor: text;
+        padding: 0;
+        box-shadow: none;
+        border: 1px solid transparent;
+        resize: none;
+        &:hover:not(:focus-visible) {
+          border: 1px solid var(--o-color-brand1);
+          box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+        }
+        &:focus-visible {
+          border: 1px solid var(--o-color-brand1);
+          outline: none;
+        }
       }
     }
   }
@@ -1063,6 +1067,7 @@ onMounted(() => {
         position: absolute;
         top: 0;
         left: inherit;
+        background-color: var(--o-color-bg2);
         &::after {
           height: 2px;
           border-radius: 1px;
@@ -1117,13 +1122,35 @@ onMounted(() => {
           display: block;
         }
       }
+      :deep(.el-textarea) {
+        textarea {
+          resize: none;
+          min-height: 38px !important;
+          padding: 8px 14px !important;
+          cursor: text;
+          padding: 0;
+          box-shadow: none;
+          border: 1px solid transparent;
+          resize: none;
+          // &:hover:not(:focus-visible) {
+          //   border: 1px solid var(--o-color-brand1);
+          //   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+          // }
+          // &:focus-visible {
+          //   border: 1px solid var(--o-color-brand1);
+          //   outline: none;
+          // }
+        }
+      }
       .o-icon {
         position: absolute;
         right: -8px;
         top: -8px;
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
         background-color: var(--o-color-bg2);
+        border: none;
       }
       @media (max-width: 1100px) {
         margin-right: 0;
@@ -1141,6 +1168,9 @@ onMounted(() => {
       :deep(.el-input__wrapper) {
         box-shadow: none;
         border: 1px solid transparent;
+        .el-input__inner {
+          color: var(--o-color-text4);
+        }
       }
       @media (max-width: 1100px) {
         font-size: 12px;
@@ -1163,6 +1193,7 @@ onMounted(() => {
           padding: 8px 14px !important;
           cursor: text;
           padding: 0;
+          color: var(--o-color-text4);
           box-shadow: none;
           border: 1px solid transparent;
           resize: none;
