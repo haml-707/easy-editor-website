@@ -1,21 +1,6 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
 import SummitSchedule from './components/SummitSchedule.vue';
 import AppEditTemplate from '@/components/AppEditTemplate.vue';
-import { usePageData } from '@/stores';
-
-import data from '@/data';
-
-// const scheduleData = ref(
-//   usePageData().pageData.get('schedule')?.content
-//     ? JSON.parse(usePageData().pageData.get('schedule').content)
-//     : data
-// );
-// const scheduleData1 = ref(
-//   usePageData().pageData.get('schedule')?.content
-//     ? JSON.parse(usePageData().pageData.get('schedule1').content)
-//     : data
-// );
 </script>
 <template>
   <AppEditTemplate>
@@ -35,7 +20,6 @@ import data from '@/data';
   padding: var(--o-gap-7) 0;
   display: flex;
   flex-direction: column;
-  gap: var(--o-gap-5) 0;
   max-width: 1504px;
   padding: var(--o-spacing-h2) var(--o-spacing-h2) var(--o-spacing-h1);
   margin: 0 auto;

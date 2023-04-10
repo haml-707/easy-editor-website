@@ -657,6 +657,7 @@ onMounted(() => {
     &:not(.is-focus) {
       box-shadow: none;
     }
+    box-shadow: none;
     input {
       &[readonly] {
         cursor: text;
@@ -1009,7 +1010,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     left: 50%;
-    border-radius: 1px;
+    border-radius: 2px;
     top: 50%;
     transform: translate(-50%, -50%);
     height: 3px;
@@ -1036,6 +1037,9 @@ onMounted(() => {
 .margin-top {
   margin-top: 40px;
 }
+.contoral-box {
+  margin-top: 24px;
+}
 .content-list {
   @media screen and (max-width: 1100px) {
     position: relative;
@@ -1061,8 +1065,15 @@ onMounted(() => {
     }
     .name-box {
       position: relative;
+      &:hover {
+        .icon-add,
+        .icon-del {
+          display: block;
+        }
+      }
       .icon-add,
       .icon-del {
+        display: none;
         position: relative;
         width: 16px;
         height: 16px;
@@ -1145,6 +1156,11 @@ onMounted(() => {
       display: inline-block;
       margin-right: 36px;
       cursor: default;
+      &:hover {
+        .o-icon {
+          display: flex;
+        }
+      }
       &:focus-within {
         .o-icon {
           display: block;
@@ -1179,6 +1195,7 @@ onMounted(() => {
         font-size: 18px;
         background-color: var(--o-color-bg2);
         border: none;
+        display: none;
       }
       @media (max-width: 1100px) {
         margin-right: 0;
