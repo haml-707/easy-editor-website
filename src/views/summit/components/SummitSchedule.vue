@@ -641,7 +641,7 @@ onMounted(() => {
     </template>
   </el-dialog>
   <div v-show="isEditStyle" class="contoral-box">
-    <o-button @click="savePageData">保存</o-button>
+    <o-button size="small" type="primary" @click="savePageData">保存</o-button>
     <!-- <o-button @click="createNewPage">保存</o-button> -->
   </div>
 </template>
