@@ -199,7 +199,10 @@ function confirmDelContent() {
   toggleDelDlg(false);
 }
 function confirmDelTab() {
-  if (delIndex.value === 0) {
+  if (
+    delIndex.value === 0 &&
+    scheduleData.value.content[tabType.value].content.length === 1
+  ) {
     scheduleData.value.content[tabType.value].content = [];
   } else {
     scheduleData.value.content[tabType.value].content.splice(delIndex.value, 1);
