@@ -30,9 +30,12 @@ function setShowIndex(index: number) {
           <p class="date-month">APRIL</p>
         </div>
       </div>
-
-      <SummitSchedule v-if="showIndex === 0" schedule-name="schedule-20" />
-      <SummitSchedule v-else schedule-name="schedule" />
+      <div v-show="showIndex === 0">
+        <SummitSchedule schedule-name="schedule-20" />
+      </div>
+      <div v-show="showIndex === 1">
+        <SummitSchedule schedule-name="schedule" />
+      </div>
     </div>
   </AppEditTemplate>
 </template>
