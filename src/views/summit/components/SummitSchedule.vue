@@ -257,8 +257,6 @@ function savePageData() {
   modifyFloorData(param)
     .then((res: { statusCode: number }) => {
       if (res?.statusCode !== 200) {
-        // clearInterval(timer);
-
         // 修改出错内容回显
         getSingleFloorData(param.path, param.name).then((res: any) => {
           param.content = res?.data?.content;
@@ -289,7 +287,7 @@ watch(
       savePageData();
       timer = setInterval(() => {
         savePageData();
-      }, 1 * 60 * 1000);
+      }, 10 * 60 * 1000);
     } else {
       clearInterval(timer);
     }
