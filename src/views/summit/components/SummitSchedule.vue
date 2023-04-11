@@ -1365,7 +1365,7 @@ onMounted(() => {
             font-size: 14px;
           }
           font-size: var(--o-font-size-h7);
-          color: var(--o-color-text4);
+          color: var(--o-color-text3);
         }
       }
       @media (max-width: 1100px) {
@@ -1395,7 +1395,7 @@ onMounted(() => {
           cursor: text;
           padding: 0;
           font-size: var(--o-font-size-h7);
-          color: var(--o-color-text4);
+          color: var(--o-color-text3);
           box-shadow: none;
           border: 1px solid transparent;
           resize: none;
@@ -1432,7 +1432,7 @@ onMounted(() => {
       svg {
         width: 18px;
         height: 18px;
-        color: var(--o-color-text4);
+        color: var(--o-color-text3);
         margin-right: 6px;
         @media screen and (max-width: 1100px) {
           display: none;
@@ -1445,7 +1445,7 @@ onMounted(() => {
           padding: 0;
           .el-input__inner {
             font-size: var(--o-font-size-h8);
-            color: var(--o-color-text4);
+            color: var(--o-color-text3);
           }
         }
       }
