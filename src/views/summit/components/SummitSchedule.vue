@@ -3,7 +3,7 @@ import { ref, onUnmounted, Ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // import { getPageData } from '@/api/api-easy-edit';
-import { modifyFloorData } from '@/api/api-easy-edit';
+import { modifyFloorData, getSingleFloorData } from '@/api/api-easy-edit';
 
 import data from '@/data';
 
@@ -248,18 +248,24 @@ function addSubtitle2() {
 }
 // 保持页面数据
 function savePageData() {
+  // if (props.scheduleName === 'schedule') {
+  //   param.content = data.content;
+  // } else {
+  //   param.content = data.content1;
+  // }
   param.content = JSON.stringify(scheduleData.value);
   modifyFloorData(param)
     .then((res: { statusCode: number }) => {
       if (res?.statusCode !== 200) {
+        // clearInterval(timer);
+
         // 修改出错内容回显
-        // getSingleFloorData(param.path, param.name).then((res: any) => {
-        //   param.content = res?.data?.content;
-        //   param.title = res?.data?.title;
-        //   usePageData().pageData.set(param.name, param);
-        // });
+        getSingleFloorData(param.path, param.name).then((res: any) => {
+          param.content = res?.data?.content;
+          param.title = res?.data?.title;
+          usePageData().pageData.set(param.name, param);
+        });
       } else {
-        clearInterval(timer);
         // ElMessage({
         //   type: 'success',
         //   message: '保持成功',
@@ -272,6 +278,10 @@ function savePageData() {
 }
 let timer: TimerType;
 
+timer = setInterval(() => {
+  savePageData();
+}, 10 * 60 * 1000);
+
 watch(
   () => modeType.value,
   (val) => {
@@ -279,7 +289,7 @@ watch(
       savePageData();
       timer = setInterval(() => {
         savePageData();
-      }, 10 * 60 * 1000);
+      }, 1 * 60 * 1000);
     } else {
       clearInterval(timer);
     }
