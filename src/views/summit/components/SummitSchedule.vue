@@ -426,6 +426,7 @@ onMounted(() => {
                   <div v-show="isEditStyle" class="time-tabs">
                     <el-input
                       v-model="itemList.name"
+                      :placeholder="isEditStyle ? '输入分论坛名称' : ''"
                       :readonly="!isEditStyle"
                       type="text"
                     />
