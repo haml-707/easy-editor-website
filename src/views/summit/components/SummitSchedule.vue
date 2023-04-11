@@ -394,8 +394,8 @@ onMounted(() => {
         v-if="
           scheduleName === 'schedule'
             ? tabType1 === 0
-              ? index === 1
-              : index !== 1
+              ? index === 0
+              : index !== 0
             : true
         "
       >
@@ -434,7 +434,8 @@ onMounted(() => {
                       v-show="isEditStyle"
                       class="icon-del del-title"
                       @click.stop="delSubtitle2(scheduleIndex)"
-                    ></span>
+                      ><span class="tip">删除此论坛</span></span
+                    >
                   </div>
                   <span v-show="!isEditStyle" class="previve-tab">{{
                     itemList.name
@@ -495,7 +496,7 @@ onMounted(() => {
                     <el-input
                       v-model="subItem.time"
                       class="el-input-time"
-                      placeholder="时间"
+                      :placeholder="isEditStyle ? '输入时间' : ''"
                       :readonly="!isEditStyle"
                       type="text"
                     />
@@ -513,9 +514,9 @@ onMounted(() => {
                     <el-input
                       v-model="subItem.desc"
                       :readonly="!isEditStyle"
-                      :autosize="{ minRows: 1, maxRows: 10 }"
+                      :autosize="{ minRows: 1, maxRows: 15 }"
                       maxlength="100"
-                      placeholder="输入议程"
+                      :placeholder="isEditStyle ? '输入议程内容' : ''"
                       type="textarea"
                     />
                     <OIcon
@@ -537,7 +538,7 @@ onMounted(() => {
                         <el-input
                           v-model="personItem.name"
                           :readonly="!isEditStyle"
-                          placeholder="输入名称"
+                          :placeholder="isEditStyle ? '嘉宾名称' : ''"
                           type="text"
                         />
                       </span>
@@ -551,7 +552,11 @@ onMounted(() => {
                           :autosize="{ minRows: 1, maxRows: 10 }"
                           maxlength="100"
                           type="textarea"
-                          placeholder="输入嘉宾名称"
+                          :placeholder="
+                            isEditStyle
+                              ? '嘉宾头衔（只有一列信息请填这里）'
+                              : ''
+                          "
                         />
                       </span>
                       <span
@@ -607,7 +612,8 @@ onMounted(() => {
                     v-if="isEditStyle"
                     class="icon-del del-content"
                     @click="delContent(subIndex)"
-                  ></span>
+                    ><span class="tip">删除此行</span></span
+                  >
                 </div>
               </div>
               <OIcon
@@ -701,10 +707,10 @@ onMounted(() => {
       >
     </template>
   </el-dialog>
-  <div v-show="isEditStyle" class="contoral-box">
+  <!-- <div v-show="isEditStyle" class="contoral-box">
     <o-button size="small" type="primary" @click="savePageData">保存</o-button>
-    <!-- <o-button @click="createNewPage">保存</o-button> -->
-  </div>
+    <o-button @click="createNewPage">保存</o-button>
+  </div> -->
 </template>
 
 <style lang="scss" scoped>
@@ -1045,9 +1051,12 @@ onMounted(() => {
     &:not(:hover) .empty {
       display: none;
     }
-    // &:hover .empty {
-    //   display: inline-block !important;
-    // }
+    .empty {
+      textarea {
+        font-size: 14px;
+      }
+    }
+
     &:hover {
       border: 1px solid var(--o-color-brand1);
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
@@ -1058,8 +1067,8 @@ onMounted(() => {
     &:focus-within {
       border: 1px solid var(--o-color-brand1);
       box-shadow: none;
-      .name {
-        border-right: 1px solid var(--o-color-brand1);
+      .post {
+        border-left: 1px solid var(--o-color-brand1);
       }
     }
   }
@@ -1099,6 +1108,25 @@ onMounted(() => {
   border: 1px solid #e02020;
 
   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+  &:hover {
+    .tip {
+      display: block;
+    }
+  }
+  .tip {
+    line-height: var(--o-font-size-tip);
+    display: none;
+    position: absolute;
+    transform: translate(100%, -50%);
+    color: #555;
+    width: max-content;
+    right: -8px;
+    top: 50%;
+    font-size: var(--o-font-size-tip);
+    padding: 4px 8px;
+    background-color: var(--o-color-bg2);
+    box-shadow: var(--o-shadow-1);
+  }
   &::after {
     content: '';
     position: absolute;
@@ -1159,13 +1187,16 @@ onMounted(() => {
   }
   .content-item {
     display: grid;
+    min-height: 92px;
     grid-template-columns: 192px 580px 400px;
     padding: 20px 0;
     transition: all 0.25s ease;
     align-items: center;
-    min-height: 64px;
+    // min-height: 64px;
     position: relative;
-    border-bottom: 1px solid var(--o-color-border2);
+    & + .content-item {
+      border-top: 1px solid var(--o-color-border2);
+    }
 
     @media screen and (max-width: 1328px) {
       grid-template-columns: 192px 450px 400px;
@@ -1282,10 +1313,11 @@ onMounted(() => {
       :deep(.el-textarea) {
         textarea {
           resize: none;
-          min-height: 38px !important;
+          min-height: 45px !important;
           padding: 8px 14px !important;
           cursor: text;
           padding: 0;
+          font-size: var(--o-font-size-h7);
           box-shadow: none;
           border: 1px solid transparent;
           resize: none;
@@ -1318,7 +1350,8 @@ onMounted(() => {
     }
 
     .name {
-      width: 100px;
+      width: 120px;
+      height: 100%;
       display: inline-block;
       color: var(--o-color-text3);
       font-size: 16px;
@@ -1327,6 +1360,10 @@ onMounted(() => {
         box-shadow: none;
         border: 1px solid transparent;
         .el-input__inner {
+          &::-webkit-input-placeholder {
+            font-size: 14px;
+          }
+          font-size: var(--o-font-size-h7);
           color: var(--o-color-text4);
         }
       }
@@ -1347,11 +1384,16 @@ onMounted(() => {
 
       :deep(.el-textarea) {
         textarea {
+          &::-webkit-input-placeholder {
+            font-size: 14px;
+            line-height: var(--o-line-height-h7);
+          }
           resize: none;
-          min-height: 38px !important;
-          padding: 8px 14px !important;
+          min-height: 45px !important;
+          padding: 10px 14px !important;
           cursor: text;
           padding: 0;
+          font-size: var(--o-font-size-h7);
           color: var(--o-color-text4);
           box-shadow: none;
           border: 1px solid transparent;
@@ -1396,11 +1438,12 @@ onMounted(() => {
         }
       }
       .el-input-time {
-        width: 90px;
+        width: 100px;
         text-align: center;
         :deep(.el-input__wrapper) {
           padding: 0;
           .el-input__inner {
+            font-size: var(--o-font-size-h8);
             color: var(--o-color-text4);
           }
         }
