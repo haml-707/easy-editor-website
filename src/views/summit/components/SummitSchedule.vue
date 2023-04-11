@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, Ref, inject, computed, watch } from 'vue';
+import { ref, onUnmounted, Ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // import { getPageData } from '@/api/api-easy-edit';
@@ -17,6 +17,8 @@ import IconLinkDefault from '~icons/edit/icon-link-default.svg';
 import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
 
 import { usePageData } from '@/stores';
+import { log } from 'console';
+export type TimerType = NodeJS.Timeout;
 
 const { locale } = useI18n();
 
@@ -198,7 +200,12 @@ function confirmDelContent() {
   toggleDelDlg(false);
 }
 function confirmDelTab() {
-  scheduleData.value.content[tabType.value].content.splice(delIndex.value, 1);
+  if (delIndex.value === 0) {
+    scheduleData.value.content[tabType.value].content = [];
+  } else {
+    scheduleData.value.content[tabType.value].content.splice(delIndex.value, 1);
+  }
+
   otherTabType.value[tabType.value] =
     delIndex.value === 0 ? 0 : delIndex.value - 1;
   toggleDelTabDlg(false);
@@ -250,6 +257,7 @@ function savePageData() {
         //   usePageData().pageData.set(param.name, param);
         // });
       } else {
+        clearInterval(timer);
         // ElMessage({
         //   type: 'success',
         //   message: '保持成功',
@@ -260,11 +268,18 @@ function savePageData() {
       console.log(err);
     });
 }
+let timer: TimerType;
+
 watch(
   () => modeType.value,
   (val) => {
     if (val) {
       savePageData();
+      timer = setInterval(() => {
+        savePageData();
+      }, 10 * 60 * 1000);
+    } else {
+      clearInterval(timer);
     }
   }
 );
@@ -317,7 +332,8 @@ watch(
   }
 );
 
-onMounted(() => {
+onUnmounted(() => {
+  clearInterval(timer);
   // handleGetPageData();
 });
 </script>
@@ -407,16 +423,18 @@ onMounted(() => {
           />
         </div>
         <div
-          v-if="scheduleItem?.content[0].content"
+          v-if="scheduleItem?.content"
           class="schedule-item other"
           @click.capture="tabType = index"
         >
           <el-tabs
-            v-if="isEditStyle || scheduleItem.content[1]"
+            v-if="isEditStyle || scheduleItem.content.length"
             v-model.number="otherTabType[index]"
             class="other-tabs"
+            :class="scheduleItem.content.length === 1 ? 'no-bar' : ''"
+            @keydown.capture.stop
           >
-            <template v-if="scheduleItem.content[1]">
+            <template v-if="scheduleItem.content.length">
               <el-tab-pane
                 v-for="(itemList, scheduleIndex) in scheduleItem.content"
                 :key="itemList.id"
@@ -426,7 +444,8 @@ onMounted(() => {
                   <div v-show="isEditStyle" class="time-tabs">
                     <el-input
                       v-model="itemList.name"
-                      :placeholder="isEditStyle ? '输入分论坛名称' : ''"
+                      :placeholder="isEditStyle ? '输入论坛名称' : ''"
+                      :class="itemList.name ? '' : 'empty'"
                       :readonly="!isEditStyle"
                       type="text"
                     />
@@ -449,8 +468,8 @@ onMounted(() => {
               <template #label>
                 <OIcon
                   class="icon-add"
-                  :class="scheduleItem.content.length >= 2 ? 'margin-left' : ''"
-                  @click.stop="addSubtitle2"
+                  :class="scheduleItem.content.length ? 'margin-left' : ''"
+                  @click.capture.stop="addSubtitle2"
                 >
                   <IconAdd />
                   <span class="tip">新增分论坛标题</span>
@@ -517,7 +536,7 @@ onMounted(() => {
                       :readonly="!isEditStyle"
                       :autosize="{ minRows: 1, maxRows: 15 }"
                       maxlength="100"
-                      :placeholder="isEditStyle ? '输入议程内容' : ''"
+                      :placeholder="isEditStyle ? '输入议程标题' : ''"
                       type="textarea"
                     />
                     <OIcon
@@ -527,6 +546,7 @@ onMounted(() => {
                     >
                       <IconLinkDefault v-if="!subItem.detail" />
                       <IconLinkFilled v-else />
+                      <div class="tip">附加议程简介</div>
                     </OIcon>
                   </span>
                   <div v-if="subItem.person[0]" class="name-box">
@@ -784,7 +804,7 @@ onMounted(() => {
       box-shadow: var(--o-shadow-1);
     }
     .schedule-title {
-      margin: 32px 0 0;
+      margin: 9px 0 0;
       :deep(.el-input) {
         .el-input__inner {
           font-size: 20px;
@@ -830,7 +850,6 @@ onMounted(() => {
       display: inline-block;
       margin: 0 0 24px;
       cursor: pointer;
-      border: 1px solid var(--o-color-border2);
       color: var(--o-color-text1);
       text-align: center;
       background: var(--o-color-bg2);
@@ -854,6 +873,7 @@ onMounted(() => {
       align-items: center;
       justify-content: center;
       font-size: var(--o-font-size-text);
+      border: 1px solid var(--o-color-border2);
       // :deep(.el-input) {
       //   cursor: pointer;
       //   .el-input__inner {
@@ -880,6 +900,7 @@ onMounted(() => {
       .one-level-tabs {
         color: var(--o-color-text2);
         background: var(--o-color-primary1);
+        border: none;
         :deep(.el-input) {
           .el-input__inner {
             width: min-content;
@@ -945,10 +966,28 @@ onMounted(() => {
             }
           }
           .el-tabs__item {
+            // &:not(:hover) .empty {
+            //   visibility: hidden;
+            // }
+
+            .el-input__wrapper {
+              padding: 0 4px;
+            }
+            .el-input__inner {
+              text-align: center;
+            }
             .previve-tab {
-              font-size: var(--o-font-size-tip);
+              font-size: var(--o-font-size-h7);
             }
           }
+        }
+      }
+      :deep(.no-bar) {
+        .el-tabs__active-bar {
+          display: none;
+        }
+        .previve-tab {
+          color: var(--o-color-text1);
         }
       }
       :deep(.el-tabs__nav-scroll) {
@@ -1039,6 +1078,13 @@ onMounted(() => {
       box-shadow: 0 0 0 1px var(--o-color-brand1) inset;
     }
   }
+  :deep(.el-tabs) {
+    .el-tabs__item {
+      max-width: 150px;
+      margin: 0 !important;
+    }
+  }
+
   .name-item {
     position: relative;
     border: 1px solid transparent;
