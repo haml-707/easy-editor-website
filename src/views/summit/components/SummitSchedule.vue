@@ -17,7 +17,6 @@ import IconLinkDefault from '~icons/edit/icon-link-default.svg';
 import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
 
 import { usePageData } from '@/stores';
-import { log } from 'console';
 export type TimerType = NodeJS.Timeout;
 
 const { locale } = useI18n();
