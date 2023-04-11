@@ -16,8 +16,6 @@ import IconWarn from '~icons/edit/icon-warn.svg';
 import IconLinkDefault from '~icons/edit/icon-link-default.svg';
 import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
 
-import { ElMessage } from 'element-plus';
-
 import { usePageData } from '@/stores';
 
 const { locale } = useI18n();
@@ -35,20 +33,11 @@ const props = defineProps({
   },
 });
 
-// props.scheduleData
-
 const scheduleData = ref(
   usePageData().pageData.get(props.scheduleName)?.content
     ? JSON.parse(usePageData().pageData.get(props.scheduleName).content)
     : data
 );
-
-// const tempData = computed({
-//   get: () => props.modelValue,
-//   set: (val) => {
-//     emit('update:modelValue', val);
-//   },
-// });
 
 const dialogTopicTitle = ref('');
 
@@ -64,9 +53,20 @@ watch(
     deep: true,
   }
 );
+watch(
+  () => scheduleData.value,
+  () => {
+    usePageData().pageData.get(props.scheduleName).content = JSON.stringify(
+      scheduleData.value
+    );
+  },
+  {
+    deep: true,
+  }
+);
 const param = {
   content: '',
-  name: 'schedule-20',
+  name: props.scheduleName,
   description: '',
   path: 'https://www.openeuler.org/zh/interaction/summit-list/devday2023/',
   title: '',
@@ -84,8 +84,8 @@ const agendaDialogVisiable = ref(false);
 
 const delIndex = ref(0);
 // 控制分论坛的详情弹窗显示
-const indexShow: any = ref(-1);
-const idShow: any = ref(-1);
+const indexShow = ref(-1);
+const idShow = ref(-1);
 function changeIndexShow(id: number, index: number) {
   idShow.value = id;
   indexShow.value = index;
@@ -93,10 +93,11 @@ function changeIndexShow(id: number, index: number) {
 // 控制主论坛及各个分论坛的显示
 const tabType = ref(0);
 
-const otherTabType = ref(0);
-function tabClick() {
-  otherTabType.value = 0;
-}
+const otherTabType = ref([0, 0, 0, 0, 0, 0, 0]);
+
+// function tabClick() {
+//   otherTabType.value[tabType.value] = 0;
+// }
 
 // function addSubtitle() {
 //   scheduleData.value.content.push({
@@ -132,24 +133,26 @@ function tabClick() {
 // 增加一行表格
 function addContent() {
   scheduleData.value.content[tabType.value].content[
-    otherTabType.value
+    otherTabType.value[tabType.value]
   ].content.push({
-    time: ['', ''],
+    time: '',
     desc: '',
     person: [
       {
         name: '',
         post: '',
         id: `id${
-          scheduleData.value.content[tabType.value].content[otherTabType.value]
-            .content.length
+          scheduleData.value.content[tabType.value].content[
+            otherTabType.value[tabType.value]
+          ].content.length
         }`,
       },
     ],
     detail: '',
     id: `id${
-      scheduleData.value.content[tabType.value].content[otherTabType.value]
-        .content.length
+      scheduleData.value.content[tabType.value].content[
+        otherTabType.value[tabType.value]
+      ].content.length
     }`,
   });
 }
@@ -160,9 +163,9 @@ function delContent(index: number) {
 }
 // 新增附属信息
 function addPersonData(index: number) {
-  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
-    index
-  ].person.push({
+  scheduleData.value.content[tabType.value].content[
+    otherTabType.value[tabType.value]
+  ].content[index].person.push({
     name: '',
     post: '',
     id: '',
@@ -171,24 +174,33 @@ function addPersonData(index: number) {
 // 删除附属信息
 function delPersonData(subIndex: number, personIndex: number) {
   if (
-    scheduleData.value.content[tabType.value].content[otherTabType.value]
-      .content[subIndex].person.length === 1
+    scheduleData.value.content[tabType.value].content[
+      otherTabType.value[tabType.value]
+    ].content[subIndex].person.length === 1
   ) {
-    return false;
+    scheduleData.value.content[tabType.value].content[
+      otherTabType.value[tabType.value]
+    ].content[subIndex].person[0] = {
+      id: '',
+      name: '',
+      post: '',
+    };
+  } else {
+    scheduleData.value.content[tabType.value].content[
+      otherTabType.value[tabType.value]
+    ].content[subIndex].person.splice(personIndex, 1);
   }
-  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
-    subIndex
-  ].person.splice(personIndex, 1);
 }
 function confirmDelContent() {
   scheduleData.value.content[tabType.value].content[
-    otherTabType.value
+    otherTabType.value[tabType.value]
   ].content.splice(delIndex.value, 1);
   toggleDelDlg(false);
 }
 function confirmDelTab() {
   scheduleData.value.content[tabType.value].content.splice(delIndex.value, 1);
-  otherTabType.value = delIndex.value === 0 ? 0 : delIndex.value - 1;
+  otherTabType.value[tabType.value] =
+    delIndex.value === 0 ? 0 : delIndex.value - 1;
   toggleDelTabDlg(false);
 }
 // 删除分论坛标题
@@ -204,7 +216,7 @@ function addSubtitle2() {
     content: [
       {
         id: window.crypto.randomUUID(),
-        time: ['', ''],
+        time: '',
         desc: '',
         person: [
           {
@@ -223,7 +235,7 @@ function addSubtitle2() {
     ],
   });
   const index = scheduleData.value.content[tabType.value].content.length;
-  otherTabType.value = index === 0 ? 0 : index - 1;
+  otherTabType.value[tabType.value] = index === 0 ? 0 : index - 1;
 }
 // 保持页面数据
 function savePageData() {
@@ -238,24 +250,33 @@ function savePageData() {
         //   usePageData().pageData.set(param.name, param);
         // });
       } else {
-        ElMessage({
-          type: 'success',
-          message: '保持成功',
-        });
+        // ElMessage({
+        //   type: 'success',
+        //   message: '保持成功',
+        // });
       }
     })
     .catch((err) => {
       console.log(err);
     });
 }
+watch(
+  () => modeType.value,
+  (val) => {
+    if (val) {
+      savePageData();
+    }
+  }
+);
 function toggleDelDlg(val: boolean) {
   delRowDialogVisiable.value = val;
 }
 function toggleAgendaDlg(val: boolean, listIndex?: number) {
   if (listIndex || listIndex === 0) {
     const targetData =
-      scheduleData.value.content[tabType.value].content[otherTabType.value]
-        .content[listIndex];
+      scheduleData.value.content[tabType.value].content[
+        otherTabType.value[tabType.value]
+      ].content[listIndex];
     dialogTopicContnet.value = targetData.detail;
     dialogTopicTitle.value = targetData.desc;
     idShow.value = listIndex;
@@ -263,9 +284,9 @@ function toggleAgendaDlg(val: boolean, listIndex?: number) {
   agendaDialogVisiable.value = val;
 }
 function confirmSaveAgenda() {
-  scheduleData.value.content[tabType.value].content[otherTabType.value].content[
-    idShow.value
-  ].detail = dialogTopicContnet.value;
+  scheduleData.value.content[tabType.value].content[
+    otherTabType.value[tabType.value]
+  ].content[idShow.value].detail = dialogTopicContnet.value;
   toggleAgendaDlg(false);
 }
 function toggleDelTabDlg(val: boolean) {
@@ -280,6 +301,22 @@ function toggleDelTabDlg(val: boolean) {
 //     });
 //   });
 // }
+const tabType1 = ref(0);
+const agendaData2: any = ref([]);
+watch(
+  tabType1,
+  () => {
+    if (tabType1.value === 1) {
+      agendaData2.value = scheduleData.value.content.slice(1);
+    } else {
+      agendaData2.value = scheduleData.value.content.slice(0, 1);
+    }
+  },
+  {
+    immediate: true,
+  }
+);
+
 onMounted(() => {
   // handleGetPageData();
 });
@@ -287,70 +324,96 @@ onMounted(() => {
 
 <template>
   <div class="schedule" :class="isEditStyle ? 'is-edit' : ''">
-    <h4 class="meeting-title">
+    <!-- <h4 class="meeting-title">
       <el-input
         v-model="scheduleData.title"
         :readonly="!isEditStyle"
         type="text"
+        @blur="savePageData()"
       />
-    </h4>
+    </h4> -->
     <el-tabs
-      v-if="scheduleData.content?.length >= 2"
-      v-model.number="tabType"
+      v-if="scheduleName === 'schedule'"
+      v-model.number="tabType1"
       class="schedule-tabs"
-      @keydown.capture.stop
-      @tab-click="tabClick"
     >
-      <template v-if="scheduleData.content?.length >= 2">
-        <el-tab-pane
-          v-for="(itemList, index) in scheduleData.content"
-          :key="itemList.id"
-          :name="index"
-        >
-          <template #label>
-            <div class="one-level-tabs">
-              <el-input
-                v-model="itemList.lable"
-                :readonly="!isEditStyle"
-                type="text"
-              />
-
-              <!-- <span
-                v-show="isEditStyle"
-                class="icon-del del-title"
-                @click.stop="delSubtitle(index)"
-              ></span> -->
-            </div>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane v-if="isEditStyle">
-          <template #label>
-            <!-- <OIcon
-              class="icon-add"
-              :class="scheduleData.content?.length >= 2 ? 'margin-left' : ''"
-              @click.stop="addSubtitle"
-            >
-              <IconAdd />
-            </OIcon> -->
-          </template>
-        </el-tab-pane>
-      </template>
+      <el-tab-pane :name="0">
+        <template #label>
+          <div class="one-level-tabs">
+            <!-- <el-input
+              v-model="itemList.lable"
+              :readonly="!isEditStyle"
+              type="text"
+              @blur="savePageData()"
+            /> -->
+            上午
+            <!-- <span
+              v-show="isEditStyle"
+              class="icon-del del-title"
+              @click.stop="delSubtitle(index)"
+            ></span> -->
+          </div>
+        </template>
+      </el-tab-pane>
+      <el-tab-pane :name="1">
+        <template #label>
+          <div class="one-level-tabs">
+            <!-- <el-input
+              v-model="itemList.lable"
+              :readonly="!isEditStyle"
+              type="text"
+              @blur="savePageData()"
+            /> -->
+            下午
+            <!-- <span
+              v-show="isEditStyle"
+              class="icon-del del-title"
+              @click.stop="delSubtitle(index)"
+            ></span> -->
+          </div>
+        </template>
+      </el-tab-pane>
+      <!-- <el-tab-pane v-if="isEditStyle">
+        <template #label>
+          <OIcon
+            class="icon-add"
+            :class="scheduleData.content?.length >= 2 ? 'margin-left' : ''"
+            @click.stop="addSubtitle"
+          >
+            <IconAdd />
+          </OIcon>
+        </template>
+      </el-tab-pane> -->
     </el-tabs>
     <el-container
-      :class="scheduleData.content?.length >= 2 ? '' : 'margin-top'"
+      v-for="(scheduleItem, index) in scheduleData.content"
+      :key="scheduleItem.id"
       :level-index="1"
     >
       <template
-        v-for="(scheduleItem, index) in scheduleData.content"
-        :key="scheduleItem.id"
+        v-if="
+          scheduleName === 'schedule'
+            ? tabType1 === 0
+              ? index === 0
+              : index !== 0
+            : true
+        "
       >
+        <div v-if="scheduleName === 'schedule'" class="schedule-title">
+          <el-input
+            v-model="scheduleItem.lable"
+            :readonly="!isEditStyle"
+            type="text"
+          />
+        </div>
         <div
-          v-if="tabType == index && scheduleItem?.content[0].content"
+          v-if="scheduleItem?.content[0].content"
           class="schedule-item other"
+          @click.capture="tabType = index"
         >
           <el-tabs
             v-if="isEditStyle || scheduleItem.content[1]"
-            v-model.number="otherTabType"
+            v-model.number="otherTabType[index]"
             class="other-tabs"
           >
             <template v-if="scheduleItem.content[1]">
@@ -363,6 +426,7 @@ onMounted(() => {
                   <div v-show="isEditStyle" class="time-tabs">
                     <el-input
                       v-model="itemList.name"
+                      :placeholder="isEditStyle ? '输入分论坛名称' : ''"
                       :readonly="!isEditStyle"
                       type="text"
                     />
@@ -371,7 +435,8 @@ onMounted(() => {
                       v-show="isEditStyle"
                       class="icon-del del-title"
                       @click.stop="delSubtitle2(scheduleIndex)"
-                    ></span>
+                      ><span class="tip">删除此论坛</span></span
+                    >
                   </div>
                   <span v-show="!isEditStyle" class="previve-tab">{{
                     itemList.name
@@ -384,10 +449,11 @@ onMounted(() => {
               <template #label>
                 <OIcon
                   class="icon-add"
-                  :class="scheduleItem.content.length ? 'margin-left' : ''"
+                  :class="scheduleItem.content.length >= 2 ? 'margin-left' : ''"
                   @click.stop="addSubtitle2"
                 >
                   <IconAdd />
+                  <span class="tip">新增分论坛标题</span>
                 </OIcon>
               </template>
             </el-tab-pane>
@@ -397,13 +463,12 @@ onMounted(() => {
             :key="itemList.id"
             class="content"
           >
-            <template v-if="tabType == index && otherTabType == listIndex">
+            <template v-if="otherTabType[index] === listIndex">
               <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
               <el-input
                 v-model="itemList.title"
                 :readonly="!isEditStyle"
                 type="text"
-                
               />
             </h4> -->
               <div class="content-list">
@@ -430,15 +495,9 @@ onMounted(() => {
                     <!-- {{ subItem.time }} -->
                     <IconTime />
                     <el-input
-                      v-model="subItem.time[0]"
+                      v-model="subItem.time"
                       class="el-input-time"
-                      :readonly="!isEditStyle"
-                      type="text"
-                    />
-                    -
-                    <el-input
-                      v-model="subItem.time[1]"
-                      class="el-input-time"
+                      :placeholder="isEditStyle ? '输入时间' : ''"
                       :readonly="!isEditStyle"
                       type="text"
                     />
@@ -456,8 +515,9 @@ onMounted(() => {
                     <el-input
                       v-model="subItem.desc"
                       :readonly="!isEditStyle"
-                      :autosize="{ minRows: 1, maxRows: 10 }"
+                      :autosize="{ minRows: 1, maxRows: 15 }"
                       maxlength="100"
+                      :placeholder="isEditStyle ? '输入议程内容' : ''"
                       type="textarea"
                     />
                     <OIcon
@@ -479,7 +539,7 @@ onMounted(() => {
                         <el-input
                           v-model="personItem.name"
                           :readonly="!isEditStyle"
-                          placeholder="输入名称"
+                          :placeholder="isEditStyle ? '嘉宾名称' : ''"
                           type="text"
                         />
                       </span>
@@ -488,10 +548,16 @@ onMounted(() => {
                         <el-input
                           :id="`textarea${personIndex}`"
                           v-model="personItem.post"
+                          :class="!personItem.post ? 'empty' : ''"
                           :readonly="!isEditStyle"
                           :autosize="{ minRows: 1, maxRows: 10 }"
                           maxlength="100"
                           type="textarea"
+                          :placeholder="
+                            isEditStyle
+                              ? '嘉宾头衔（只有一列信息请填这里）'
+                              : ''
+                          "
                         />
                       </span>
                       <span
@@ -547,7 +613,8 @@ onMounted(() => {
                     v-if="isEditStyle"
                     class="icon-del del-content"
                     @click="delContent(subIndex)"
-                  ></span>
+                    ><span class="tip">删除此行</span></span
+                  >
                 </div>
               </div>
               <OIcon
@@ -556,6 +623,7 @@ onMounted(() => {
                 @click="addContent"
               >
                 <IconAdd />
+                <span class="tip">新增一行内容</span>
               </OIcon>
             </template>
           </div>
@@ -575,7 +643,7 @@ onMounted(() => {
     </template>
     <div class="line-input">
       <span class="label">议题名称</span>
-      <el-input readonly v-model="dialogTopicTitle"></el-input>
+      <el-input v-model="dialogTopicTitle" readonly></el-input>
     </div>
     <div class="line-input">
       <span class="label">议题简介</span>
@@ -640,10 +708,10 @@ onMounted(() => {
       >
     </template>
   </el-dialog>
-  <div v-show="isEditStyle" class="contoral-box">
+  <!-- <div v-show="isEditStyle" class="contoral-box">
     <o-button size="small" type="primary" @click="savePageData">保存</o-button>
-    <!-- <o-button @click="createNewPage">保存</o-button> -->
-  </div>
+    <o-button @click="createNewPage">保存</o-button>
+  </div> -->
 </template>
 
 <style lang="scss" scoped>
@@ -710,7 +778,20 @@ onMounted(() => {
     }
   }
   .el-container {
-    box-shadow: var(--o-shadow-1);
+    display: flex;
+    flex-direction: column;
+    .schedule-item {
+      box-shadow: var(--o-shadow-1);
+    }
+    .schedule-title {
+      margin: 32px 0 0;
+      :deep(.el-input) {
+        .el-input__inner {
+          font-size: 20px;
+          text-align: center;
+        }
+      }
+    }
   }
   :deep(.el-tabs) {
     .el-tabs__header.is-top .el-tabs__item.is-top {
@@ -720,8 +801,9 @@ onMounted(() => {
   .schedule-tabs {
     position: relative;
     text-align: center;
-    margin-top: 24px;
+    margin-top: 32px;
     :deep(.el-tabs__content) {
+      margin-top: 0;
       overflow: visible;
       .el-button {
         position: absolute;
@@ -764,33 +846,39 @@ onMounted(() => {
 
     .one-level-tabs {
       position: relative;
-      width: 250px;
+      width: 160px;
+      height: 40px;
       background: var(--o-color-bg2);
       border-color: var(--o-color-primary2);
-      :deep(.el-input) {
-        cursor: pointer;
-        .el-input__inner {
-          cursor: pointer;
-          width: min-content;
-          color: var(--o-color-text1);
-          text-align: center;
-        }
-      }
-      .del-title {
-        left: inherit;
-        width: 16px;
-        height: 16px;
-        right: -8px;
-        top: -14px;
-        transform: none;
-        &::after {
-          height: 2px;
-          width: calc(100% - 6px);
-        }
-      }
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--o-font-size-text);
+      // :deep(.el-input) {
+      //   cursor: pointer;
+      //   .el-input__inner {
+      //     cursor: pointer;
+      //     width: min-content;
+      //     color: var(--o-color-text1);
+      //     text-align: center;
+      //   }
+      // }
+      // .del-title {
+      //   left: inherit;
+      //   width: 16px;
+      //   height: 16px;
+      //   right: -8px;
+      //   top: -14px;
+      //   transform: none;
+      //   &::after {
+      //     height: 2px;
+      //     width: calc(100% - 6px);
+      //   }
+      // }
     }
     .is-active {
       .one-level-tabs {
+        color: var(--o-color-text2);
         background: var(--o-color-primary1);
         :deep(.el-input) {
           .el-input__inner {
@@ -803,6 +891,7 @@ onMounted(() => {
     }
   }
   .schedule-item {
+    margin-top: 32px;
     width: 100%;
     padding: 24px;
     background-color: var(--o-color-bg2);
@@ -847,15 +936,17 @@ onMounted(() => {
               overflow: visible;
             }
           }
-          .el-tabs__item {
+          .el-tabs__item:not(:last-child) {
             margin-right: 20px;
 
-            .previve-tab {
-              font-size: var(--o-font-size-tip);
-            }
             @media (max-width: 1100px) {
               font-size: 12px;
               line-height: 18px;
+            }
+          }
+          .el-tabs__item {
+            .previve-tab {
+              font-size: var(--o-font-size-tip);
             }
           }
         }
@@ -952,11 +1043,21 @@ onMounted(() => {
     position: relative;
     border: 1px solid transparent;
     transition: all 0.3s;
+    min-height: 36px;
     :deep(.el-input) {
       .el-input__inner {
         color: #707070;
       }
     }
+    &:not(:hover) .empty {
+      display: none;
+    }
+    .empty {
+      textarea {
+        font-size: 14px;
+      }
+    }
+
     &:hover {
       border: 1px solid var(--o-color-brand1);
       box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
@@ -967,8 +1068,8 @@ onMounted(() => {
     &:focus-within {
       border: 1px solid var(--o-color-brand1);
       box-shadow: none;
-      .name {
-        border-right: 1px solid var(--o-color-brand1);
+      .post {
+        border-left: 1px solid var(--o-color-brand1);
       }
     }
   }
@@ -1008,6 +1109,25 @@ onMounted(() => {
   border: 1px solid #e02020;
 
   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+  &:hover {
+    .tip {
+      display: block;
+    }
+  }
+  .tip {
+    line-height: var(--o-font-size-tip);
+    display: none;
+    position: absolute;
+    transform: translate(100%, -50%);
+    color: #555;
+    width: max-content;
+    right: -8px;
+    top: 50%;
+    font-size: var(--o-font-size-tip);
+    padding: 4px 8px;
+    background-color: var(--o-color-bg2);
+    box-shadow: var(--o-shadow-1);
+  }
   &::after {
     content: '';
     position: absolute;
@@ -1021,6 +1141,7 @@ onMounted(() => {
   }
 }
 .icon-add {
+  position: relative;
   margin: 0 auto;
   cursor: pointer;
   width: 24px;
@@ -1033,6 +1154,24 @@ onMounted(() => {
   border: 1px solid var(--o-color-brand1);
   color: var(--o-color-brand1);
   box-shadow: 0px 4px 16px 0px rgba(45, 47, 51, 0.32);
+  &:hover {
+    .tip {
+      display: block;
+    }
+  }
+  .tip {
+    display: none;
+    position: absolute;
+    transform: translate(100%, -50%);
+    color: #555;
+    width: max-content;
+    right: -8px;
+    top: 50%;
+    font-size: var(--o-font-size-tip);
+    padding: 4px 8px;
+    background-color: var(--o-color-bg2);
+    box-shadow: var(--o-shadow-1);
+  }
 }
 .margin-left {
   margin-left: 40px;
@@ -1049,13 +1188,16 @@ onMounted(() => {
   }
   .content-item {
     display: grid;
+    min-height: 92px;
     grid-template-columns: 192px 580px 400px;
     padding: 20px 0;
     transition: all 0.25s ease;
     align-items: center;
-    min-height: 64px;
+    // min-height: 64px;
     position: relative;
-    border-bottom: 1px solid var(--o-color-border2);
+    & + .content-item {
+      border-top: 1px solid var(--o-color-border2);
+    }
 
     @media screen and (max-width: 1328px) {
       grid-template-columns: 192px 450px 400px;
@@ -1172,10 +1314,11 @@ onMounted(() => {
       :deep(.el-textarea) {
         textarea {
           resize: none;
-          min-height: 38px !important;
+          min-height: 45px !important;
           padding: 8px 14px !important;
           cursor: text;
           padding: 0;
+          font-size: var(--o-font-size-h7);
           box-shadow: none;
           border: 1px solid transparent;
           resize: none;
@@ -1208,7 +1351,8 @@ onMounted(() => {
     }
 
     .name {
-      width: 100px;
+      width: 120px;
+      height: 100%;
       display: inline-block;
       color: var(--o-color-text3);
       font-size: 16px;
@@ -1217,7 +1361,11 @@ onMounted(() => {
         box-shadow: none;
         border: 1px solid transparent;
         .el-input__inner {
-          color: var(--o-color-text4);
+          &::-webkit-input-placeholder {
+            font-size: 14px;
+          }
+          font-size: var(--o-font-size-h7);
+          color: var(--o-color-text3);
         }
       }
       @media (max-width: 1100px) {
@@ -1234,14 +1382,20 @@ onMounted(() => {
       flex: 1;
       border-left: 1px solid transparent;
       transition: all 0.3s;
+
       :deep(.el-textarea) {
         textarea {
+          &::-webkit-input-placeholder {
+            font-size: 14px;
+            line-height: var(--o-line-height-h7);
+          }
           resize: none;
-          min-height: 38px !important;
-          padding: 8px 14px !important;
+          min-height: 45px !important;
+          padding: 10px 14px !important;
           cursor: text;
           padding: 0;
-          color: var(--o-color-text4);
+          font-size: var(--o-font-size-h7);
+          color: var(--o-color-text3);
           box-shadow: none;
           border: 1px solid transparent;
           resize: none;
@@ -1278,19 +1432,20 @@ onMounted(() => {
       svg {
         width: 18px;
         height: 18px;
-        color: var(--o-color-text4);
+        color: var(--o-color-text3);
         margin-right: 6px;
         @media screen and (max-width: 1100px) {
           display: none;
         }
       }
       .el-input-time {
-        width: 40px;
+        width: 100px;
         text-align: center;
         :deep(.el-input__wrapper) {
           padding: 0;
           .el-input__inner {
-            color: var(--o-color-text4);
+            font-size: var(--o-font-size-h8);
+            color: var(--o-color-text3);
           }
         }
       }
