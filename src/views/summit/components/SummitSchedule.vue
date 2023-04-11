@@ -669,7 +669,7 @@ onUnmounted(() => {
       <el-input
         v-model="dialogTopicContnet"
         type="textarea"
-        maxlength="300"
+        maxlength="500"
         show-word-limit
         :autosize="{ minRows: 12, maxRows: 20 }"
       ></el-input>
