@@ -26,9 +26,9 @@ export default (err: AxiosError) => {
           // 清除过期token
           // tokenFailIndicateLogin();
           err.message = '您的账号信息已过期，请重新登陆';
-          router.push({
-            path: '/zh/login',
-          });
+          // router.push({
+          //   path: '/zh/login',
+          // });
         } else if (res.includes('java.net.SocketTimeoutException')) {
         } else {
           err.message = '未授权，或无访问权限(401)';

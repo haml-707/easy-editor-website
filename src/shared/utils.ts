@@ -178,14 +178,14 @@ export function isUserActive(active: any, unActive: any) {
 
   function resetTimer() {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(unActiveCallback, 20 * 60 * 1000);
+    timeoutId = setTimeout(unActiveCallback, 15 * 60 * 1000);
   }
 
   function activeCallback() {
     if (timeoutId && !intervalTimeoutId) {
       intervalTimeoutId = setInterval(() => {
         active();
-      }, 20 * 60 * 1000);
+      }, 15 * 60 * 1000);
     }
     resetTimer();
   }
