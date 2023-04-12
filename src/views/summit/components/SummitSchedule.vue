@@ -286,11 +286,11 @@ watch(
   (val) => {
     if (val) {
       savePageData();
+      clearInterval(timer);
+    } else {
       timer = setInterval(() => {
         savePageData();
       }, 10 * 60 * 1000);
-    } else {
-      clearInterval(timer);
     }
   }
 );
@@ -346,15 +346,6 @@ onBeforeRouteLeave((to, from, next) => {
   if (!modeType.value) {
     savePageData();
     next();
-    // if (
-    //   confirm(
-    //     '编辑模式直接退出可能导致编辑内容丢失,切换至预览模式可保存,是否确认离开？'
-    //   )
-    // ) {
-    //   next();
-    // } else {
-    //   next(false);
-    // }
   } else {
     next();
   }

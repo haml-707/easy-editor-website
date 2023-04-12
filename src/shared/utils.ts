@@ -178,8 +178,7 @@ export function isUserActive(active: any, unActive: any) {
 
   function resetTimer() {
     clearTimeout(timeoutId);
-
-    timeoutId = setTimeout(inactiveCallback, 20 * 60 * 1000);
+    timeoutId = setTimeout(unActiveCallback, 20 * 60 * 1000);
   }
 
   function activeCallback() {
@@ -191,7 +190,7 @@ export function isUserActive(active: any, unActive: any) {
     resetTimer();
   }
 
-  function inactiveCallback() {
+  function unActiveCallback() {
     clearInterval(intervalTimeoutId);
     window.removeEventListener('mousemove', activeCallback);
     unActive();

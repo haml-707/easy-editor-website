@@ -15,7 +15,7 @@ import { router } from './routers';
 import { ElMessage } from 'element-plus';
 
 refreshInfo();
-isUserActive(refreshInfo, tiemOutlogin);
+isUserActive(refreshInfo, tiemOutloginOut);
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -27,11 +27,11 @@ const isPreviewMode = ref<boolean>(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
 }
-function tiemOutlogin() {
+function tiemOutloginOut() {
   tokenFailIndicateLogin();
-  router.push('/zh/404');
+  router.push('/zh/login');
   ElMessage({
-    message: '长时间未操作页面，自动退出',
+    message: '长时间未操作页面，自动退出登陆',
     type: 'warning',
   });
 }
