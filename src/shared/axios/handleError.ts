@@ -1,6 +1,6 @@
 import type { AxiosError } from 'axios';
 import { router } from '@/routers';
-import { tokenFailIndicateLogin } from '@/shared/login';
+// import { tokenFailIndicateLogin } from '@/shared/login';
 
 export default (err: AxiosError) => {
   const { response } = err;
@@ -21,10 +21,10 @@ export default (err: AxiosError) => {
       case 401:
         if (
           res === 'authentication failed: token expires' ||
-          res?.message === 'token expires'
+          res?.message.includes('token expires')
         ) {
           // 清除过期token
-          tokenFailIndicateLogin();
+          // tokenFailIndicateLogin();
           err.message = '您的账号信息已过期，请重新登陆';
           router.push({
             path: '/zh/login',
