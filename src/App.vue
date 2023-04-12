@@ -9,9 +9,14 @@ import { useLangStore } from '@/stores';
 import EditHeader from '@/views/edit/EditHeader.vue';
 import EditFooter from '@/views/edit/EditFooter.vue';
 import EditTextTitle from '@/views/edit/EditTextTitle.vue';
-import { refreshInfo } from '@/shared/login';
+import { refreshInfo, tokenFailIndicateLogin } from '@/shared/login';
+import { isUserActive } from '@/shared/utils';
+import { router } from './routers';
+import { ElMessage } from 'element-plus';
 
 refreshInfo();
+isUserActive(refreshInfo, tiemOutloginOut);
+
 const { t, locale } = useI18n();
 const route = useRoute();
 const langStore = useLangStore();
@@ -21,6 +26,14 @@ const isEditPage = computed(() => {
 const isPreviewMode = ref<boolean>(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
+}
+function tiemOutloginOut() {
+  tokenFailIndicateLogin();
+  router.push('/zh/login');
+  ElMessage({
+    message: '长时间未操作页面，自动退出登陆',
+    type: 'warning',
+  });
 }
 provide('modeType', isPreviewMode);
 watch(

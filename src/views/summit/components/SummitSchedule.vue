@@ -2,8 +2,9 @@
 import { ref, onUnmounted, Ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import { onBeforeRouteLeave } from 'vue-router';
 // import { getPageData } from '@/api/api-easy-edit';
-import { modifyFloorData } from '@/api/api-easy-edit';
+import { modifyFloorData, getSingleFloorData } from '@/api/api-easy-edit';
 
 import data from '@/data';
 
@@ -199,7 +200,10 @@ function confirmDelContent() {
   toggleDelDlg(false);
 }
 function confirmDelTab() {
-  if (delIndex.value === 0) {
+  if (
+    delIndex.value === 0 &&
+    scheduleData.value.content[tabType.value].content.length === 1
+  ) {
     scheduleData.value.content[tabType.value].content = [];
   } else {
     scheduleData.value.content[tabType.value].content.splice(delIndex.value, 1);
@@ -245,18 +249,22 @@ function addSubtitle2() {
 }
 // 保持页面数据
 function savePageData() {
+  // if (props.scheduleName === 'schedule') {
+  //   param.content = data.content;
+  // } else {
+  //   param.content = data.content1;
+  // }
   param.content = JSON.stringify(scheduleData.value);
   modifyFloorData(param)
     .then((res: { statusCode: number }) => {
       if (res?.statusCode !== 200) {
         // 修改出错内容回显
-        // getSingleFloorData(param.path, param.name).then((res: any) => {
-        //   param.content = res?.data?.content;
-        //   param.title = res?.data?.title;
-        //   usePageData().pageData.set(param.name, param);
-        // });
+        getSingleFloorData(param.path, param.name).then((res: any) => {
+          param.content = res?.data?.content;
+          param.title = res?.data?.title;
+          usePageData().pageData.set(param.name, param);
+        });
       } else {
-        clearInterval(timer);
         // ElMessage({
         //   type: 'success',
         //   message: '保持成功',
@@ -269,16 +277,20 @@ function savePageData() {
 }
 let timer: TimerType;
 
+timer = setInterval(() => {
+  savePageData();
+}, 10 * 60 * 1000);
+
 watch(
   () => modeType.value,
   (val) => {
     if (val) {
       savePageData();
+      clearInterval(timer);
+    } else {
       timer = setInterval(() => {
         savePageData();
       }, 10 * 60 * 1000);
-    } else {
-      clearInterval(timer);
     }
   }
 );
@@ -330,10 +342,17 @@ watch(
     immediate: true,
   }
 );
-
+onBeforeRouteLeave((to, from, next) => {
+  if (!modeType.value) {
+    savePageData();
+    next();
+  } else {
+    next();
+  }
+});
 onUnmounted(() => {
   clearInterval(timer);
-  // handleGetPageData();
+  // window.removeEventListener('mousemove');
 });
 </script>
 
@@ -669,7 +688,7 @@ onUnmounted(() => {
       <el-input
         v-model="dialogTopicContnet"
         type="textarea"
-        maxlength="300"
+        maxlength="500"
         show-word-limit
         :autosize="{ minRows: 12, maxRows: 20 }"
       ></el-input>

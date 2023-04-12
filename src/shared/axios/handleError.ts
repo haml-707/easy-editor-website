@@ -39,9 +39,7 @@ export default (err: AxiosError) => {
         break;
       case 403:
         err.message =
-          `${res?.message} <br> ${res?.data}` ||
-          res?.message ||
-          '拒绝访问(403)';
+          `${res?.message}\n ${res?.data}` || res?.message || '拒绝访问(403)';
         break;
       case 404:
         err.message = '请求出错(404)';
