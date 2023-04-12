@@ -178,7 +178,7 @@ export function isUserActive(active: any, unActive: any) {
 
   function resetTimer() {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(unActiveCallback, 15 * 60 * 1000);
+    timeoutId = setTimeout(unActiveCallback, 30 * 60 * 1000);
   }
 
   function activeCallback() {
