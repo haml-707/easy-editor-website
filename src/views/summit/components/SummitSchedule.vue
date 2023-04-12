@@ -2,6 +2,7 @@
 import { ref, onUnmounted, Ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import { onBeforeRouteLeave } from 'vue-router';
 // import { getPageData } from '@/api/api-easy-edit';
 import { modifyFloorData, getSingleFloorData } from '@/api/api-easy-edit';
 
@@ -341,10 +342,26 @@ watch(
     immediate: true,
   }
 );
-
+onBeforeRouteLeave((to, from, next) => {
+  if (!modeType.value) {
+    savePageData();
+    next();
+    // if (
+    //   confirm(
+    //     '编辑模式直接退出可能导致编辑内容丢失,切换至预览模式可保存,是否确认离开？'
+    //   )
+    // ) {
+    //   next();
+    // } else {
+    //   next(false);
+    // }
+  } else {
+    next();
+  }
+});
 onUnmounted(() => {
   clearInterval(timer);
-  // handleGetPageData();
+  // window.removeEventListener('mousemove');
 });
 </script>
 

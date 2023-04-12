@@ -1,4 +1,6 @@
 import { Ref } from 'vue';
+export type TimerType = NodeJS.Timeout;
+
 // 格式化数字
 export function formatNumber(num: number) {
   return num >= 1e3 && num < 1e4
@@ -168,4 +170,33 @@ export function guardFunc(bool: boolean, guard: Ref<boolean>) {
       return false;
     }
   }
+}
+
+export function isUserActive(active: any, unActive: any) {
+  let timeoutId: TimerType;
+  let intervalTimeoutId: TimerType;
+
+  function resetTimer() {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(inactiveCallback, 20 * 60 * 1000);
+  }
+
+  function activeCallback() {
+    if (timeoutId && !intervalTimeoutId) {
+      intervalTimeoutId = setInterval(() => {
+        active();
+      }, 20 * 60 * 1000);
+    }
+    resetTimer();
+  }
+
+  function inactiveCallback() {
+    clearInterval(intervalTimeoutId);
+    window.removeEventListener('mousemove', activeCallback);
+    unActive();
+  }
+
+  window.addEventListener('mousemove', activeCallback);
+  resetTimer();
 }
