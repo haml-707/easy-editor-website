@@ -126,11 +126,11 @@ export function setStoreData(community = 'openeuler') {
 }
 
 // 刷新后重新请求登录用户信息
-export function refreshInfo(community = 'openeuler') {
+export async function refreshInfo(community = 'openeuler') {
   const { token } = getUserAuth();
   if (token) {
     const { guardAuthClient } = useStoreData();
-    queryPermission({ community }).then((res) => {
+    await queryPermission({ community }).then((res) => {
       const { data } = res;
       if (Object.prototype.toString.call(data) === '[object Object]') {
         guardAuthClient.value = data;

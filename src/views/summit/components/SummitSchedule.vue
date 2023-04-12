@@ -279,7 +279,7 @@ let timer: TimerType;
 
 timer = setInterval(() => {
   savePageData();
-}, 10 * 60 * 1000);
+}, 8 * 60 * 1000);
 
 watch(
   () => modeType.value,
@@ -290,7 +290,7 @@ watch(
     } else {
       timer = setInterval(() => {
         savePageData();
-      }, 10 * 60 * 1000);
+      }, 8 * 60 * 1000);
     }
   }
 );
