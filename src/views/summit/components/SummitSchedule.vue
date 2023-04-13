@@ -446,7 +446,10 @@ onUnmounted(() => {
           @click.capture="tabType = index"
         >
           <el-tabs
-            v-if="isEditStyle || scheduleItem.content.length"
+            v-if="
+              isEditStyle ||
+              (scheduleItem.content.length && scheduleItem.content[0].name)
+            "
             v-model.number="otherTabType[index]"
             class="other-tabs"
             :class="scheduleItem.content.length === 1 ? 'no-bar' : ''"
