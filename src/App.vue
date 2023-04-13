@@ -29,10 +29,15 @@ function getModeType(val: boolean) {
 }
 function tiemOutloginOut() {
   tokenFailIndicateLogin();
-  router.push('/zh/login');
+  router.push({
+    path: '/zh/login',
+    query: { redirect: route.fullPath },
+  });
   ElMessage({
     message: '长时间未操作页面，自动退出登陆',
     type: 'warning',
+    showClose: true,
+    duration: 0,
   });
 }
 provide('modeType', isPreviewMode);
