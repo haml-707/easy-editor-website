@@ -822,7 +822,7 @@ onUnmounted(() => {
       box-shadow: var(--o-shadow-1);
     }
     .schedule-title {
-      margin: 9px 0 0;
+      margin-top: 32px;
       :deep(.el-input) {
         .el-input__inner {
           font-size: 20px;
@@ -840,6 +840,9 @@ onUnmounted(() => {
     position: relative;
     text-align: center;
     margin-top: 32px;
+    :deep(.el-tabs__header.is-top) {
+      margin: 0;
+    }
     :deep(.el-tabs__content) {
       margin-top: 0;
       overflow: visible;

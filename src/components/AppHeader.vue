@@ -30,7 +30,7 @@ const jumpToUserZone = () => {
   <header class="app-header">
     <div class="wrap">
       <div class="header-logo">
-        <router-link to="/zh/">EasyEdit</router-link>
+        <router-link to="/zh/">EasyEditor</router-link>
         <span class="line"></span>
         <a target="_blank" :href="`https://www.openeuler.org/${lang}/`"
           ><img class="community-logo" :src="communityLogoWhite"
