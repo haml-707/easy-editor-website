@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, onUnmounted, Ref, inject, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import draggable from 'vuedraggable';
 
 import { onBeforeRouteLeave } from 'vue-router';
 // import { getPageData } from '@/api/api-easy-edit';
@@ -193,12 +194,14 @@ function delPersonData(subIndex: number, personIndex: number) {
     ].content[subIndex].person.splice(personIndex, 1);
   }
 }
+// 确认删除一行
 function confirmDelContent() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value[tabType.value]
   ].content.splice(delIndex.value, 1);
   toggleDelDlg(false);
 }
+// 确认删除分论坛标题
 function confirmDelTab() {
   if (
     delIndex.value === 0 &&
@@ -247,7 +250,7 @@ function addSubtitle2() {
   const index = scheduleData.value.content[tabType.value].content.length;
   otherTabType.value[tabType.value] = index === 0 ? 0 : index - 1;
 }
-// 保持页面数据
+// 保存页面数据
 function savePageData() {
   // if (props.scheduleName === 'schedule') {
   //   param.content = data.content;
@@ -264,11 +267,6 @@ function savePageData() {
           param.title = res?.data?.title;
           usePageData().pageData.set(param.name, param);
         });
-      } else {
-        // ElMessage({
-        //   type: 'success',
-        //   message: '保持成功',
-        // });
       }
     })
     .catch((err) => {
@@ -277,6 +275,7 @@ function savePageData() {
 }
 let timer: TimerType;
 
+// 定时保持页面
 timer = setInterval(() => {
   savePageData();
 }, 8 * 60 * 1000);
@@ -297,6 +296,7 @@ watch(
 function toggleDelDlg(val: boolean) {
   delRowDialogVisiable.value = val;
 }
+// 议程详情
 function toggleAgendaDlg(val: boolean, listIndex?: number) {
   if (listIndex || listIndex === 0) {
     const targetData =
@@ -309,6 +309,7 @@ function toggleAgendaDlg(val: boolean, listIndex?: number) {
   }
   agendaDialogVisiable.value = val;
 }
+// 确认保持议程详情
 function confirmSaveAgenda() {
   scheduleData.value.content[tabType.value].content[
     otherTabType.value[tabType.value]
@@ -328,7 +329,7 @@ function toggleDelTabDlg(val: boolean) {
 //   });
 // }
 const tabType1 = ref(0);
-const agendaData2: any = ref([]);
+const agendaData2 = ref([]);
 watch(
   tabType1,
   () => {
@@ -352,7 +353,6 @@ onBeforeRouteLeave((to, from, next) => {
 });
 onUnmounted(() => {
   clearInterval(timer);
-  // window.removeEventListener('mousemove');
 });
 </script>
 
@@ -512,127 +512,126 @@ onUnmounted(() => {
               />
             </h4> -->
               <div class="content-list">
-                <div
-                  v-for="(subItem, subIndex) in itemList.content"
-                  :key="subItem.id"
-                  class="content-item"
-                  :class="{
-                    'show-detail':
-                      indexShow === subIndex && idShow === listIndex,
-                  }"
+                <draggable
+                  :list="itemList?.content"
+                  ghost-class="ghost"
+                  item-key="id"
+                  chosen-class="chosen-class"
+                  animation="300"
+                  :disabled="!isEditStyle"
                 >
-                  <span class="time">
-                    <!-- <el-time-picker
-                    v-model="subItem.time"
-                    is-range
-                    value-format="HH:mm"
-                    :readonly="!isEditStyle"
-                    format="HH:mm"
-                    start-placeholder="Start"
-                    end-placeholder="End"
-                    @change="handleClose"
-                  /> -->
-                    <!-- {{ subItem.time }} -->
-                    <IconTime />
-                    <el-input
-                      v-model="subItem.time"
-                      class="el-input-time"
-                      :placeholder="isEditStyle ? '输入时间' : ''"
-                      :readonly="!isEditStyle"
-                      type="text"
-                    />
-                    <!-- {{ subItem.time[0] + '-' + subItem.time[1] }} -->
-                  </span>
-                  <span
-                    class="desc"
-                    :class="{ 'exit-detail': subItem.detail[0] }"
-                    @click="
-                      !isEditStyle
-                        ? changeIndexShow(listIndex, subIndex as any)
-                        : ''
-                    "
-                  >
-                    <el-input
-                      v-model="subItem.desc"
-                      :readonly="!isEditStyle"
-                      :autosize="{ minRows: 1, maxRows: 15 }"
-                      maxlength="100"
-                      :placeholder="isEditStyle ? '输入议程标题' : ''"
-                      type="textarea"
-                    />
-                    <OIcon
-                      v-show="isEditStyle"
-                      class="icon-add"
-                      @click="toggleAgendaDlg(true, subIndex)"
-                    >
-                      <IconLinkDefault v-if="!subItem.detail" />
-                      <IconLinkFilled v-else />
-                      <div class="tip">附加议程简介</div>
-                    </OIcon>
-                  </span>
-                  <div v-if="subItem.person[0]" class="name-box">
+                  <template #item="{ element, subIndex }">
                     <div
-                      v-for="(personItem, personIndex) in subItem.person"
-                      :key="personItem.id"
-                      class="name-item"
+                      class="content-item"
+                      :class="[
+                        {
+                          'show-detail':
+                            indexShow === subIndex && idShow === listIndex,
+                        },
+                        isEditStyle ? 'move' : '',
+                      ]"
                     >
-                      <span v-show="personItem.name" class="name">
+                      <span class="time">
+                        <IconTime />
                         <el-input
-                          v-model="personItem.name"
+                          v-model="element.time"
+                          class="el-input-time"
+                          :placeholder="isEditStyle ? '输入时间' : ''"
                           :readonly="!isEditStyle"
-                          :placeholder="isEditStyle ? '嘉宾名称' : ''"
                           type="text"
                         />
                       </span>
-                      <span class="post">
-                        <label :for="`textarea${personIndex}`"></label>
-                        <el-input
-                          :id="`textarea${personIndex}`"
-                          v-model="personItem.post"
-                          :class="!personItem.post ? 'empty' : ''"
-                          :readonly="!isEditStyle"
-                          :autosize="{ minRows: 1, maxRows: 10 }"
-                          maxlength="100"
-                          type="textarea"
-                          :placeholder="
-                            isEditStyle
-                              ? '嘉宾头衔（只有一列信息请填这里）'
-                              : ''
-                          "
-                        />
-                      </span>
                       <span
-                        v-show="isEditStyle"
-                        class="icon-del"
-                        @click="delPersonData(subIndex, personIndex)"
-                        ><span class="tip">删除附属信息</span></span
+                        class="desc"
+                        :class="{ 'exit-detail': element.detail[0] }"
+                        @click="
+                          !isEditStyle
+                            ? changeIndexShow(listIndex, subIndex as any)
+                            : ''
+                        "
                       >
-                    </div>
-                    <OIcon
-                      v-show="isEditStyle"
-                      class="icon-add"
-                      @click="addPersonData(subIndex)"
-                    >
-                      <span class="tip">新增附属信息</span>
-                      <IconAdd />
-                    </OIcon>
-                  </div>
-                  <div v-if="subItem.detail" class="detail">
-                    <p>
-                      <span>议题名称：</span><span> {{ subItem.desc }}</span>
-                    </p>
-                    <p v-if="subItem.detail">
-                      <span>议题简介：</span
-                      ><span
-                        ><span class="detail-text">
-                          {{ subItem.detail }}
-                        </span></span
-                      >
-                    </p>
-                    <!-- <p v-if="subItem.person[0]">
+                        <el-input
+                          v-model="element.desc"
+                          :readonly="!isEditStyle"
+                          :autosize="{ minRows: 1, maxRows: 15 }"
+                          maxlength="100"
+                          :placeholder="isEditStyle ? '输入议程标题' : ''"
+                          type="textarea"
+                        />
+                        <OIcon
+                          v-show="isEditStyle"
+                          class="icon-add"
+                          @click="toggleAgendaDlg(true, subIndex)"
+                        >
+                          <IconLinkDefault v-if="!element.detail" />
+                          <IconLinkFilled v-else />
+                          <div class="tip">附加议程简介</div>
+                        </OIcon>
+                      </span>
+                      <div v-if="element.person[0]" class="name-box">
+                        <div
+                          v-for="(personItem, personIndex) in element.person"
+                          :key="personItem.id"
+                          class="name-item"
+                        >
+                          <span v-show="personItem.name" class="name">
+                            <el-input
+                              v-model="personItem.name"
+                              :readonly="!isEditStyle"
+                              :placeholder="isEditStyle ? '嘉宾名称' : ''"
+                              type="text"
+                            />
+                          </span>
+                          <span class="post">
+                            <label :for="`textarea${personIndex}`"></label>
+                            <el-input
+                              :id="`textarea${personIndex}`"
+                              v-model="personItem.post"
+                              :class="!personItem.post ? 'empty' : ''"
+                              :readonly="!isEditStyle"
+                              :autosize="{ minRows: 1, maxRows: 10 }"
+                              maxlength="100"
+                              type="textarea"
+                              :placeholder="
+                                isEditStyle
+                                  ? '嘉宾头衔（只有一列信息请填这里）'
+                                  : ''
+                              "
+                            />
+                          </span>
+                          <span
+                            v-show="isEditStyle"
+                            class="icon-del"
+                            @click="delPersonData(subIndex, personIndex)"
+                            ><span class="tip">删除附属信息</span></span
+                          >
+                        </div>
+                        <OIcon
+                          v-show="isEditStyle"
+                          class="icon-add"
+                          @click="addPersonData(subIndex)"
+                        >
+                          <span class="tip">新增附属信息</span>
+                          <IconAdd />
+                        </OIcon>
+                      </div>
+                      <div v-if="element.detail" class="detail">
+                        <p>
+                          <span>议题名称：</span
+                          ><span> {{ element.desc }}</span>
+                        </p>
+                        <p v-if="element.detail">
+                          <span>议题简介：</span
+                          ><span
+                            ><span class="detail-text">
+                              {{ element.detail }}
+                            </span></span
+                          >
+                        </p>
+                        <!-- <p v-if="element.person[0]">
                     <span>发言人：</span>
                     <span
-                      v-for="personItem in subItem.person"
+                      v-for="personItem in element.person"
                       :key="personItem.id"
                       >{{ personItem.name }}
                       <template v-if="personItem.post[0]">
@@ -642,21 +641,25 @@ onUnmounted(() => {
                       </template>
                     </span>
                   </p> -->
-                  </div>
-                  <div
-                    v-show="
-                      indexShow !== -1 && subItem.detail && idShow === listIndex
-                    "
-                    class="mask"
-                    @click="changeIndexShow(-1, -1)"
-                  ></div>
-                  <span
-                    v-if="isEditStyle"
-                    class="icon-del del-content"
-                    @click="delContent(subIndex)"
-                    ><span class="tip">删除此行</span></span
-                  >
-                </div>
+                      </div>
+                      <div
+                        v-show="
+                          indexShow !== -1 &&
+                          element.detail &&
+                          idShow === listIndex
+                        "
+                        class="mask"
+                        @click="changeIndexShow(-1, -1)"
+                      ></div>
+                      <span
+                        v-if="isEditStyle"
+                        class="icon-del del-content"
+                        @click="delContent(subIndex)"
+                        ><span class="tip">删除此行</span></span
+                      >
+                    </div>
+                  </template>
+                </draggable>
               </div>
               <OIcon
                 v-if="isEditStyle"
@@ -760,6 +763,12 @@ onUnmounted(() => {
   color: #e02020;
 }
 
+.chosen-class {
+  background-color: var(--o-color-bg4);
+}
+.move {
+  cursor: move;
+}
 :deep(.el-input) {
   .el-input__wrapper {
     border: 1px solid transparent;
