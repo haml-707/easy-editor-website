@@ -104,25 +104,25 @@ const otherTabType = ref([0, 0, 0, 0, 0, 0, 0]);
 
 // function addSubtitle() {
 //   scheduleData.value.content.push({
-//     lable: '请输入论坛名称',
+//     lable: '',
 //     id: window.crypto.randomUUID(),
 //     content: [
 //       {
 //         id: window.crypto.randomUUID(),
-//         name: '填写标题',
+//         name: '',
 //         content: [
 //           {
 //             id: window.crypto.randomUUID(),
-//             time: ['14:00', '14:05'],
-//             desc: 'XXX领导致辞',
+//             time: ['', ''],
+//             desc: '',
 //             person: [
 //               {
 //                 id: window.crypto.randomUUID(),
-//                 name: '姓名',
+//                 name: '',
 //                 post: '',
 //               },
 //             ],
-//             detail: '描述',
+//             detail: '',
 //           },
 //         ],
 //       },
@@ -171,7 +171,7 @@ function addPersonData(index: number) {
   ].content[index].person.push({
     name: '',
     post: '',
-    id: '',
+    id: window.crypto.randomUUID(),
   });
 }
 // 删除附属信息
@@ -184,7 +184,7 @@ function delPersonData(subIndex: number, personIndex: number) {
     scheduleData.value.content[tabType.value].content[
       otherTabType.value[tabType.value]
     ].content[subIndex].person[0] = {
-      id: '',
+      id: window.crypto.randomUUID(),
       name: '',
       post: '',
     };
@@ -628,19 +628,6 @@ onUnmounted(() => {
                             </span></span
                           >
                         </p>
-                        <!-- <p v-if="element.person[0]">
-                    <span>发言人：</span>
-                    <span
-                      v-for="personItem in element.person"
-                      :key="personItem.id"
-                      >{{ personItem.name }}
-                      <template v-if="personItem.post[0]">
-                        <span>(</span>
-                        <span>{{ personItem.post.split('\n') }}</span>
-                        <span>)</span>
-                      </template>
-                    </span>
-                  </p> -->
                       </div>
                       <div
                         v-show="
