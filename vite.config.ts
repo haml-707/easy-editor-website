@@ -76,6 +76,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-omapi/, ''),
       },
+      '/api-dsapi/': {
+        target: 'https://dsapi.osinfra.cn/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-dsapi/, ''),
+      },
       '/api-meeting/': {
         target: 'https://meetings.openeuler.org',
         changeOrigin: true,
