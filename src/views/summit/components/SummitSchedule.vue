@@ -527,7 +527,6 @@ onUnmounted(() => {
               <div class="content-list">
                 <draggable
                   :list="itemList?.content"
-                  ghost-class="ghost"
                   item-key="id"
                   chosen-class="chosen-class"
                   animation="300"
@@ -764,7 +763,7 @@ onUnmounted(() => {
 }
 
 .chosen-class {
-  background-color: var(--o-color-bg4);
+  box-shadow: var(--o-shadow-l2_hover);
 }
 .move {
   cursor: move;
