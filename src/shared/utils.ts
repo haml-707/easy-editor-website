@@ -199,3 +199,28 @@ export function isUserActive(active: any, unActive: any) {
   window.addEventListener('mousemove', activeCallback);
   resetTimer();
 }
+
+export function watchFocusWithin(
+  element: HTMLElement | null,
+  callback: (isFocused: boolean) => void
+): void {
+  if (!element) return;
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        console.log(element.classList);
+
+        const isFocused = element.classList.contains('focus-within');
+        callback(isFocused);
+      }
+    });
+  });
+  console.log(
+    observer.observe(element, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    })
+  );
+}
