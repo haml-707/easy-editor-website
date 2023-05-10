@@ -1121,7 +1121,7 @@ onUnmounted(() => {
     position: relative;
     border: 1px solid transparent;
     transition: all 0.3s;
-    min-height: 36px;
+    min-height: 51px;
     :deep(.el-input) {
       .el-input__inner {
         color: #707070;
