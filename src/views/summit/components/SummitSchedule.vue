@@ -81,11 +81,8 @@ const param = {
 };
 
 onMounted(() => {
-  const target = document.querySelector('.edit-summit');
-  if (!target) return;
-
   // focus 状态禁止拖动。防止无法选中输入框内容
-  target.addEventListener('click', function () {
+  document.addEventListener('click', function () {
     isInputFocus.value =
       document.querySelector('.edit-summit :focus-within') !== null;
   });
@@ -365,6 +362,10 @@ onBeforeRouteLeave((to, from, next) => {
 });
 onUnmounted(() => {
   clearInterval(timer);
+  document.removeEventListener('click', function () {
+    isInputFocus.value =
+      document.querySelector('.edit-summit :focus-within') !== null;
+  });
 });
 </script>
 
