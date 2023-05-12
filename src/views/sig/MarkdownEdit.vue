@@ -123,7 +123,7 @@ function onBlurEvent() {
           :readonly="!isEditStyle"
           :autosize="{ minRows: 4, maxRows: 20 }"
           placeholder="输入markdown编辑页面"
-          maxlength="1000"
+          maxlength="10000"
           show-word-limit
           type="textarea"
           @blur="onBlurEvent"
