@@ -101,7 +101,7 @@ const sigDetailName = ref(route.params.name as string);
           :readonly="!isEditStyle"
           :autosize="{ minRows: 2, maxRows: 23 }"
           placeholder="输入markdown编辑页面"
-          maxlength="1000"
+          maxlength="10000"
           show-word-limit
           type="textarea"
           @blur="onBlurEvent"
