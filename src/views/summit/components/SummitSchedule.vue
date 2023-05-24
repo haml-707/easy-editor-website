@@ -49,9 +49,15 @@ const isInputFocus = ref(false);
 watch(
   () => usePageData().pageData.get(props.scheduleName),
   () => {
-    scheduleData.value = JSON.parse(
-      usePageData().pageData.get(props.scheduleName).content
-    );
+    try {
+      if (!props.scheduleName) return;
+      if (!usePageData().pageData.get(props.scheduleName)?.content) return;
+      scheduleData.value = JSON.parse(
+        usePageData().pageData.get(props.scheduleName)?.content
+      );
+    } catch (error) {
+      console.error(error);
+    }
   },
   {
     deep: true,
@@ -60,9 +66,14 @@ watch(
 watch(
   () => scheduleData.value,
   () => {
-    usePageData().pageData.get(props.scheduleName).content = JSON.stringify(
-      scheduleData.value
-    );
+    try {
+      if (!usePageData().pageData.get(props.scheduleName)) return;
+      usePageData().pageData.get(props.scheduleName).content = JSON.stringify(
+        scheduleData.value
+      );
+    } catch (error) {
+      console.error(error);
+    }
   },
   {
     deep: true,

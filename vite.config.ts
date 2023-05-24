@@ -72,7 +72,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api-edit/, ''),
       },
       '/api-omapi/': {
-        target: 'https://omapi.osinfra.cn/',
+        target: 'https://omapi.test.osinfra.cn/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-omapi/, ''),
       },
