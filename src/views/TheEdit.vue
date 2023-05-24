@@ -157,7 +157,9 @@ watch(
       </el-table-column>
       <el-table-column label="目标页面链接" prop="path" min-width="310">
         <template #default="scope">
-          <a :href="scope.row.path" target="_blank"> {{ scope.row.path }} </a>
+          <a :href="scope.row.path" target="_blank" rel="noopener noreferrer">
+            {{ scope.row.path }}
+          </a>
         </template>
       </el-table-column>
       <el-table-column label="最新修改时间" prop="updated_at" min-width="110">

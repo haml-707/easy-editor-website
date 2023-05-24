@@ -483,6 +483,7 @@ onMounted(() => {
                   <a
                     :href="`https://gitee.com/${item.gitee_id}`"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <OIcon class="icon"> <IconGitee /> </OIcon
                   ></a>
@@ -610,6 +611,7 @@ onMounted(() => {
                 <template #default="scope">
                   <a
                     target="_blank"
+                    rel="noopener noreferrer"
                     :href="`https://gitee.com/${scope.row.repo}`"
                   >
                     {{ scope.row.repo }}
@@ -622,6 +624,7 @@ onMounted(() => {
                     v-for="(item, index) in scope.row.maintainers"
                     :key="item"
                     target="_blank"
+                    rel="noopener noreferrer"
                     :href="`https://gitee.com/${item}`"
                   >
                     {{ item
@@ -638,6 +641,7 @@ onMounted(() => {
                     v-for="(item, index) in scope.row.gitee_id"
                     :key="item"
                     target="_blank"
+                    rel="noopener noreferrer"
                     :href="`https://gitee.com/${item}`"
                   >
                     {{ item

@@ -175,7 +175,11 @@ const footBg = {
     <AppContent :pc-top="0" :mobile-top="0">
       <div class="atom">
         <p class="atom-text">{{ t('common.FOOTER.ATOM_TEXT') }}</p>
-        <a href="https://openatom.cn/home" target="_blank">
+        <a
+          href="https://openatom.cn/home"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <img :src="LogoAtom" class="atom-logo" alt="" />
         </a>
       </div>
@@ -191,6 +195,7 @@ const footBg = {
                 class="email"
                 href="mailto:contact@openeuler.io"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 contact@openeuler.io
               </a>
@@ -231,6 +236,7 @@ const footBg = {
                 :href="item.path"
                 class="links-logo"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <img :src="item.logo" alt="" />
               </a>

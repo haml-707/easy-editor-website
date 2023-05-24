@@ -278,6 +278,7 @@ const watchData = watch(
                 oldEmail || 'dev@openeuler.org'
               }/`"
               target="_blank"
+              rel="noopener noreferrer"
               class="subscribe"
               >{{ t('sig.SIG_DETAIL.SUBSCRIBE') }}</a
             >
@@ -320,6 +321,7 @@ const watchData = watch(
             <a
               :href="`https://etherpad.openeuler.org/p/${$route.params.name}`"
               target="_blank"
+              rel="noopener noreferrer"
             >
               <OButton class="view-history" animation type="text"
                 >查看历史会议纪要
@@ -447,6 +449,7 @@ const watchData = watch(
                           v-else-if="keys.isLink"
                           :href="item[keys.key]"
                           target="_blank"
+                          rel="noopener noreferrer"
                           >{{ item[keys.key] }}</a
                         >
                         <p
