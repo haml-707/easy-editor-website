@@ -345,7 +345,7 @@ function setDefaultImage(e: any) {
     e.target.src = 'https://gitee.com/assets/no_portrait.png';
   }
 }
-
+// 筛选对应楼层数据
 function filterMap(name: string) {
   const targetMap = new Map();
   pageData.value.forEach((val, key) => {
