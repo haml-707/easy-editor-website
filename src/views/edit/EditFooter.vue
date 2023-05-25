@@ -101,7 +101,7 @@ function confirmPublish(verify: FormInstance | undefined) {
           ? 'latest'
           : useVersionData().activeVersion.toString()
       ).then((res) => {
-        if (res.statusCode === 200) {
+        if (res?.statusCode === 200) {
           ElMessage({
             type: 'success',
             message: '发布成功',

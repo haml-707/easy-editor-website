@@ -107,7 +107,7 @@ export const useVersionData = defineStore('version-data', {
     // 获取版本信息
     setVersionData(path: string) {
       getReleaseVersion(path).then((res: VersionDataRes) => {
-        if (res.statusCode === 200) {
+        if (res?.statusCode === 200) {
           this.versionData = res.data;
           // if (this.versionData.length) {
           //   usePageData().setLatestData(path, this.versionData[0].version);

@@ -356,6 +356,7 @@ function filterMap(name: string) {
   return targetMap;
 }
 
+// 切换预览模式 清除编辑状态
 watch(
   () => modeType.value,
   () => {
