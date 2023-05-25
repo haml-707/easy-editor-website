@@ -39,7 +39,6 @@ const previewShown = ref('');
 
 const emit = defineEmits(['update:modelValue', 'handle-del', 'auto-save']);
 
-// computed
 const tempData = computed({
   get: () => props.modelValue,
   set: (val) => {
@@ -57,6 +56,7 @@ function hanleChangePreview(val: string, isFallback: boolean) {
       console.log(error);
     }
   }
+
   if (
     (!_.isEqual(
       usePageData().tempData.get(props.markdownId),

@@ -79,7 +79,9 @@ const modeType = inject('modeType') as Ref<boolean>;
 // 新建楼层，赋值默认markdown
 const addFloor = async function (name: string) {
   dataMap[name].value['name'] = name;
-  dataMap[name].value['content'] = t('edit.MARKDOWN_TEMPLATE');
+  if (pageData.value.has(name)) {
+    name = `${name}/${window.crypto.randomUUID()}`;
+  }
   await creatFloor(name);
   isEditVisiable.value = name;
 };
@@ -106,56 +108,20 @@ const introductData = computed({
   },
 });
 
-const markdownData1 = computed({
-  get: () =>
-    pageData.value.get('markdown1') || {
-      content: '',
-      title: '',
-    },
-  set: (val) => {
-    val;
-  },
+const markdownData1 = computed(() => {
+  return filterMap('markdown1');
 });
-
-const markdownData2 = computed({
-  get: () =>
-    pageData.value.get('markdown2') || {
-      content: '',
-      title: '',
-    },
-  set: (val) => {
-    val;
-  },
+const markdownData2 = computed(() => {
+  return filterMap('markdown2');
 });
-const markdownData3 = computed({
-  get: () =>
-    pageData.value.get('markdown3') || {
-      content: '',
-      title: '',
-    },
-  set: (val) => {
-    val;
-  },
+const markdownData3 = computed(() => {
+  return filterMap('markdown3');
 });
-const markdownData4 = computed({
-  get: () =>
-    pageData.value.get('markdown4') || {
-      content: '',
-      title: '',
-    },
-  set: (val) => {
-    val;
-  },
+const markdownData4 = computed(() => {
+  return filterMap('markdown4');
 });
-const markdownData5 = computed({
-  get: () =>
-    pageData.value.get('markdown5') || {
-      content: '',
-      title: '',
-    },
-  set: (val) => {
-    val;
-  },
+const markdownData5 = computed(() => {
+  return filterMap('markdown5');
 });
 
 // name和数据映射
@@ -170,9 +136,7 @@ const dataMap: any = {
 };
 
 function saveData(name: string) {
-  if (pageData.value.has(name)) {
-    params = dataMap[name as keyof typeof dataMap].value;
-  }
+  params = pageData.value.get(name);
   params.name = name;
   params.path = path.value;
   modifyFloorData(params)
@@ -200,11 +164,11 @@ function creatFloor(name: string) {
     saveData(name);
   } else {
     const param = {
-      content: dataMap[name].value.content,
+      content: t('edit.MARKDOWN_TEMPLATE'),
       name: name,
       description: '',
       path: path.value,
-      title: dataMap[name].value.title,
+      title: '',
       isPrivate: false,
       type: 'sig',
       locale: locale.value,
@@ -232,8 +196,10 @@ function confirmDel() {
         message: '删除成功',
       });
     }
+    if (!isEditVisiable.value.includes('/')) {
+      dataMap[isEditVisiable.value].value.name = '';
+    }
     pageData.value.delete(isEditVisiable.value);
-    dataMap[isEditVisiable.value].value.name = '';
     isEditVisiable.value = '';
     toggleDelDlg(false);
   });
@@ -243,17 +209,7 @@ function toggleDelDlg(val: boolean, name?: string) {
   isEditVisiable.value = name || '';
 }
 
-// 切换预览模式 清除编辑状态
-watch(
-  () => modeType.value,
-  () => {
-    if (modeType.value) {
-      isEditVisiable.value = '';
-    }
-  }
-);
-
-////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------
 
 const screenWidth = useWindowResize();
 const isIphone = computed(() => {
@@ -389,6 +345,26 @@ function setDefaultImage(e: any) {
     e.target.src = 'https://gitee.com/assets/no_portrait.png';
   }
 }
+
+function filterMap(name: string) {
+  const targetMap = new Map();
+  pageData.value.forEach((val, key) => {
+    if (key.includes(name) && (val.content_type || val.contentType)) {
+      targetMap.set(key, val);
+    }
+  });
+  return targetMap;
+}
+
+watch(
+  () => modeType.value,
+  () => {
+    if (modeType.value) {
+      isEditVisiable.value = '';
+    }
+  }
+);
+
 onMounted(() => {
   getSigDetails();
   getOldEmail();
@@ -411,22 +387,25 @@ onMounted(() => {
             @auto-save="creatFloor('introduction')"
           ></SigIntroduction>
         </div>
+        <div class="markdown-floor">
+          <MarkdownEdit
+            v-for="child in markdownData1"
+            :key="child[0]"
+            v-model="child[1]"
+            :markdown-id="child[0]"
+            @auto-save="creatFloor(child[0])"
+            @handle-del="toggleDelDlg(true, child[0])"
+          />
+        </div>
+
         <div
-          v-show="!modeType && !pageData.has('markdown1')"
+          v-show="!modeType && markdownData1.size < 3"
           class="add-floor square"
           @click="addFloor('markdown1')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
-        </div>
-        <div v-if="pageData.has('markdown1')" class="markdown-floor">
-          <MarkdownEdit
-            v-model="markdownData1"
-            markdown-id="markdown1"
-            @auto-save="creatFloor('markdown1')"
-            @handle-del="toggleDelDlg(true, 'markdown1')"
-          />
         </div>
         <div v-if="locale === 'zh'" class="meeting">
           <SigMeeting
@@ -441,22 +420,24 @@ onMounted(() => {
             {{ t('sig.SIG_DETAIL.NO_MEETINGS') }}
           </p>
         </div>
+        <div class="markdown-floor">
+          <MarkdownEdit
+            v-for="child in markdownData2"
+            :key="child[0]"
+            v-model="child[1]"
+            :markdown-id="child[0]"
+            @auto-save="creatFloor(child[0])"
+            @handle-del="toggleDelDlg(true, child[0])"
+          />
+        </div>
         <div
-          v-show="!modeType && !pageData.has('markdown2') && locale === 'zh'"
+          v-show="!modeType && markdownData2.size < 3"
           class="add-floor square"
           @click="addFloor('markdown2')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
-        </div>
-        <div v-if="pageData.has('markdown2')" class="markdown-floor">
-          <MarkdownEdit
-            v-model="markdownData2"
-            markdown-id="markdown2"
-            @auto-save="creatFloor('markdown2')"
-            @handle-del="toggleDelDlg(true, 'markdown2')"
-          />
         </div>
         <div v-if="memberList.length" class="member">
           <h2>
@@ -495,22 +476,24 @@ onMounted(() => {
             </ul>
           </div>
         </div>
+        <div class="markdown-floor">
+          <MarkdownEdit
+            v-for="child in markdownData3"
+            :key="child[0]"
+            v-model="child[1]"
+            :markdown-id="child[0]"
+            @auto-save="creatFloor(child[0])"
+            @handle-del="toggleDelDlg(true, child[0])"
+          />
+        </div>
         <div
-          v-show="!modeType && !pageData.has('markdown3')"
+          v-show="!modeType && markdownData3.size < 3"
           class="add-floor square"
           @click="addFloor('markdown3')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
-        </div>
-        <div v-if="pageData.has('markdown3')" class="markdown-floor">
-          <MarkdownEdit
-            v-model="markdownData3"
-            markdown-id="markdown3"
-            @auto-save="creatFloor('markdown3')"
-            @handle-del="toggleDelDlg(true, 'markdown3')"
-          />
         </div>
         <div class="repository">
           <h2>
@@ -680,22 +663,24 @@ onMounted(() => {
             </div>
           </div>
         </div>
+        <div class="markdown-floor">
+          <MarkdownEdit
+            v-for="child in markdownData4"
+            :key="child[0]"
+            v-model="child[1]"
+            :markdown-id="child[0]"
+            @auto-save="creatFloor(child[0])"
+            @handle-del="toggleDelDlg(true, child[0])"
+          />
+        </div>
         <div
-          v-show="!modeType && !pageData.has('markdown4')"
+          v-show="!modeType && markdownData4.size < 3"
           class="add-floor square"
           @click="addFloor('markdown4')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
-        </div>
-        <div v-if="pageData.has('markdown4')" class="markdown-floor">
-          <MarkdownEdit
-            v-model="markdownData4"
-            markdown-id="markdown4"
-            @auto-save="creatFloor('markdown4')"
-            @handle-del="toggleDelDlg(true, 'markdown4')"
-          />
         </div>
         <div class="contribution">
           <h2>
@@ -716,22 +701,24 @@ onMounted(() => {
             ></ContributList>
           </div>
         </div>
+        <div class="markdown-floor">
+          <MarkdownEdit
+            v-for="child in markdownData5"
+            :key="child[0]"
+            v-model="child[1]"
+            :markdown-id="child[0]"
+            @auto-save="creatFloor(child[0])"
+            @handle-del="toggleDelDlg(true, child[0])"
+          />
+        </div>
         <div
-          v-show="!modeType && !pageData.has('markdown5')"
+          v-show="!modeType && markdownData5.size < 3"
           class="add-floor square"
           @click="addFloor('markdown5')"
         >
           <OIcon>
             <IconAdd />
           </OIcon>
-        </div>
-        <div v-if="pageData.has('markdown5')" class="markdown-floor">
-          <MarkdownEdit
-            v-model="markdownData5"
-            markdown-id="markdown5"
-            @auto-save="creatFloor('markdown5')"
-            @handle-del="toggleDelDlg(true, 'markdown5')"
-          />
         </div>
       </div>
     </div>
@@ -907,7 +894,6 @@ onMounted(() => {
       }
     }
     .markdown-floor {
-      margin-top: 40px;
       position: relative;
       z-index: 11;
       h2 {
@@ -917,6 +903,9 @@ onMounted(() => {
         margin-top: 40px;
         padding: 40px;
         box-shadow: var(--o-shadow-l2);
+      }
+      .markdown-edit {
+        margin-top: 40px;
       }
     }
     .meeting {
