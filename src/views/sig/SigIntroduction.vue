@@ -89,6 +89,7 @@ const sigDetailName = ref(route.params.name as string);
       <a
         :href="`https://gitee.com/openeuler/community/tree/master/sig/${sigDetailName}`"
         target="_blank"
+        rel="noopener noreferrer"
       >
         <OIcon class="icon"> <IconGitee /> </OIcon
       ></a>

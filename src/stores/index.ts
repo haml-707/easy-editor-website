@@ -6,6 +6,7 @@ interface FloorData {
   content_type?: string;
   description?: string;
   title: string;
+  items?: FloorData[];
 }
 interface VersionData {
   version: number;
@@ -36,18 +37,16 @@ export const usePageData = defineStore('edit-data', {
       pageData: new Map(),
       // 线上版本内容（用于判断是否有修改）
       laststData: new Map(),
+      // 暂存内容用于撤销回退
       tempData: new Map(),
     };
   },
   actions: {
     setPageData(data: [FloorData]) {
       if (data?.length) {
-        const mapData = new Map();
-        for (let i = 0; i < data.length; i++) {
-          mapData.set(data[i].name, data[i]);
-        }
-        this.pageData = mapData;
-        this.tempData = _.cloneDeep(mapData);
+        this.pageData = getFlattenData(data);
+
+        this.tempData = _.cloneDeep(this.pageData);
       } else {
         this.pageData = new Map();
         this.tempData = new Map();
@@ -64,6 +63,24 @@ export const usePageData = defineStore('edit-data', {
     },
   },
 });
+// 数组扁平化
+function getFlattenData(data: [FloorData]) {
+  let mapData = new Map();
+  for (let i = 0; i < data.length; i++) {
+    // 将含有 items 的数据放入 if 中处理否则将导致数据顺序错误
+    if (data[i].items?.length) {
+      mapData.set(data[i].name, data[i]);
+      mapData = new Map([
+        ...mapData,
+        ...getFlattenData(data[i]?.items as [FloorData]),
+      ]);
+    } else {
+      mapData.set(data[i].name, data[i]);
+    }
+  }
+  return mapData;
+}
+
 export const useVersionData = defineStore('version-data', {
   state: () => {
     return {
@@ -90,11 +107,8 @@ export const useVersionData = defineStore('version-data', {
     // 获取版本信息
     setVersionData(path: string) {
       getReleaseVersion(path).then((res: VersionDataRes) => {
-        if (res.statusCode === 200) {
+        if (res?.statusCode === 200) {
           this.versionData = res.data;
-          // if (this.versionData.length) {
-          //   usePageData().setLatestData(path, this.versionData[0].version);
-          // }
         }
       });
     },

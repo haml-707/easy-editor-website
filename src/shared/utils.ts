@@ -180,12 +180,12 @@ export function isUserActive(active: any, unActive: any) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(unActiveCallback, 30 * 60 * 1000);
   }
-
+  // 30分钟时更新token，留10s 容错时间刷新
   function activeCallback() {
     if (timeoutId && !intervalTimeoutId) {
       intervalTimeoutId = setInterval(() => {
         active();
-      }, 15 * 60 * 1000);
+      }, 15 * 60 * 1000 + 5 * 1000);
     }
     resetTimer();
   }
@@ -198,29 +198,4 @@ export function isUserActive(active: any, unActive: any) {
 
   window.addEventListener('mousemove', activeCallback);
   resetTimer();
-}
-
-export function watchFocusWithin(
-  element: HTMLElement | null,
-  callback: (isFocused: boolean) => void
-): void {
-  if (!element) return;
-
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === 'class') {
-        console.log(element.classList);
-
-        const isFocused = element.classList.contains('focus-within');
-        callback(isFocused);
-      }
-    });
-  });
-  console.log(
-    observer.observe(element, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-    })
-  );
 }
