@@ -9,6 +9,8 @@ import { modifyFloorData, getSingleFloorData } from '@/api/api-easy-edit';
 import OIcon from '@/components/OIcon.vue';
 import { OButton } from '@/components/button';
 
+import data from '@/data';
+
 import IconAdd from '~icons/app/icon-add.svg';
 import IconTime from '~icons/app/icon-time.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
@@ -36,7 +38,7 @@ const props = defineProps({
 const scheduleData = ref(
   usePageData().pageData.get(props.scheduleName)?.content
     ? JSON.parse(usePageData().pageData.get(props.scheduleName).content)
-    : ''
+    : data
 );
 
 const dialogTopicTitle = ref('');
