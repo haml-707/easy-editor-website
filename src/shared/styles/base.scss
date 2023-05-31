@@ -1,6 +1,8 @@
 /* base */
 @import './token.scss';
 @import './normalize.scss';
+@import './o-variable/variable.scss';
+@import './markdown';
 html,
 body {
   margin: 0;

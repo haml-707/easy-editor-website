@@ -55,6 +55,7 @@ export default defineConfig({
       compiler: 'vue3',
       customCollections: {
         app: FileSystemIconLoader('./src/assets/svg-icons'),
+        edit: FileSystemIconLoader('./src/assets/svg-edit'),
       },
     }),
     ElementPlus({
@@ -62,10 +63,24 @@ export default defineConfig({
     }),
   ],
   server: {
+    port: 80,
     proxy: {
-      '/api/': {
-        target: 'https://easyeditor.test.osinfra.cn/',
+      '/api-edit/': {
+        target: 'https://easyeditor.opengauss.org/api/',
+        // target: 'https://easyeditor.test.osinfra.cn/api/',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-edit/, ''),
+      },
+      '/api-omapi/': {
+        target: 'https://omapi.osinfra.cn/',
+        // target: 'https://omapi.test.osinfra.cn/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-omapi/, ''),
+      },
+      '/api-dsapi/': {
+        target: 'https://dsapi.osinfra.cn/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-dsapi/, ''),
       },
     },
   },
