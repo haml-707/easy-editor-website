@@ -30,6 +30,12 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/summit/TheSummit.vue'),
   },
   {
+    path: '/zh/edit/:name',
+    name: 'summit2023',
+    alias: '/en/edit/:name',
+    component: () => import('@/views/summit/TheSummit2023.vue'),
+  },
+  {
     path: '/zh/404',
     name: '404',
     alias: '/en/404',

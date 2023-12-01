@@ -65,6 +65,8 @@ const goEdit = (item: EditData) => {
   let path = '';
   if (item.type === 'sig') {
     path = `/${item.locale}/edit/${item.type}/${getUrlParams(item.path)?.name}`;
+  } else if (item.siteName === 'summit2023') {
+    path = `/${item.locale}/edit/${item.path.split('/').at(-2)}/`;
   } else {
     path = `/${item.locale}/edit/${item.type}/${item.path.split('/').at(-2)}/`;
   }

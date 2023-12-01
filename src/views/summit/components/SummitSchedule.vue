@@ -1,5 +1,14 @@
 <script lang="ts" setup>
-import { ref, onUnmounted, Ref, inject, computed, watch, onMounted } from 'vue';
+import {
+  ref,
+  onUnmounted,
+  Ref,
+  inject,
+  computed,
+  watch,
+  onMounted,
+  nextTick,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 
@@ -16,7 +25,7 @@ import IconTime from '~icons/app/icon-time.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
 import IconLinkDefault from '~icons/edit/icon-link-default.svg';
 import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
-
+import _ from 'lodash-es';
 import { usePageData } from '@/stores';
 export type TimerType = NodeJS.Timeout;
 
@@ -378,6 +387,36 @@ onUnmounted(() => {
       document.querySelector('.edit-summit :focus-within') !== null;
   });
 });
+
+const textareaRef = ref();
+
+const previewShown = ref(false);
+
+function hanleChangePreview(val: boolean, isFallback?: boolean) {
+  // 与原始数据比较是否修改
+  // if (
+  //   !_.isEqual(
+  //     usePageData().pageData.get(props.scheduleName),
+  //     usePageData().pageData.get(props.scheduleName) || isFallback
+  //   ) &&
+  //   !val
+  // ) {
+  //   emit('auto-save');
+  // }
+
+  // 切换至编辑框textarea获得焦点
+  if (!previewShown.value) {
+    nextTick(() => {
+      textareaRef.value.focus();
+    });
+  }
+  previewShown.value = val;
+}
+function onBlurEvent() {
+  setTimeout(() => {
+    hanleChangePreview(false, false);
+  }, 200);
+}
 </script>
 
 <template>
@@ -574,13 +613,36 @@ onUnmounted(() => {
                         "
                       >
                         <el-input
+                          v-show="isEditStyle && previewShown"
+                          ref="textareaRef"
+                          v-model="element.desc"
+                          :readonly="!isEditStyle"
+                          :autosize="{ minRows: 2, maxRows: 23 }"
+                          placeholder="输入markdown编辑页面"
+                          maxlength="10000"
+                          show-word-limit
+                          type="textarea"
+                          @blur="onBlurEvent"
+                          @focus="hanleChangePreview(true, false)"
+                        >
+                        </el-input>
+                        <MdStatement
+                          v-show="!(isEditStyle && previewShown)"
+                          :class="isEditStyle ? 'border' : ''"
+                          :statement="element.desc"
+                          class="markdown-main"
+                          @click.stop="
+                            isEditStyle ? hanleChangePreview(true, false) : ''
+                          "
+                        ></MdStatement>
+                        <!-- <el-input
                           v-model="element.desc"
                           :readonly="!isEditStyle"
                           :autosize="{ minRows: 1, maxRows: 15 }"
                           maxlength="100"
                           :placeholder="isEditStyle ? '输入议程标题' : ''"
                           type="textarea"
-                        />
+                        /> -->
                         <OIcon
                           v-show="isEditStyle"
                           class="icon-add"
