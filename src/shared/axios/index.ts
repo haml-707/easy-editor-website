@@ -140,7 +140,6 @@ const responseInterceptorId = request.interceptors.response.use(
       loadingInstance.close();
     }
     const { config } = err;
-    console.log();
 
     // 非取消请求发生异常，同样将请求移除请求池
     if (!axios.isCancel(err) && config?.url) {
