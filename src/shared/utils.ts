@@ -172,30 +172,22 @@ export function guardFunc(bool: boolean, guard: Ref<boolean>) {
   }
 }
 
-export function isUserActive(active: any, unActive: any) {
+export function isUserActive(unActive: any) {
   let timeoutId: TimerType;
-  let intervalTimeoutId: TimerType;
 
   function resetTimer() {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(unActiveCallback, 30 * 60 * 1000);
   }
-  // 30分钟时更新token，留10s 容错时间刷新
-  function activeCallback() {
-    if (timeoutId && !intervalTimeoutId) {
-      intervalTimeoutId = setInterval(() => {
-        active();
-      }, 15 * 60 * 1000 + 5 * 1000);
-    }
-    resetTimer();
-  }
 
   function unActiveCallback() {
-    clearInterval(intervalTimeoutId);
-    window.removeEventListener('mousemove', activeCallback);
     unActive();
   }
 
-  window.addEventListener('mousemove', activeCallback);
+  function handleUserActivity() {
+    resetTimer();
+  }
+
+  window.addEventListener('mousemove', handleUserActivity);
   resetTimer();
 }

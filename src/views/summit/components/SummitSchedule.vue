@@ -16,7 +16,6 @@ import IconTime from '~icons/app/icon-time.svg';
 import IconWarn from '~icons/edit/icon-warn.svg';
 import IconLinkDefault from '~icons/edit/icon-link-default.svg';
 import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
-
 import { usePageData } from '@/stores';
 export type TimerType = NodeJS.Timeout;
 
@@ -79,11 +78,12 @@ watch(
     deep: true,
   }
 );
+
 const param = {
   content: '',
   name: props.scheduleName,
   description: '',
-  path: 'https://www.openeuler.org/zh/interaction/summit-list/devday2023/',
+  path: `https://www.openeuler.org/${locale.value}/interaction/summit-list/summit2023/`,
   title: '',
   isPrivate: false,
   type: 'event',
@@ -118,41 +118,6 @@ const tabType = ref(0);
 
 const otherTabType = ref([0, 0, 0, 0, 0, 0, 0]);
 
-// function tabClick() {
-//   otherTabType.value[tabType.value] = 0;
-// }
-
-// function addSubtitle() {
-//   scheduleData.value.content.push({
-//     lable: '',
-//     id: window.crypto.randomUUID(),
-//     content: [
-//       {
-//         id: window.crypto.randomUUID(),
-//         name: '',
-//         content: [
-//           {
-//             id: window.crypto.randomUUID(),
-//             time: ['', ''],
-//             desc: '',
-//             person: [
-//               {
-//                 id: window.crypto.randomUUID(),
-//                 name: '',
-//                 post: '',
-//               },
-//             ],
-//             detail: '',
-//           },
-//         ],
-//       },
-//     ],
-//   });
-// }
-// function delSubtitle(index: number) {
-//   scheduleData.value.content.splice(index, 1);
-//   tabType.value = 0;
-// }
 // 增加一行表格
 function addContent() {
   scheduleData.value.content[tabType.value].content[
@@ -272,10 +237,10 @@ function addSubtitle2() {
 }
 // 保存页面数据
 function savePageData() {
-  // if (props.scheduleName === 'schedule') {
-  //   param.content = data.content;
+  // if (props.scheduleName === 'schedule-15') {
+  //   param.content = JSON.stringify(data.content);
   // } else {
-  //   param.content = data.content1;
+  //   param.content = JSON.stringify(data.content1);
   // }
   param.content = JSON.stringify(scheduleData.value);
   modifyFloorData(param)
@@ -340,29 +305,12 @@ function toggleDelTabDlg(val: boolean) {
   delTabDialogVisiable.value = val;
 }
 // function createNewPage() {
-//   param.content = JSON.stringify(data);
-//   createPage(param).then(() => {
-//     ElMessage({
-//       type: 'success',
-//       message: '成功',
-//     });
-//   });
+//   param.content = '';
+//   createPage(param).then(() => {});
 // }
+
 const tabType1 = ref(0);
-const agendaData2 = ref([]);
-watch(
-  tabType1,
-  () => {
-    if (tabType1.value === 1) {
-      agendaData2.value = scheduleData.value.content.slice(1);
-    } else {
-      agendaData2.value = scheduleData.value.content.slice(0, 1);
-    }
-  },
-  {
-    immediate: true,
-  }
-);
+
 onBeforeRouteLeave((to, from, next) => {
   if (!modeType.value) {
     savePageData();
@@ -382,85 +330,29 @@ onUnmounted(() => {
 
 <template>
   <div class="schedule" :class="isEditStyle ? 'is-edit' : ''">
-    <!-- <h4 class="meeting-title">
-      <el-input
-        v-model="scheduleData.title"
-        :readonly="!isEditStyle"
-        type="text"
-        @blur="savePageData()"
-      />
-    </h4> -->
-    <el-tabs
-      v-if="scheduleName === 'schedule'"
-      v-model.number="tabType1"
-      class="schedule-tabs"
-    >
+    <el-tabs v-model.number="tabType1" class="schedule-tabs">
       <el-tab-pane :name="0">
         <template #label>
-          <div class="one-level-tabs">
-            <!-- <el-input
-              v-model="itemList.lable"
-              :readonly="!isEditStyle"
-              type="text"
-              @blur="savePageData()"
-            /> -->
-            上午
-            <!-- <span
-              v-show="isEditStyle"
-              class="icon-del del-title"
-              @click.stop="delSubtitle(index)"
-            ></span> -->
-          </div>
+          <div class="one-level-tabs">上午：主论坛</div>
         </template>
       </el-tab-pane>
       <el-tab-pane :name="1">
         <template #label>
-          <div class="one-level-tabs">
-            <!-- <el-input
-              v-model="itemList.lable"
-              :readonly="!isEditStyle"
-              type="text"
-              @blur="savePageData()"
-            /> -->
-            下午
-            <!-- <span
-              v-show="isEditStyle"
-              class="icon-del del-title"
-              @click.stop="delSubtitle(index)"
-            ></span> -->
-          </div>
+          <div class="one-level-tabs">下午：分论坛</div>
         </template>
       </el-tab-pane>
-      <!-- <el-tab-pane v-if="isEditStyle">
-        <template #label>
-          <OIcon
-            class="icon-add"
-            :class="scheduleData.content?.length >= 2 ? 'margin-left' : ''"
-            @click.stop="addSubtitle"
-          >
-            <IconAdd />
-          </OIcon>
-        </template>
-      </el-tab-pane> -->
     </el-tabs>
     <el-container
       v-for="(scheduleItem, index) in scheduleData.content"
       :key="scheduleItem.id"
       :level-index="1"
     >
-      <template
-        v-if="
-          scheduleName === 'schedule'
-            ? tabType1 === 0
-              ? index === 0
-              : index !== 0
-            : true
-        "
-      >
-        <div v-if="scheduleName === 'schedule'" class="schedule-title">
+      <template v-if="tabType1 === 0 ? index === 0 : index !== 0">
+        <div v-if="isEditStyle || scheduleItem.lable" class="schedule-title">
           <el-input
             v-model="scheduleItem.lable"
             :readonly="!isEditStyle"
+            :placeholder="isEditStyle ? '输入主标题' : ''"
             type="text"
           />
         </div>
@@ -528,13 +420,6 @@ onUnmounted(() => {
             class="content"
           >
             <template v-if="otherTabType[index] === listIndex">
-              <!-- <h4 v-if="itemList.title || isEditStyle" class="other-title">
-              <el-input
-                v-model="itemList.title"
-                :readonly="!isEditStyle"
-                type="text"
-              />
-            </h4> -->
               <div class="content-list">
                 <draggable
                   :list="itemList?.content"
@@ -574,6 +459,7 @@ onUnmounted(() => {
                         "
                       >
                         <el-input
+                          v-if="isEditStyle"
                           v-model="element.desc"
                           :readonly="!isEditStyle"
                           :autosize="{ minRows: 1, maxRows: 15 }"
@@ -581,6 +467,11 @@ onUnmounted(() => {
                           :placeholder="isEditStyle ? '输入议程标题' : ''"
                           type="textarea"
                         />
+                        <MdStatement
+                          v-else
+                          :statement="element.desc"
+                          class="markdown-main"
+                        ></MdStatement>
                         <OIcon
                           v-show="isEditStyle"
                           class="icon-add"
@@ -778,6 +669,13 @@ onUnmounted(() => {
 }
 .move {
   cursor: move;
+}
+:deep(.markdown) {
+  p {
+    font-size: 18px;
+    line-height: 30px;
+    color: var(--o-color-text1);
+  }
 }
 :deep(.el-input) {
   .el-input__wrapper {

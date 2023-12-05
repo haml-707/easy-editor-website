@@ -15,7 +15,7 @@ import { router } from './routers';
 import { ElMessage } from 'element-plus';
 
 refreshInfo();
-isUserActive(refreshInfo, tiemOutloginOut);
+isUserActive(tiemOutloginOut);
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -23,11 +23,15 @@ const langStore = useLangStore();
 const isEditPage = computed(() => {
   return route.path.includes('edit');
 });
+
 const isPreviewMode = ref<boolean>(false);
 function getModeType(val: boolean) {
   isPreviewMode.value = val;
 }
 function tiemOutloginOut() {
+  if (route.fullPath === '/zh/login') {
+    return false;
+  }
   tokenFailIndicateLogin();
   router.push({
     path: '/zh/login',
