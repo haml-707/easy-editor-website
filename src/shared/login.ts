@@ -76,7 +76,6 @@ export function logout(community = 'openeuler') {
 // 跳转首页
 export function goToHome() {
   window.location.href = '/zh/login/';
-  // window?.location?.reload();
 }
 
 function createClient(
@@ -86,8 +85,8 @@ function createClient(
   const lang = getLanguage();
   const obj: IObject = {
     openeuler: {
-      appId: '62679eab0b22b146d2ea0a3a',
-      appHost: 'https://datastat.authing.cn',
+      appId: '655d637668e3addd8ee560cb',
+      appHost: 'https://openeuler-common.authing.cn',
       redirectUri: url,
       lang: lang.language,
     },
