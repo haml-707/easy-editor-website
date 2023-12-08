@@ -1,17 +1,22 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+
+import { useI18n } from 'vue-i18n';
+
 import SummitSchedule from './components/SummitSchedule.vue';
 import AppEditTemplate from '@/components/AppEditTemplate.vue';
 
 const showIndex = ref(1);
+const { t } = useI18n();
 function setShowIndex(index: number) {
   showIndex.value = index;
 }
+
 </script>
 <template>
   <AppEditTemplate>
     <div class="edit-summit">
-      <h3>会议日程</h3>
+      <h3>{{ t('edit.AGENDA') }}</h3>
       <div class="date">
         <div
           class="date-item"

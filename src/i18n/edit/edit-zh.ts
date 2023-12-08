@@ -16,6 +16,10 @@ export default {
   CONFIRM_DEL1: '是否确认',
   CONFIRM_DEL2: '删除',
   CONFIRM_DEL3: '本楼层？',
+  AGENDA: '会议日程',
+  MORINING: '上午：主论坛',
+  AFTERNOON: '下午：分论坛',
+  AFTERNOON1: '下午：分论坛',
   MARKDOWN_TEMPLATE:
     '以下为Markdown文档编辑样例：\n# 一级标题\n## 二级标题\n### 三级标题\n#### 四级标题\n正文段落\n\n无序列表\n- 无序列表1\n- 无序列表2\n- 无序列表3\n\n有序列表\n1. 有序列表1\n2. 有序列表2\n3. 有序列表3\n\n文本超链接\n\n[链接](https://www.openeuler.org/zh/)\n\n插入图片\n\n![Description](https://openeuler-website-beijing.obs.cn-north-4.myhuaweicloud.com/detail-banner/euler-logo.png)',
 };
