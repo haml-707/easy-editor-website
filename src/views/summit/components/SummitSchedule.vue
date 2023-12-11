@@ -6,7 +6,7 @@ import draggable from 'vuedraggable';
 import { onBeforeRouteLeave } from 'vue-router';
 import { modifyFloorData, getSingleFloorData } from '@/api/api-easy-edit';
 
-import data from '@/data';
+// import data from '@/data';
 
 import OIcon from '@/components/OIcon.vue';
 import { OButton } from '@/components/button';
@@ -19,7 +19,7 @@ import IconLinkFilled from '~icons/edit/icon-link-filled.svg';
 import { usePageData } from '@/stores';
 export type TimerType = NodeJS.Timeout;
 
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 
 const modeType = inject('modeType') as Ref<boolean>;
 
@@ -37,7 +37,7 @@ const props = defineProps({
 const scheduleData = ref(
   usePageData().pageData.get(props.scheduleName)?.content
     ? JSON.parse(usePageData().pageData.get(props.scheduleName).content)
-    : data
+    : []
 );
 
 const dialogTopicTitle = ref('');
@@ -242,6 +242,9 @@ function savePageData() {
   // } else {
   //   param.content = JSON.stringify(data.content1);
   // }
+  if (!scheduleData.value.content) {
+    return false;
+  }
   param.content = JSON.stringify(scheduleData.value);
   modifyFloorData(param)
     .then((res: { statusCode: number }) => {
@@ -333,12 +336,15 @@ onUnmounted(() => {
     <el-tabs v-model.number="tabType1" class="schedule-tabs">
       <el-tab-pane :name="0">
         <template #label>
-          <div class="one-level-tabs">上午：主论坛</div>
+          <div class="one-level-tabs">{{ t('edit.MORINING') }}</div>
         </template>
       </el-tab-pane>
       <el-tab-pane :name="1">
         <template #label>
-          <div class="one-level-tabs">下午：分论坛</div>
+          <div v-if="scheduleName === 'schedule-15'" class="one-level-tabs">
+            {{ t('edit.AFTERNOON') }}
+          </div>
+          <div v-else class="one-level-tabs">{{ t('edit.AFTERNOON1') }}</div>
         </template>
       </el-tab-pane>
     </el-tabs>
@@ -1180,7 +1186,7 @@ onUnmounted(() => {
   .content-item {
     display: grid;
     min-height: 92px;
-    grid-template-columns: 192px 580px 400px;
+    grid-template-columns: 192px 580px 445px;
     padding: 20px 0;
     transition: all 0.25s ease;
     align-items: center;
@@ -1345,7 +1351,7 @@ onUnmounted(() => {
     }
 
     .name {
-      width: 120px;
+      width: 200px;
       height: 100%;
       display: inline-block;
       color: var(--o-color-text3);
