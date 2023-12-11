@@ -469,7 +469,7 @@ onUnmounted(() => {
                           v-model="element.desc"
                           :readonly="!isEditStyle"
                           :autosize="{ minRows: 1, maxRows: 15 }"
-                          maxlength="100"
+                          maxlength="200"
                           :placeholder="isEditStyle ? '输入议程标题' : ''"
                           type="textarea"
                         />
@@ -510,7 +510,7 @@ onUnmounted(() => {
                               :class="!personItem.post ? 'empty' : ''"
                               :readonly="!isEditStyle"
                               :autosize="{ minRows: 1, maxRows: 10 }"
-                              maxlength="100"
+                              maxlength="200"
                               type="textarea"
                               :placeholder="
                                 isEditStyle
@@ -601,7 +601,7 @@ onUnmounted(() => {
       <el-input
         v-model="dialogTopicContnet"
         type="textarea"
-        maxlength="500"
+        maxlength="800"
         show-word-limit
         :autosize="{ minRows: 12, maxRows: 20 }"
       ></el-input>
