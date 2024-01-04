@@ -469,7 +469,7 @@ onUnmounted(() => {
                           v-model="element.desc"
                           :readonly="!isEditStyle"
                           :autosize="{ minRows: 1, maxRows: 15 }"
-                          maxlength="200"
+                          maxlength="1000"
                           :placeholder="isEditStyle ? '输入议程标题' : ''"
                           type="textarea"
                         />
